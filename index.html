@@ -2,6 +2,13 @@
 <html lang="en"><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Oak Street">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#006747">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="apple-touch-icon.png">
 <title>Oak Street Auctions</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&family=Cinzel:wght@500;700&family=Libre+Franklin:ital,wght@0,500;0,700;1,500&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Montserrat:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -367,7 +374,7 @@ function tabCheck(k,t){
   if(/loading|#n\/a|#ref!|#error/i.test(t.slice(0,4000)))return"still loading";
   return table(t).rows.length?"":"empty"}
 let STALE="";
-async function load(){
+async function load(){lastLoad=Date.now();
   const keys=Object.keys(CFG.sheets);const bad=[];
   const txt=await Promise.all(keys.map(async k=>{
     try{const t=await getTab(k);const why=tabCheck(k,t);
@@ -628,6 +635,9 @@ document.addEventListener("click",e=>{
   const row=e.target.closest("[data-p]");if(row&&!e.target.closest("[data-o]")){openCard(row.dataset.p)}});
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeCard()});
 
+/* refresh right away when the app is reopened from the background */
+let lastLoad=0;document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&Date.now()-lastLoad>15000)load()});
+window.addEventListener("pageshow",e=>{if(e.persisted)load()});
 document.addEventListener("change",e=>{if(e.target.id!=="sel")return;STATE.sel=e.target.value||null;save();render()});
 load();
 if(CFG.espnEvent!=="off"||Object.values(CFG.sheets).some(Boolean))setInterval(load,CFG.refreshSeconds*1000);
