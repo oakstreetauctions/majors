@@ -2,10 +2,7 @@
 <html lang="en"><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Oak Street">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#006747">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" href="apple-touch-icon.png">
@@ -204,12 +201,6 @@ html[data-ev="fedex"] header h1{font-weight:600;text-transform:uppercase;letter-
 .pr.cut .pthru{font-size:10.5px;letter-spacing:.06em;color:var(--mut)}
 @media (max-width:380px){.pr{grid-template-columns:22px 32px minmax(0,1fr) 28px 32px 28px 28px;gap:5px;padding:0 8px}.pname{font-size:14px}}
 
-/* ===== refresh button + pull to refresh ===== */
-.rf{appearance:none;border:0;background:none;color:var(--green);font:600 11px Inter,sans-serif;padding:2px 0;cursor:pointer}
-.ptr{position:fixed;left:0;right:0;top:0;z-index:40;display:flex;justify-content:center;pointer-events:none;transform:translateY(-60px);transition:transform .2s}
-.ptr span{margin-top:calc(env(safe-area-inset-top,0px) + 10px);background:var(--card);color:var(--green);border:1px solid var(--line);box-shadow:var(--shadow);border-radius:999px;padding:7px 14px;font:600 12px Inter,sans-serif}
-.ptr.spin span::before{content:"";display:inline-block;width:10px;height:10px;margin-right:7px;border:2px solid var(--green);border-right-color:transparent;border-radius:50%;animation:rot .7s linear infinite;vertical-align:-1px}
-@keyframes rot{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
@@ -220,7 +211,6 @@ html[data-ev="fedex"] header h1{font-weight:600;text-transform:uppercase;letter-
   <button data-v="st">Standings</button>
   <button data-v="lots">Auction</button>
 </nav>
-<div class="ptr" id="ptr"><span>Pull to refresh</span></div>
 <div class="sheet" id="sheet"><div class="sheet-bg" data-close></div><div class="sheet-card" id="sheetCard"></div></div>
 <div class="wrap">
   <div id="err"></div>
@@ -522,7 +512,7 @@ function render(){
   const st=D.final?"Final":D.curRound?`Round ${D.curRound} · live, projected payouts`:"Waiting on first round";
   const tm=d=>d.toLocaleTimeString([],{hour:"numeric",minute:"2-digit"});
   const sub=SOURCE==="sample"?STALE:UPDATED?(STALE?`Showing the update from ${tm(UPDATED)}`:`Updated ${tm(UPDATED)}`):STALE;
-  $("#status").innerHTML=`<b>${st}</b>`+`<span class="stale">${sub?sub+" · ":""}<button class="rf" id="rf" aria-label="Refresh">↻ Refresh</button></span>`;
+  $("#status").innerHTML=`<b>${st}</b>`+(sub?`<span class="stale">${sub}</span>`:"");
   const os=Object.values(D.owners);
   const sorted=os.slice().sort((a,b)=>a.name.localeCompare(b.name));const cur=STATE.sel&&D.owners[STATE.sel];
   $("#pick").innerHTML=`<span class="lbl">Bidder</span>${cur?`<span class="sw" style="background:${cur.color};border-color:${cur.color}"></span>`:""}<span class="val">${cur?esc(cur.name):"Everyone"}</span><span class="car2">▾</span>
@@ -644,16 +634,6 @@ document.addEventListener("click",e=>{
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeCard()});
 
 
-/* pull down from the top to reload (home-screen apps have no browser refresh) */
-(()=>{let y0=null,dy=0;const ptr=$("#ptr"),lab=ptr.querySelector("span"),TH=80;
-  const hard=()=>{ptr.classList.add("spin");lab.textContent="Refreshing";ptr.style.transform="translateY(0)";
-    setTimeout(()=>location.reload(),250)};
-  window.addEventListener("touchstart",e=>{if(window.scrollY<=0&&!$("#sheet").classList.contains("on"))y0=e.touches[0].clientY;else y0=null;dy=0},{passive:true});
-  window.addEventListener("touchmove",e=>{if(y0==null)return;dy=e.touches[0].clientY-y0;if(dy<=0){ptr.style.transform="";return}
-    const p=Math.min(dy,TH*1.4);ptr.style.transition="none";ptr.style.transform=`translateY(${p-60}px)`;lab.textContent=dy>TH?"Release to refresh":"Pull to refresh"},{passive:true});
-  window.addEventListener("touchend",()=>{ptr.style.transition="";if(y0!=null&&dy>TH)hard();else ptr.style.transform="";y0=null;dy=0});
-  document.addEventListener("click",e=>{if(e.target.closest("#rf"))hard()});
-})();
 /* refresh right away when the app is reopened from the background */
 let lastLoad=0;document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&Date.now()-lastLoad>15000)load()});
 window.addEventListener("pageshow",e=>{if(e.persisted)load()});
