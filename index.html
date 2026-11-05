@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Oak Street Auctions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f6f4ec;--card:#ffffff;--fg:#1c2a21;--mut:#6d7468;--line:#e6e2d4;--row:#faf9f4;
+  --green:#006747;--deep:#00543a;--gold:#f2c94c;--under:#c8102e;--over:#006747;--pos:#006747;--neg:#c8102e;
+  --hdr:#006747;--hdrfg:#ffffff;--th:#006747;--thfg:#ffffff;--shadow:0 1px 2px rgba(28,42,33,.06),0 4px 14px rgba(28,42,33,.04);
+  --serif:"Libre Caslon Text",Georgia,"Times New Roman",serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0b120e;--card:#131c17;--fg:#eef1ea;--mut:#9aa396;--line:#253029;--row:#17211b;
+  --green:#4fb98a;--deep:#003a28;--under:#ff6b6b;--over:#5fca98;--pos:#5fca98;--neg:#ff7a72;--hdr:#00422d;--th:#0a4a34;--shadow:none}}
+:root[data-theme="dark"]{
+  --bg:#0b120e;--card:#131c17;--fg:#eef1ea;--mut:#9aa396;--line:#253029;--row:#17211b;
+  --green:#4fb98a;--deep:#003a28;--under:#ff6b6b;--over:#5fca98;--pos:#5fca98;--neg:#ff7a72;--hdr:#00422d;--th:#0a4a34;--shadow:none}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--fg);font:14px/1.4 Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;-webkit-text-size-adjust:100%;-webkit-font-smoothing:antialiased}
+header{background:var(--hdr);color:var(--hdrfg);padding:calc(env(safe-area-inset-top,0px) + 18px) 16px 14px;text-align:center}
+header h1{margin:0;font:400 27px/1.1 var(--serif);letter-spacing:.06em}
+header .rule{width:44px;height:1px;background:var(--gold);margin:10px auto 0;opacity:.9}
+nav{position:sticky;top:0;z-index:5;background:var(--hdr);display:flex;padding:0 8px;justify-content:center;border-bottom:1px solid rgba(255,255,255,.08);box-shadow:0 2px 8px rgba(0,0,0,.08)}
+nav button{flex:1 1 0;max-width:160px;appearance:none;border:0;background:none;color:rgba(255,255,255,.66);font:600 11.5px Inter,sans-serif;letter-spacing:.11em;text-transform:uppercase;padding:13px 2px 11px;border-bottom:2px solid transparent;cursor:pointer;transition:color .15s}
+nav button:hover{color:#fff}
+nav button.on{color:#fff;border-bottom-color:var(--gold)}
+.wrap{max-width:760px;margin:0 auto;padding:16px 12px calc(36px + env(safe-area-inset-bottom,0px))}
+.status{display:flex;align-items:center;gap:12px;justify-content:center;font:italic 400 14px var(--serif);color:var(--green);margin:2px 0 14px}
+.status::before,.status::after{content:"";height:1px;width:38px;background:var(--gold)}
+.status b{font-weight:400}
+.status{flex-wrap:wrap}.stale{flex-basis:100%;text-align:center;font:500 11px Inter,sans-serif;font-style:normal;color:var(--mut);margin-top:-2px}
+.status .stale{order:3}
+.chips{display:flex;gap:6px;overflow-x:auto;padding:2px 0 14px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:0 0 auto;display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);background:var(--card);border-radius:999px;padding:4px 11px 4px 4px;font:600 11.5px Inter,sans-serif;letter-spacing:.04em;color:var(--fg);cursor:pointer;transition:border-color .15s}
+.chip.on{border-color:var(--green);box-shadow:inset 0 0 0 1px var(--green)}
+.tag{display:inline-flex;align-items:center;justify-content:center;min-width:26px;height:20px;padding:0 5px;border-radius:3px;font:700 10.5px Inter,sans-serif;letter-spacing:.04em}
+.card{background:var(--card);border:1px solid var(--line);border-radius:4px;overflow:hidden;margin-bottom:16px;box-shadow:var(--shadow)}
+.sec{font:400 15px var(--serif);color:var(--green);padding:12px 12px 10px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:baseline}
+.sec span:last-child:not(:first-child){font:600 10.5px Inter,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)}
+.lb .r{display:grid;grid-template-columns:28px 3px minmax(0,1fr) 40px 40px 28px;align-items:center;gap:6px;padding:9px 10px 9px 10px;border-bottom:1px solid var(--line)}
+.lb .r:last-child{border-bottom:0}
+.lb .r:not(.h):nth-child(odd){background:var(--row)}
+.lb .h,th,.lot.h{background:var(--th)!important;color:var(--thfg)!important;font:600 10.5px Inter,sans-serif!important;letter-spacing:.12em!important;text-transform:uppercase;border-bottom:0!important}
+.lb .h{padding-top:9px;padding-bottom:9px;letter-spacing:.07em!important;font-size:10px!important}
+.bar{width:3px;height:32px;border-radius:2px;background:transparent}
+.pos{font:400 15px var(--serif);color:var(--fg)}
+.nm{min-width:0}
+.nm b{display:flex;align-items:baseline;font-weight:600;font-size:14px;letter-spacing:-.005em;min-width:0}
+.nm b .n1{min-width:0;line-height:1.2;overflow-wrap:anywhere}
+.lc{text-align:center;font:italic 400 12.5px var(--serif);color:var(--mut);line-height:1.1}
+.nm small{display:flex;align-items:center;gap:6px;color:var(--mut);font-size:11px;letter-spacing:.03em;margin-top:3px;white-space:nowrap;overflow:hidden}
+.nm small .tag{height:16px;min-width:22px;font-size:9.5px}
+.sc{text-align:right;font-weight:700;font-size:15.5px;font-variant-numeric:tabular-nums}
+.under{color:var(--under)}.over{color:var(--over)}
+.th{text-align:center;color:var(--mut);font-size:12px}
+.mo{text-align:right;font-weight:600;font-variant-numeric:tabular-nums;font-size:12.5px}
+.mo:empty::after{content:"–";color:var(--line)}
+.dim{opacity:.25}
+.me td{background:rgba(242,201,76,.16)!important}
+.selbar{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--card);border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:4px;padding:10px 12px;margin:0 0 14px;box-shadow:var(--shadow)}
+.selbar .who2{display:flex;align-items:center;gap:8px;font-weight:600;min-width:0}
+.selbar .nums{font-size:12px;color:var(--mut);margin-top:3px;font-variant-numeric:tabular-nums}
+.selbar .nums b{color:var(--fg);font-weight:600}
+.selbar .nums b.posv{color:var(--pos)}.selbar .nums b.negv{color:var(--neg)}
+.selbar button{appearance:none;border:1px solid var(--green);background:none;color:var(--green);border-radius:999px;padding:6px 12px;font:600 10.5px Inter,sans-serif;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;white-space:nowrap}
+.empty{padding:22px 12px;text-align:center;font:italic 400 14px var(--serif);color:var(--mut)}
+.cutrow .nm b{font-weight:500;color:var(--mut)}
+.cutrow .sc{font-weight:500;font-size:14px}
+.rk{flex:0 0 auto;font:italic 400 12px var(--serif);color:var(--mut);margin-left:5px;white-space:nowrap}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+th{text-align:right;padding:9px 10px}
+th:first-child,td:first-child{text-align:left}
+td{padding:11px 10px;border-bottom:1px solid var(--line);text-align:right}
+tbody tr:nth-child(even) td{background:var(--row)}
+tr:last-child td{border-bottom:0}
+.who{display:flex;align-items:center;gap:9px;font-weight:600}
+.who>span:first-child{font:400 15px var(--serif)!important;color:var(--fg)!important}
+.posv{color:var(--pos)}.negv{color:var(--neg)}
+details>summary{list-style:none;cursor:pointer}
+details>summary::-webkit-details-marker{display:none}
+.lot{display:grid;grid-template-columns:1fr 44px 52px 54px;gap:6px;align-items:center;padding:10px;border-bottom:1px solid var(--line)}
+.lot .ln{display:flex;align-items:center;gap:8px;min-width:0}
+.lnm{display:flex;align-items:baseline;min-width:0;font-weight:600;font-size:13.5px}
+.lnm .n1{min-width:0;line-height:1.2;overflow-wrap:anywhere}
+.lot.rkd{grid-template-columns:34px minmax(0,1fr) 44px 52px 54px}
+.lr{font:italic 400 13px var(--serif);color:var(--mut)}
+.lot.h span{font-size:10px!important}
+.lot .n{font-size:13px}
+.lot .n{text-align:right;font-variant-numeric:tabular-nums}
+.lot.h{padding:9px 10px}
+details[open]>summary .car{transform:rotate(90deg)}
+.car{display:inline-block;color:var(--green);transition:transform .15s;font-size:9px;width:10px}
+.sub{background:var(--row);border-bottom:1px solid var(--line);padding:4px 10px 6px 28px}
+.sub div{display:grid;grid-template-columns:1fr 46px 40px 56px;gap:8px;padding:5px 0;font-size:13px;border-bottom:1px dotted var(--line)}
+.sub div:last-child{border-bottom:0}
+.sub div span:not(:first-child){text-align:right;font-variant-numeric:tabular-nums}
+.badge{display:inline-block;font:600 9.5px Inter,sans-serif;letter-spacing:.12em;text-transform:uppercase;padding:3px 7px;border-radius:2px;border:1px solid var(--line);color:var(--mut);margin-top:5px}
+.badge.final{background:var(--green);border-color:var(--green);color:#fff}
+.pay td{vertical-align:top}
+.pay td b{font-weight:600}
+.pay .holders{display:flex;flex-direction:column;gap:5px;align-items:flex-start;text-align:left}
+.pay .holders div{display:flex;gap:7px;align-items:center;font-size:13px}
+.pot{display:flex;flex-direction:column;align-items:center;padding:18px 12px 16px;gap:2px}
+.pot span:first-child{font:600 10.5px Inter,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:var(--mut)}
+.pot span:last-child{font:400 32px/1.1 var(--serif);color:var(--green)}
+.note{font:italic 400 12.5px var(--serif);color:var(--mut);padding:0 4px 12px;text-align:center}
+.err{background:#fff3cd;color:#664d03;border:1px solid #ffe08a;border-radius:4px;padding:8px 10px;margin-bottom:10px;font-size:12px}
+footer{text-align:center;font:italic 400 12px var(--serif);color:var(--mut);padding:4px 0 0}
+@media (max-width:380px){.lb .r{grid-template-columns:26px 3px minmax(0,1fr) 36px 36px 24px;gap:5px}nav button{letter-spacing:.08em;font-size:11px}}
+</style>
+</head>
+<body>
+<header><h1>Oak Street Auctions</h1><div class="rule"></div></header>
+<nav id="nav">
+  <button data-v="lb" class="on">Leaderboard</button>
+  <button data-v="pay">Payouts</button>
+  <button data-v="st">Standings</button>
+  <button data-v="lots">Auction</button>
+</nav>
+<div class="wrap">
+  <div id="err"></div>
+  <div class="status" id="status"></div>
+  <div class="chips" id="chips"></div>
+  <div id="selbar"></div>
+  <div id="view"></div>
+</div>
+<script>
+/* ====== SETTINGS ======
+   For each tab: File > Share > Publish to web > pick the tab > Comma-separated values (.csv) > Publish.
+   Paste the link between the quotes. Leave a slot blank to use the sample data for that tab. */
+const CFG = {
+  // ESPN tournament ID: the number after tournamentId= in the ESPN leaderboard link.
+  // Leave it "" to use whatever PGA Tour event ESPN is showing this week.
+  espnEvent: "401811941",   // 2026 Masters
+  sheets: {
+    leaderboard: "",   // optional backup only: your ESPN sheet pull, used if ESPN can't be reached
+    players:     "",   // Player | Lot | OWGR   (ESPN spelling; individuals are the top-50 OWGR)
+    lots:        "",   // Lot | Owner | Price
+    payouts:     "",   // Item | % of Pot
+    bonuses:     ""    // Award | Player   (Hole-in-One or Most Eagles, one row per player)
+  },
+  refreshSeconds: 60
+};
+const DEMO = {"leaderboard": "POS,PLAYER,SCORE,TODAY,THRU,R1,R2,R3,R4,TOT\n1,Rory McIlroy,-12,,F,67,65,73,71,276\n2,Scottie Scheffler,-11,,F,70,74,65,68,277\nT3,Tyrrell Hatton,-10,,F,74,66,72,66,278\nT3,Russell Henley,-10,,F,73,71,66,68,278\nT3,Justin Rose,-10,,F,70,69,69,70,278\nT3,Cameron Young,-10,,F,73,67,65,73,278\nT7,Collin Morikawa,-9,,F,74,69,68,68,279\nT7,Sam Burns,-9,,F,67,71,68,73,279\nT9,Max Homa,-8,,F,72,70,71,67,280\nT9,Xander Schauffele,-8,,F,70,72,70,68,280\n11,Jake Knapp,-7,,F,73,69,69,70,281\nT12,Jordan Spieth,-5,,F,72,73,70,68,283\nT12,Hideki Matsuyama,-5,,F,72,70,72,69,283\nT12,Brooks Koepka,-5,,F,72,69,71,71,283\nT12,Patrick Cantlay,-5,,F,77,67,66,73,283\nT12,Patrick Reed,-5,,F,69,69,72,73,283\nT12,Jason Day,-5,,F,69,71,68,75,283\nT18,Maverick McNealy,-4,,F,77,70,70,67,284\nT18,Viktor Hovland,-4,,F,75,71,71,67,284\nT18,Matt Fitzpatrick,-4,,F,74,69,70,71,284\nT21,Keegan Bradley,-3,,F,72,74,73,66,285\nT21,Ludvig Åberg,-3,,F,74,70,69,72,285\nT21,Wyndham Clark,-3,,F,72,68,72,73,285\nT24,Matt McCarty,-2,,F,72,73,72,69,286\nT24,Adam Scott,-2,,F,72,74,70,70,286\nT24,Sam Stevens,-2,,F,72,74,70,70,286\nT24,Brian Campbell,-2,,F,71,73,69,73,286\nT24,Michael Brennan,-2,,F,72,71,70,73,286\nT24,Chris Gotterup,-2,,F,72,69,72,73,286\nT30,Shane Lowry,-1,,F,70,69,68,80,287\nT30,Alex Noren,-1,,F,77,71,69,70,287\nT30,Harris English,-1,,F,73,71,71,72,287\nT33,Gary Woodland,E,,F,71,75,76,66,288\nT33,Dustin Johnson,E,,F,73,71,75,69,288\nT33,Brian Harman,E,,F,79,69,67,73,288\nT33,Tommy Fleetwood,E,,F,71,68,73,76,288\nT33,Ben Griffin,E,,F,72,69,70,77,288\nT38,Jon Rahm,+1,,F,78,70,73,68,289\nT38,Ryan Gerard,+1,,F,72,72,68,77,289\nT38,Haotong Li,+1,,F,71,69,69,80,289\nT41,Justin Thomas,+2,,F,72,74,71,73,290\nT41,Jacob Bridgeman,+2,,F,71,74,69,76,290\nT41,Sepp Straka,+2,,F,73,72,69,76,290\nT41,Nick Taylor,+2,,F,71,72,70,77,290\nT41,Kristoffer Reitan,+2,,F,72,68,73,77,290\n46,Sungjae Im,+3,,F,76,69,69,77,291\n47,Si Woo Kim,+4,,F,75,73,72,72,292\n48,Aaron Rai,+5,,F,71,74,78,70,293\nT49,Corey Conners,+6,,F,75,73,71,75,294\nT49,Marco Penge,+6,,F,76,69,71,78,294\n51,Kurt Kitayama,+7,,F,69,79,75,72,295\n52,Sergio Garcia,+8,,F,72,75,74,75,296\n53,Rasmus Højgaard,+10,,F,78,70,73,77,298\n54,Charl Schwartzel,+12,,F,75,73,77,75,300\nCUT,Ryan Fox,+5,,,77,72,,,149\nCUT,Harry Hall,+5,,,77,72,,,149\nCUT,J.J. Spaun,+5,,,74,75,,,149\nCUT,Bubba Watson,+5,,,76,73,,,149\nCUT,Danny Willett,+5,,,76,73,,,149\nCUT,Akshay Bhatia,+6,,,73,77,,,150\nCUT,Bryson DeChambeau,+6,,,76,74,,,150\nCUT,Nicolai Højgaard,+6,,,76,74,,,150\nCUT,Zach Johnson,+6,,,75,75,,,150\nCUT,Robert MacIntyre,+7,,,80,71,,,151\nCUT,Tom McKibbin,+7,,,75,76,,,151\nCUT,Rasmus Neergaard-Petersen,+7,,,77,74,,,151\nCUT,Andrew Novak,+7,,,75,76,,,151\nCUT,Cameron Smith,+7,,,74,77,,,151\nCUT,Daniel Berger,+8,,,76,76,,,152\nCUT,Ethan Fang (a),+8,,,74,78,,,152\nCUT,Jackson Herrington (a),+8,,,76,76,,,152\nCUT,Casey Jarvis,+8,,,77,75,,,152\nCUT,Michael Kim,+8,,,75,77,,,152\nCUT,Fred Couples,+9,,,78,75,,,153\nCUT,Mason Howell (a),+9,,,77,76,,,153\nCUT,José María Olazábal,+9,,,74,79,,,153\nCUT,Vijay Singh,+10,,,79,75,,,154\nCUT,Mike Weir,+10,,,81,73,,,154\nCUT,Johnny Keefer,+11,,,76,79,,,155\nCUT,Fifa Laopakdee (a),+11,,,80,75,,,155\nCUT,Min Woo Lee,+11,,,78,77,,,155\nCUT,Carlos Ortiz,+11,,,80,75,,,155\nCUT,Sami Välimäki,+11,,,80,75,,,155\nCUT,Max Greyserman,+12,,,79,77,,,156\nCUT,Nico Echavarría,+13,,,79,78,,,157\nCUT,Brandon Holtz (a),+15,,,81,78,,,159\nCUT,Naoyuki Kataoka,+15,,,84,75,,,159\nCUT,Aldrich Potgieter,+15,,,84,75,,,159\nCUT,Mateo Pulcini (a),+15,,,81,78,,,159\nCUT,Ángel Cabrera,+16,,,79,81,,,160\nCUT,Davis Riley,+18,,,82,80,,,162\n", "players": "Player,Lot,OWGR\nScottie Scheffler,Scottie Scheffler,1\nRory McIlroy,Rory McIlroy,2\nCameron Young,Cameron Young,3\nTommy Fleetwood,Tommy Fleetwood,4\nJ.J. Spaun,J.J. Spaun,5\nMatt Fitzpatrick,Matt Fitzpatrick,6\nCollin Morikawa,Collin Morikawa,7\nRobert MacIntyre,Robert MacIntyre,8\nJustin Rose,Justin Rose,9\nXander Schauffele,Xander Schauffele,10\nChris Gotterup,Chris Gotterup,11\nRussell Henley,Russell Henley,12\nSepp Straka,Sepp Straka,13\nHideki Matsuyama,Hideki Matsuyama,14\nJustin Thomas,Justin Thomas,15\nBen Griffin,Ben Griffin,16\nLudvig Åberg,Ludvig Åberg,17\nJacob Bridgeman,Jacob Bridgeman,18\nAlex Noren,Alex Noren,19\nHarris English,Harris English,20\nAkshay Bhatia,Akshay Bhatia,21\nViktor Hovland,Viktor Hovland,22\nPatrick Reed,Patrick Reed,23\nBryson DeChambeau,Bryson DeChambeau,24\nMin Woo Lee,Min Woo Lee,25\nKeegan Bradley,Keegan Bradley,26\nMaverick McNealy,Maverick McNealy,27\nSi Woo Kim,Si Woo Kim,28\nRyan Gerard,Ryan Gerard,29\nJon Rahm,Jon Rahm,30\nTyrrell Hatton,Tyrrell Hatton,31\nShane Lowry,Shane Lowry,32\nSam Burns,Sam Burns,33\nKurt Kitayama,Kurt Kitayama,34\nPatrick Cantlay,Patrick Cantlay,35\nNicolai Højgaard,Nicolai Højgaard,36\nMarco Penge,Marco Penge,37\nDaniel Berger,Daniel Berger,38\nAaron Rai,Aaron Rai,39\nNico Echavarria,Nico Echavarria,40\nJason Day,Jason Day,41\nJake Knapp,Jake Knapp,42\nMichael Kim,Michael Kim,43\nCorey Conners,Corey Conners,44\nSam Stevens,Sam Stevens,45\nKristoffer Reitan,Kristoffer Reitan,46\nMichael Brennan,Michael Brennan,47\nAndrew Novak,Andrew Novak,48\nMatt McCarty,Matt McCarty,49\nBrian Harman,Brian Harman,50\nJordan Spieth,Group A,\nCharl Schwartzel,Group A,\nAldrich Potgieter,Group A,\nSergio García,Group A,\nBubba Watson,Group A,\nAdam Scott,Group B,\nSungjae Im,Group B,\nMax Homa,Group B,\nRasmus Neergaard-Petersen,Group B,\nSami Välimäki,Group B,\nBrooks Koepka,Group C,\nNick Taylor,Group C,\nRyan Fox,Group C,\nTom McKibbin,Group C,\nDustin Johnson,Group C,\nHarry Hall,Group D,\nGary Woodland,Group D,\nMax Greyserman,Group D,\nCasey Jarvis,Group D,\nHaotong Li,Group D,\nRasmus Højgaard,Group E,\nCameron Smith,Group E,\nWyndham Clark,Group E,\nCarlos Ortiz,Group E,\nJohnny Keefer,Group E,\nZach Johnson,Field,\nDavis Riley,Field,\nDanny Willett,Field,\nMason Howell (a),Field,\nNaoyuki Kataoka,Field,\nBrian Campbell,Field,\nÁngel Cabrera,Field,\nEthan Fang (a),Field,\nVijay Singh,Field,\nFred Couples,Field,\nFifa Laopakdee (a),Field,\nJackson Herrington (a),Field,\nBrandon Holtz (a),Field,\nMike Weir,Field,\nMateo Pulcini (a),Field,\nJosé María Olazábal,Field,\n", "lots": "Lot,Owner,Price\nScottie Scheffler,STONE. B,200\nRory McIlroy,KAISER. K,180\nCameron Young,FLATH. B,130\nTommy Fleetwood,FLATH. B,75\nJ.J. Spaun,MILLER. J,55\nMatt Fitzpatrick,FLATH. H,68\nCollin Morikawa,FLATH. B,50\nRobert MacIntyre,KAISER. K,55\nJustin Rose,MILLER. J,52\nXander Schauffele,WILLIAMS. K,65\nChris Gotterup,WYNDHAM. R,50\nRussell Henley,BOYD. D,33\nSepp Straka,KAISER. K,30\nHideki Matsuyama,FLATH. H,65\nJustin Thomas,BOYD IV. B,40\nBen Griffin,OLSON. T,33\nLudvig Åberg,WYNDHAM. R,136\nJacob Bridgeman,CLAYTON. D,35\nAlex Noren,KAISER. K,22\nHarris English,FLATH. H,30\nAkshay Bhatia,KAISER. K,80\nViktor Hovland,FOUGEROUSSE. D,66\nPatrick Reed,OLSON. T,50\nBryson DeChambeau,MILLER. J,120\nMin Woo Lee,WYNDHAM. R,60\nKeegan Bradley,KAISER. K,26\nMaverick McNealy,FLATH. H,30\nSi Woo Kim,FLATH. H,35\nRyan Gerard,MILLER. J,22\nJon Rahm,STONE. B,140\nTyrrell Hatton,CLAYTON. D,27\nShane Lowry,FLATH. B,35\nSam Burns,STONE. J,20\nKurt Kitayama,STONE. J,17\nPatrick Cantlay,FLATH. H,40\nNicolai Højgaard,BOYD. D,33\nMarco Penge,OLSON. T,20\nDaniel Berger,FOUGEROUSSE. D,32\nAaron Rai,KAISER. K,20\nNico Echavarria,FOUGEROUSSE. D,16\nJason Day,WYNDHAM. R,40\nJake Knapp,FLATH. H,29\nMichael Kim,MILLER. J,16\nCorey Conners,CLAYTON. D,45\nSam Stevens,KAISER. K,15\nKristoffer Reitan,OLSON. T,15\nMichael Brennan,WILLIAMS. K,15\nAndrew Novak,STONE. J,12\nMatt McCarty,BOYD IV. B,12\nBrian Harman,BOYD. D,15\nGroup A,MILLER. J,35\nGroup B,BOYD IV. B,47\nGroup C,STONE. B,50\nGroup D,STONE. J,50\nGroup E,STONE. J,55\nField,FLATH. B,30\n", "payouts": "Item,% of Pot\n1st,20%\n2nd,15%\n3rd,12%\n4th,9%\n5th,8%\n6th,7%\n7th,6%\n8th,5%\n9th,4%\n10th,3%\nLow Round Rd1,1%\nLow Round Rd2,1%\nLow Round Rd3,1%\nLow Round Rd4,2%\nHole-in-One,2%\nWorst Finish Miss Cut,2%\nWorst Finish Make Cut,2%\n", "bonuses": "Award,Player\nHole-in-One,Shane Lowry\n"};
+
+/* ====== helpers ====== */
+const PALETTE=["#1f77b4","#e6194b","#3cb44b","#f58231","#911eb4","#00a3a3","#f032e6","#9a6324","#808000","#000075","#e6a700","#46f0f0","#fabebe","#aaffc3","#800000","#ffd8b1","#7f7f7f","#bcf60c","#4363d8","#dcbeff"];
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const norm=s=>String(s||"").replace(/\(a\)/gi,"").normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/ø/gi,"o").replace(/æ/gi,"ae").replace(/ß/g,"ss").toLowerCase().replace(/[^a-z0-9]/g,"");
+const money=v=>(v<0?"-$":"$")+Math.abs(Math.round(v)).toLocaleString();
+const num=v=>{const n=parseFloat(String(v).replace(/[$,%\s]/g,""));return isFinite(n)?n:null};
+function parseCSV(t){const out=[];let row=[],f="",q=false;t=String(t).replace(/^﻿/,"");
+  for(let i=0;i<t.length;i++){const c=t[i];
+    if(q){if(c==='"'){if(t[i+1]==='"'){f+='"';i++}else q=false}else f+=c}
+    else if(c==='"')q=true;else if(c===','){row.push(f);f=""}
+    else if(c==='\n'||c==='\r'){if(c==='\r'&&t[i+1]==='\n')i++;row.push(f);out.push(row);row=[];f=""}
+    else f+=c}
+  if(f!==""||row.length){row.push(f);out.push(row)}
+  return out.filter(r=>r.some(x=>x.trim()!==""))}
+function table(csv){const r=parseCSV(csv);if(!r.length)return{h:[],rows:[]};return{h:r[0].map(x=>x.trim().toLowerCase()),rows:r.slice(1)}}
+function col(h,re,not){return h.findIndex(x=>re.test(x)&&!(not&&not.test(x)))}
+function toPar(s){s=String(s||"").trim().toUpperCase();if(s==="E"||s==="EVEN")return 0;const n=parseInt(s.replace("+",""),10);return /^[+-]?\d+$/.test(s)?n:null}
+function lum(hex){const n=parseInt(hex.slice(1),16),r=n>>16,g=n>>8&255,b=n&255;return(.299*r+.587*g+.114*b)/255}
+function tagHTML(o){if(!o)return"";return`<span class="tag" style="background:${o.color};color:${lum(o.color)>.6?"#111":"#fff"}">${esc(o.tag)}</span>`}
+
+/* ====== load ====== */
+/* ====== ESPN ======
+   Turns ESPN's leaderboard feed into the same columns as the old sheet:
+   POS, PLAYER, SCORE, TODAY, THRU, R1-R4, TOT. A round only counts once the
+   player has finished it (ESPN shows a partial stroke count mid-round). */
+function espnURL(){const ev=String(CFG.espnEvent||"").match(/\d{6,}/);
+  return "https://site.web.api.espn.com/apis/site/v2/sports/golf/leaderboard?league=pga"+(ev?"&event="+ev[0]:"")}
+function espnToRows(j){
+  const ev=(j.events||[])[0];if(!ev)throw new Error("no event in ESPN feed");
+  const comp=(ev.competitions||[])[0]||{};const cs=comp.competitors||[];
+  const parTxt=v=>{v=String(v??"").trim().toUpperCase();if(v==="E")return 0;return /^[+-]?\d+$/.test(v)?parseInt(v.replace("+",""),10):null};
+  const fmt=v=>v===0?"E":(v>0?"+"+v:""+v);
+  const rows=[["POS","PLAYER","SCORE","TODAY","THRU","R1","R2","R3","R4","TOT"]];
+  for(const c of cs.slice().sort((a,b)=>(a.sortOrder??a.order??999)-(b.sortOrder??b.order??999))){
+    const st=c.status||{},ty=((st.type&&st.type.name)||"").toUpperCase(),name=(c.athlete&&c.athlete.displayName)||"";
+    if(!name)continue;
+    const period=+st.period||0,thruN=+st.thru||0,finishedNow=thruN>=18||/FINISH/.test(ty);
+    const ls={};(c.linescores||[]).forEach(l=>{if(l&&l.period)ls[l.period]=l});
+    const r=[null,null,null,null,null];let par=0,anyPar=false;
+    for(let k=1;k<=4;k++){const l=ls[k];if(!l)continue;
+      const done=k<period||(k===period&&finishedNow)||/CUT/.test(ty)&&k<=2;
+      if(done&&l.value>50)r[k]=l.value;
+      const p=parTxt(l.displayValue);if(p!==null&&(l.value>0||k===period)){par+=p;anyPar=true}}
+    let pos=(st.position&&st.position.displayName)||"",score=anyPar?fmt(par):"",thru="";
+    if(/CUT/.test(ty)){pos="CUT";score="CUT"}
+    else if(/WITHDRAW|WD/.test(ty)||/^WD$/i.test(st.displayValue||"")){pos="WD";score="WD"}
+    else if(/DISQ|DQ/.test(ty)||/^DQ$/i.test(st.displayValue||"")){pos="DQ";score="DQ"}
+    else if(finishedNow)thru="F";
+    else if(thruN>0)thru=String(thruN);
+    else if(st.teeTime){const d=new Date(st.teeTime);thru=isNaN(d)?"":d.toLocaleTimeString([],{hour:"numeric",minute:"2-digit"})}
+    const today=ls[period]?ls[period].displayValue||"":"";
+    const tot=[1,2,3,4].reduce((a,k)=>a+(r[k]||0),0);
+    rows.push([pos,name,score,/^(CUT|WD|DQ)$/.test(pos)?"":today,thru,r[1]??"",r[2]??"",r[3]??"",r[4]??"",tot||""])}
+  const sType=((ev.status&&ev.status.type)||(comp.status&&comp.status.type)||{});
+  return{rows,event:ev.name||"",final:!!sType.completed}}
+async function getESPN(){const r=await fetch(espnURL()+"&_="+Date.now(),{cache:"no-store"});
+  if(!r.ok)throw new Error("ESPN ("+r.status+")");const j=await r.json();const x=espnToRows(j);
+  const s=io=>io.map(row=>row.map(v=>{v=String(v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}).join(",")).join("\n");
+  return{csv:s(x.rows),event:x.event,final:x.final}}
+
+let SOURCE="";
+async function getSheet(k){const u=CFG.sheets[k];if(!u)return DEMO[k];
+  const r=await fetch(u+(u.includes("?")?"&":"?")+"t="+Date.now(),{cache:"no-store"});
+  if(!r.ok)throw new Error(k+" tab ("+r.status+")");return r.text()}
+async function getTab(k){
+  if(k==="leaderboard"&&CFG.espnEvent!=="off"){
+    try{const x=await getESPN();if(!x.rows&&x.csv.split("\n").length<20)throw new Error("ESPN feed empty");SOURCE="";return x.csv}
+    catch(e){if(CFG.sheets.leaderboard){SOURCE="sheet";return getSheet(k)}
+      if(!GOOD.leaderboard&&DEMO.leaderboard){SOURCE="sample";return DEMO.leaderboard}throw e}}
+  return getSheet(k)}
+let D=null,STATE={view:"lb",sel:null};
+try{const s=localStorage.getItem("osa-golf");if(s)Object.assign(STATE,JSON.parse(s))}catch(e){}
+function save(){try{localStorage.setItem("osa-golf",JSON.stringify(STATE))}catch(e){}}
+
+/* A tab that comes back mid-reload (Loading..., #N/A, half empty) is ignored and the
+   last good copy is used instead, so the board never blanks out between refreshes. */
+const GOOD={};
+function lbCheck(t){
+  if(/loading|#n\/a|#ref!|#error|#value!/i.test(t.slice(0,4000)))return"still loading";
+  const T=table(t);const h=T.h;const n=col(h,/player|name|golfer/),sc=col(h,/score|to ?par/),ps=col(h,/^pos/);
+  if(n<0||sc<0)return"missing columns";
+  const rows=T.rows.filter(r=>(r[n]||"").trim());
+  if(rows.length<20)return`only ${rows.length} players`;
+  const ok=rows.filter(r=>toPar(r[sc])!==null||/^(cut|mc|wd|dq)$/i.test((r[sc]||"").trim())||/^(cut|mc|wd|dq)$/i.test((r[ps]||"").trim())||/:|am|pm/i.test(r[sc]||"")).length;
+  if(ok<rows.length*.8)return"scores not filled in";
+  const prev=GOOD.leaderboardCount;if(prev&&rows.length<prev*.6)return`dropped to ${rows.length} players`;
+  GOOD.leaderboardCount=rows.length;return""}
+function tabCheck(k,t){
+  if(k==="leaderboard")return lbCheck(t);
+  if(/loading|#n\/a|#ref!|#error/i.test(t.slice(0,4000)))return"still loading";
+  return table(t).rows.length?"":"empty"}
+let STALE="";
+async function load(){
+  const keys=Object.keys(CFG.sheets);const bad=[];
+  const txt=await Promise.all(keys.map(async k=>{
+    try{const t=await getTab(k);const why=tabCheck(k,t);
+      if(!why){GOOD[k]=t;return t}
+      bad.push(k);return GOOD[k]??null}
+    catch(e){bad.push(k);return GOOD[k]??null}}));
+  if(txt.some(t=>t==null)){$("#err").innerHTML=`<div class="err">Waiting on the leaderboard to load. Trying again in ${CFG.refreshSeconds} seconds.</div>`;return}
+  const T={};keys.forEach((k,i)=>T[k]=table(txt[i]));
+  try{D=compute(T)}catch(e){if(!D){$("#err").innerHTML=`<div class="err">Something in the sheet couldn't be read.</div>`;return}}
+  STALE=SOURCE==="sample"?"Can't reach ESPN, so this is saved sample data":bad.length?"Showing the last good update":"";
+  $("#err").innerHTML="";render();
+}
+
+/* ====== the math ====== */
+function compute(T){
+  // players on the leaderboard
+  const L=T.leaderboard,h=L.h;
+  const c={pos:col(h,/^pos/),name:col(h,/player|name|golfer/),score:col(h,/score|to ?par/),today:col(h,/today/),thru:col(h,/thru/),tot:col(h,/^tot/),
+    r:[null,col(h,/^r(ound)? ?1$/),col(h,/^r(ound)? ?2$/),col(h,/^r(ound)? ?3$/),col(h,/^r(ound)? ?4$/)]};
+  const P=[];
+  for(const r of L.rows){const name=(r[c.name]||"").trim();if(!name)continue;
+    const pos=(r[c.pos]||"").trim().toUpperCase();const sc=(r[c.score]||"").trim();
+    let st="active";if(/^(CUT|MC)$/.test(pos)||/^(CUT|MC)$/i.test(sc))st="cut";else if(/^(WD|DQ)$/.test(pos)||/^(WD|DQ)$/i.test(sc))st="wd";
+    const rd=[null];for(let k=1;k<=4;k++){const v=c.r[k]>=0?num(r[c.r[k]]):null;rd.push(v&&v>50?v:null)}
+    P.push({name,key:norm(name),pos:pos||"–",status:st,toPar:toPar(sc),scoreTxt:sc,today:c.today>=0?(r[c.today]||"").trim():"",thru:c.thru>=0?(r[c.thru]||"").trim():"",r:rd,won:0,awards:[]})}
+  const byKey={};P.forEach(p=>byKey[p.key]=p);
+
+  // players -> lots
+  const PL=T.players,ph=PL.h,pc={name:col(ph,/player|golfer|name/),lot:col(ph,/lot|group/),owgr:col(ph,/owgr|rank/)};
+  const lotOf={},top50={},lotPlayers={},owgrOf={};
+  for(const r of PL.rows){const k=norm(r[pc.name]);if(!k)continue;const lot=(r[pc.lot]||"").trim()||r[pc.name].trim();
+    lotOf[k]=lot;if(pc.owgr>=0){const n=num(r[pc.owgr]);if(n)owgrOf[k]=n}(lotPlayers[lot]=lotPlayers[lot]||[]).push(r[pc.name].trim())}
+  for(const k in lotOf)top50[k]=lotPlayers[lotOf[k]].length===1; // individual lots = top-50 OWGR
+
+  // lots -> owners
+  const LT=T.lots,lh=LT.h,lc={lot:col(lh,/lot|player|group/),owner:col(lh,/owner|buyer|bidder/),price:col(lh,/price|bid|paid|cost/)};
+  const lots={},ownersMap={};
+  for(const r of LT.rows){const lot=(r[lc.lot]||"").trim();if(!lot)continue;const owner=(r[lc.owner]||"").trim();
+    lots[lot]={lot,owner,price:num(r[lc.price])||0,won:0,players:lotPlayers[lot]||[lot]};if(owner)ownersMap[owner]=1}
+  for(const lot in lotPlayers)if(!lots[lot])lots[lot]={lot,owner:"",price:0,won:0,players:lotPlayers[lot]};
+  const pot=Object.values(lots).reduce((a,l)=>a+l.price,0);
+
+  // owners, tags, colors
+  const names=Object.keys(ownersMap).sort();const used={};const owners={};
+  const parse=o=>{const m=o.match(/^([^.,]+)[.,]\s*(.+)$/);return m?{last:m[1].trim(),first:m[2].trim()}:{last:o,first:""}};
+  names.forEach((o,i)=>{const{last,first}=parse(o);const L2=last.replace(/[^A-Za-z]/g,"").toUpperCase(),F=first.replace(/[^A-Za-z]/g,"").toUpperCase();
+    let t=(F[0]||"")+(L2[0]||"");if(!t)t=o.slice(0,2).toUpperCase();
+    let j=1;while(used[t]&&j<L2.length){t=(F[0]||"")+L2[0]+L2[j];j++}let n=2;const b=t;while(used[t])t=b+(n++);used[t]=1;
+    owners[o]={name:o,tag:t,color:PALETTE[i%PALETTE.length],paid:0,won:0,lots:[]}});
+  for(const l of Object.values(lots))if(l.owner){owners[l.owner].paid+=l.price;owners[l.owner].lots.push(l)}
+
+  // payout table
+  const PY=T.payouts,yh=PY.h,yc={item:col(yh,/item|place|award|payout/),pct:col(yh,/%|pct|percent|pot/)};
+  const items=PY.rows.map(r=>({item:(r[yc.item]||"").trim(),pct:num(r[yc.pct])||0})).filter(x=>x.item);
+  const place=[];const extras=[];
+  for(const it of items){const m=it.item.match(/^(\d+)\s*(st|nd|rd|th)?\b/i);if(m&&!/rd\s*\d/i.test(it.item)&&!/round/i.test(it.item))place[+m[1]]=it.pct;else extras.push(it)}
+
+  // bonuses
+  const BN=T.bonuses,bh=BN.h,bc={award:col(bh,/award|item|type/),player:col(bh,/player|golfer|name/)};
+  const hio=[],eag=[];for(const r of BN.rows){const a=(r[bc.award]||"");const p=(r[bc.player]||"").trim();if(!p)continue;
+    if(/hole|ace|hio/i.test(a))hio.push(p);else if(/eagle/i.test(a))eag.push(p)}
+
+  const active=P.filter(p=>p.status==="active"&&p.toPar!==null);
+  const cutMade=P.some(p=>p.status==="cut");
+  const final=active.length>0&&active.every(p=>p.r[4]!==null&&!/^\d+$/.test(p.thru));
+  const curRound=[4,3,2,1].find(k=>P.some(p=>p.r[k]!==null))||0;
+  const roundDone=k=>{const el=P.filter(p=>k<=2?p.status!=="wd":p.status==="active");return el.length>0&&el.every(p=>p.r[k]!==null)};
+  const awards=[];
+  const find=n=>byKey[norm(n)]||{name:n,key:norm(n),won:0,awards:[],missing:true};
+
+  // finishing positions with ties split
+  const sorted=[...active].sort((a,b)=>a.toPar-b.toPar);
+  let i=0;const posAwards=[];
+  while(i<sorted.length){let j=i;while(j<sorted.length&&sorted[j].toPar===sorted[i].toPar)j++;
+    const grp=sorted.slice(i,j);let tot=0,places=[];for(let k=i+1;k<=j;k++)if(place[k]){tot+=place[k];places.push(k)}
+    if(tot>0){posAwards.push({label:grp.length>1?"T"+(i+1):(i+1)+ord(i+1),detail:grp.length>1?`${places.map(x=>x+ord(x)).join("+")} split ${grp.length} ways`:"",pct:tot,holders:grp,status:final?"Final":"Projected",kind:"place"})}
+    i=j}
+  awards.push(...posAwards);
+  const placeTotal=place.reduce((a,b)=>a+(b||0),0);
+  const paidPlace=posAwards.reduce((a,b)=>a+b.pct,0);
+
+  // extras
+  for(const it of extras){const s=it.item;let a={label:s,pct:it.pct,holders:[],status:"Pending",kind:"bonus"};
+    const rm=s.match(/(?:rd|round)\s*(\d)/i);
+    if(/low/i.test(s)&&rm){const k=+rm[1];const done=roundDone(k);
+      const pool=P.filter(p=>p.r[k]!==null&&(done||k<curRound||!/^\d+$/.test(p.thru)));
+      if(pool.length){const lo=Math.min(...pool.map(p=>p.r[k]));a.holders=pool.filter(p=>p.r[k]===lo);a.detail=`Shot ${lo}`;a.status=done?"Final":"Leading"}}
+    else if(/hole|ace|hio|eagle/i.test(s)){
+      if(hio.length){a.holders=hio.map(find);a.detail="Hole-in-one";a.status="Final"}
+      else if(eag.length){a.holders=eag.map(find);a.label="Most Eagles";a.detail="No hole-in-one";a.status=final?"Final":"Leading"}}
+    else if(/worst/i.test(s)&&/miss|mc/i.test(s)){
+      if(cutMade){const pool=P.filter(p=>p.status==="cut"&&top50[p.key]&&p.r[1]&&p.r[2]);
+        if(pool.length){const w=Math.max(...pool.map(p=>p.r[1]+p.r[2]));a.holders=pool.filter(p=>p.r[1]+p.r[2]===w);a.detail=`+${w-144} through 36 (top 50 only)`;a.status="Final"}
+        else{a.detail="No top-50 player missed the cut";a.status="Unclaimed"}}}
+    else if(/worst/i.test(s)&&/make|made/i.test(s)){
+      if(cutMade){const pool=active.filter(p=>top50[p.key]&&(!final||[1,2,3,4].every(k=>p.r[k]!==null)));
+        if(pool.length){const w=Math.max(...pool.map(p=>p.toPar));a.holders=pool.filter(p=>p.toPar===w);a.detail=`${fmtPar(w)} (top 50 only)`;a.status=final?"Final":"Projected"}}}
+    awards.push(a)}
+
+  // allocate
+  for(const a of awards){a.amount=a.pct/100*pot;if(!a.holders.length)continue;const each=a.amount/a.holders.length;
+    for(const p of a.holders){p.won+=each;p.awards.push({label:a.kind==="place"?"Finish":a.label,amt:each})}}
+  const allP=[...P];for(const a of awards)for(const p of a.holders)if(p.missing&&!allP.includes(p))allP.push(p);
+  for(const p of allP){const lot=lotOf[p.key];p.lot=lot||"";if(lot&&lots[lot])lots[lot].won+=p.won}
+  for(const l of Object.values(lots))if(l.owner)owners[l.owner].won+=l.won;
+
+  const missing=allP.filter(p=>p.missing).map(p=>p.name).concat(Object.keys(lotOf).filter(k=>!byKey[k]).map(k=>PL.rows.find(r=>norm(r[pc.name])===k)[pc.name]));
+  return{P,byKey,owgrOf,lots,owners,pot,awards,final,curRound,cutMade,placeTotal,paidPlace,missing:[...new Set(missing)],extras};
+}
+function ord(n){return n%100>=11&&n%100<=13?"th":({1:"st",2:"nd",3:"rd"}[n%10]||"th")}
+function fmtPar(v){return v===0?"E":(v>0?"+"+v:""+v)}
+function parClass(v){return v<0?"under":v>0?"over":""}
+
+/* ====== render ====== */
+const ownerOf=p=>{const l=D.lots[p.lot];return l&&l.owner?D.owners[l.owner]:null};
+function render(){
+  document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("on",b.dataset.v===STATE.view));
+  const st=D.final?"Final":D.curRound?`Round ${D.curRound} · live, projected payouts`:"Waiting on first round";
+  $("#status").innerHTML=`<b>${st}</b>`+(STALE?`<span class="stale">${STALE}</span>`:"");
+  const os=Object.values(D.owners);
+  $("#chips").innerHTML=os.map(o=>`<button class="chip${STATE.sel===o.name?" on":""}" data-o="${esc(o.name)}">${tagHTML(o)}${esc(o.name)}</button>`).join("");
+  if(STATE.sel&&!D.owners[STATE.sel])STATE.sel=null;
+  const so=STATE.sel&&D.owners[STATE.sel];
+  if(so){const net=Math.round(so.won)-so.paid;
+    $("#selbar").innerHTML=`<div class="selbar"><div style="min-width:0"><div class="who2">${tagHTML(so)}${esc(so.name)}</div><div class="nums">Paid <b>${money(so.paid)}</b> · Won <b>${money(so.won)}</b> · Net <b class="${net>0?"posv":net<0?"negv":""}">${money(net)}</b></div></div><button data-o="${esc(so.name)}">Show all</button></div>`}
+  else $("#selbar").innerHTML="";
+  ({lb:renderLB,st:renderST,lots:renderLots,pay:renderPay})[STATE.view]();
+}
+function mine(o){return !STATE.sel||(o&&o.name===STATE.sel)}
+function dimCls(o){return""}
+function lotLabel(p){const l=D.lots[p.lot];if(!l)return"";if(l.players.length>1)return /field/i.test(p.lot)?"Field":esc(p.lot.replace(/^group\s*/i,""));const n=D.owgrOf[p.key];return n?"#"+n:""}
+function rk(p){const l=D.lots[p.lot];if(!l)return"";if(l.players.length>1)return`<span class="rk">${esc(p.lot)}</span>`;const n=D.owgrOf[p.key];return n?`<span class="rk">#${n}</span>`:""}
+function lbRow(p,cut){const o=ownerOf(p);
+  const score=p.status==="wd"?"WD":cut?fmtPar(p.r[1]+p.r[2]-144):fmtPar(p.toPar);const cls=p.status==="wd"?"":parClass(cut?p.r[1]+p.r[2]-144:p.toPar);
+  const thru=cut||p.status==="wd"?"":(p.thru||"");
+  return`<div class="r${cut?" cutrow":""}${dimCls(o)}"><span class="pos">${esc(cut?"":p.pos)}</span><span class="bar" style="background:${o?o.color:"transparent"}"></span>
+  <span class="nm"><b><span class="n1">${esc(p.name)}</span></b><small>${o?tagHTML(o)+esc(o.name):"Unsold"}</small></span>
+  <span class="lc">${lotLabel(p)}</span><span class="sc ${cls}">${score}</span><span class="th">${esc(thru)}</span></div>`}
+function renderLB(){
+  const act=D.P.filter(p=>p.status==="active"&&mine(ownerOf(p))).sort((a,b)=>(a.toPar??99)-(b.toPar??99));
+  const cut=D.P.filter(p=>p.status!=="active"&&mine(ownerOf(p))).sort((a,b)=>(a.status==="wd")-(b.status==="wd")||((a.r[1]||0)+(a.r[2]||0))-((b.r[1]||0)+(b.r[2]||0)));
+  const head=`<div class="r h"><span>Pos</span><span></span><span>Player</span><span style="text-align:center">RK</span><span style="text-align:right">Score</span><span style="text-align:center">Thru</span></div>`;
+  let h=`<div class="card lb">${head}${act.length?act.map(p=>lbRow(p,false)).join(""):`<div class="empty">${STATE.sel?"None of your golfers made the cut":"No scores yet"}</div>`}</div>`;
+  if(cut.length)h+=`<div class="card lb"><div class="sec"><span>Missed cut</span><span>36 holes</span></div>${cut.map(p=>lbRow(p,true)).join("")}</div>`;
+  if(D.missing.length)h+=`<div class="note">Not matched to the leaderboard (check ESPN spelling): ${D.missing.map(esc).join(", ")}</div>`;
+  $("#view").innerHTML=h}
+function renderST(){
+  const os=Object.values(D.owners).map(o=>({...o,net:Math.round(o.won)-o.paid})).sort((a,b)=>b.net-a.net||b.won-a.won);
+  let h=`<div class="card"><table><thead><tr><th>Bidder</th><th>Paid</th><th>Won</th><th>Net</th></tr></thead><tbody>`;
+  os.forEach((o,i)=>{h+=`<tr class="${STATE.sel===o.name?"me":""}" data-o="${esc(o.name)}" style="cursor:pointer"><td><div class="who"><span style="color:var(--mut);width:18px;font-weight:500">${i+1}</span>${tagHTML(o)}${esc(o.name)}</div></td><td>${money(o.paid)}</td><td>${money(o.won)}</td><td class="${o.net>0?"posv":o.net<0?"negv":""}" style="font-weight:700">${money(o.net)}</td></tr>`});
+  h+=`</tbody></table></div><div class="note">Projected until the tournament is final. Tap a bidder to see only their golfers.</div>`;
+  $("#view").innerHTML=h}
+function lotBlock(title,list,ranked){list=list.filter(l=>mine(l.owner?D.owners[l.owner]:null));if(!list.length)return"";
+  let h=`<div class="card"><div class="sec"><span>${title}</span><span>${list.length}</span></div><div class="lot h${ranked?" rkd":""}">${ranked?"<span>RK</span><span>Player</span>":"<span>Lot</span>"}<span class="n">Paid</span><span class="n">Won</span><span class="n">Net</span></div>`;
+  for(const l of list){const o=l.owner?D.owners[l.owner]:null;const net=Math.round(l.won)-l.price;
+    const row=`${ranked?`<span class="lr">${D.owgrOf[norm(l.lot)]?"#"+D.owgrOf[norm(l.lot)]:""}</span>`:""}<span class="ln">${l.players.length>1?'<span class="car">▶</span>':""}${tagHTML(o)}<span class="lnm"><span class="n1">${esc(l.lot)}</span></span></span><span class="n">${money(l.price)}</span><span class="n">${l.won?money(l.won):"–"}</span><span class="n ${net>0?"posv":net<0?"negv":""}" style="font-weight:700">${money(net)}</span>`;
+    if(l.players.length>1){const ps=l.players.map(n=>D.byKey[norm(n)]||{name:n,pos:"?",toPar:null,status:"",won:0,r:[]});
+      h+=`<details class="${dimCls(o)}"><summary class="lot">${row}</summary><div class="sub">${ps.map(p=>{const cut=p.status==="cut";const v=cut?p.r[1]+p.r[2]-144:p.toPar;
+        return`<div><span>${esc(p.name)}</span><span>${esc(p.status==="active"?p.pos:p.status==="cut"?"MC":p.pos)}</span><span class="${parClass(v)}">${p.status==="wd"?"WD":v==null?"":fmtPar(v)}</span><span>${p.won?money(p.won):"–"}</span></div>`}).join("")}</div></details>`}
+    else h+=`<div class="lot${ranked?" rkd":""}${dimCls(o)}">${row}</div>`}
+  return h+"</div>"}
+function renderLots(){const all=Object.values(D.lots);
+  const ind=all.filter(l=>l.players.length===1),fld=all.filter(l=>l.players.length>1&&/field/i.test(l.lot)),grp=all.filter(l=>l.players.length>1&&!/field/i.test(l.lot));
+  $("#view").innerHTML=(lotBlock("Individuals",ind,true)+lotBlock("Groups",grp)+lotBlock("Field",fld))||`<div class="card"><div class="empty">No lots</div></div>`}
+function renderPay(){
+  const paid=D.awards.reduce((a,x)=>a+(x.holders.length?x.pct:0),0);
+  let h=`<div class="card"><div class="pot"><span>Pot</span><span>${money(D.pot)}</span></div></div>`;
+  const sect=(title,list)=>{list=list.filter(a=>!STATE.sel||a.holders.some(p=>mine(ownerOf(p))));if(!list.length)return"";let s=`<div class="card"><div class="sec"><span>${title}</span></div><table class="pay"><thead><tr><th>Award</th><th style="text-align:left">Who</th><th>Pays</th></tr></thead><tbody>`;
+    for(const a of list){s+=`<tr><td><b>${esc(a.label)}</b><br><small style="color:var(--mut)">${a.pct}%${a.detail?" · "+esc(a.detail):""}</small><br><span class="badge${a.status==="Final"?" final":""}">${esc(a.status)}</span></td>
+      <td><div class="holders">${a.holders.length?a.holders.filter(p=>mine(ownerOf(p))).map(p=>{const o=ownerOf(p);return`<div class="${dimCls(o)}">${tagHTML(o)}<span>${esc(p.name)}</span></div>`}).join(""):'<span style="color:var(--mut)">—</span>'}</div></td>
+      <td><b>${money(a.amount)}</b>${a.holders.length>1?`<br><small style="color:var(--mut)">${money(a.amount/a.holders.length)} each</small>`:""}</td></tr>`}
+    return s+"</tbody></table></div>"};
+  h+=sect("Finishing position",D.awards.filter(a=>a.kind==="place"));
+  h+=sect("Bonuses",D.awards.filter(a=>a.kind==="bonus"));
+  if(STATE.sel&&!D.awards.some(a=>a.holders.some(p=>mine(ownerOf(p)))))h+=`<div class="card"><div class="empty">Nothing in the money yet</div></div>`;
+  h+=`<div class="note">${Math.round(paid*100)/100}% of the pot is assigned right now. Ties split the combined payouts evenly.</div>`;
+  $("#view").innerHTML=h}
+
+/* ====== events ====== */
+$("#nav").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;STATE.view=b.dataset.v;save();render();window.scrollTo(0,0)});
+document.addEventListener("click",e=>{const t=e.target.closest("[data-o]");if(!t||t.closest("#nav"))return;const o=t.dataset.o;STATE.sel=STATE.sel===o?null:o;save();render()});
+load();
+if(CFG.espnEvent!=="off"||Object.values(CFG.sheets).some(Boolean))setInterval(load,CFG.refreshSeconds*1000);
+</script>
+</body></html>
