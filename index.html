@@ -4,7 +4,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Oak Street Auctions</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&family=Cinzel:wght@500;700&family=Libre+Franklin:ital,wght@0,500;0,700;1,500&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Montserrat:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#f6f4ec;--card:#ffffff;--fg:#1c2a21;--mut:#6d7468;--line:#e6e2d4;--row:#faf9f4;
@@ -40,7 +40,7 @@ nav button.on{color:#fff;border-bottom-color:var(--gold)}
 .pick .val{flex:1;min-width:0;font:600 14px Inter,sans-serif;letter-spacing:.03em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pick .car2{color:var(--green);font-size:11px;flex:0 0 auto}
 .pick select{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;font-size:16px}
-.tag{display:inline-flex;align-items:center;justify-content:center;min-width:26px;height:20px;padding:0 5px;border-radius:3px;font:700 10.5px Inter,sans-serif;letter-spacing:.04em}
+.tag{display:inline-flex;align-items:center;justify-content:center;min-width:32px;flex:0 0 auto;height:20px;padding:0 5px;border-radius:3px;font:700 10.5px Inter,sans-serif;letter-spacing:.04em}
 .card{background:var(--card);border:1px solid var(--line);border-radius:4px;overflow:hidden;margin-bottom:16px;box-shadow:var(--shadow)}
 .sec{font:400 15px var(--serif);color:var(--green);padding:12px 12px 10px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:baseline}
 .sec span:last-child:not(:first-child){font:600 10.5px Inter,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)}
@@ -56,7 +56,7 @@ nav button.on{color:#fff;border-bottom-color:var(--gold)}
 .nm b .n1{min-width:0;line-height:1.2;overflow-wrap:anywhere}
 .lc{text-align:center;font:italic 400 12.5px var(--serif);color:var(--mut);line-height:1.1}
 .nm small{display:flex;align-items:center;gap:6px;color:var(--mut);font-size:11px;letter-spacing:.03em;margin-top:3px;white-space:nowrap;overflow:hidden}
-.nm small .tag{height:16px;min-width:22px;font-size:9.5px}
+.nm small .tag{height:16px;min-width:28px;font-size:9.5px}
 .sc{text-align:right;font-weight:700;font-size:15.5px;font-variant-numeric:tabular-nums}
 .under{color:var(--under)}.over{color:var(--over)}
 .th{text-align:center;color:var(--mut);font-size:12px}
@@ -113,6 +113,63 @@ details[open]>summary .car{transform:rotate(90deg)}
 .err{background:#fff3cd;color:#664d03;border:1px solid #ffe08a;border-radius:4px;padding:8px 10px;margin-bottom:10px;font-size:12px}
 footer{text-align:center;font:italic 400 12px var(--serif);color:var(--mut);padding:4px 0 0}
 @media (max-width:380px){.lb .r{grid-template-columns:26px 3px minmax(0,1fr) 36px 36px 24px;gap:5px}nav button{letter-spacing:.08em;font-size:11px}}
+
+/* ===== per-major themes (set automatically from the ESPN event name) ===== */
+html[data-ev="pga"]{--hdr:#00205B;--th:#00205B;--green:#00205B;--over:#00205B;--gold:#C9A961;--serif:"Cinzel",Georgia,serif}
+html[data-ev="usopen"]{--hdr:#00365F;--th:#00365F;--green:#00365F;--over:#00365F;--gold:#BF0D3E;--serif:"Libre Franklin",Inter,sans-serif}
+html[data-ev="open"]{--hdr:#0B2545;--th:#0B2545;--green:#0B2545;--over:#0B2545;--gold:#FFD100;--serif:"Cormorant Garamond",Georgia,serif}
+html[data-ev="fedex"]{--hdr:#4D148C;--th:#4D148C;--green:#4D148C;--over:#4D148C;--gold:#FF6200;--serif:"Montserrat",Inter,sans-serif}
+@media (prefers-color-scheme:dark){
+  html[data-ev="pga"]:not([data-theme="light"]){--hdr:#0d1d44;--th:#132a5e;--green:#9db7ff;--over:#9db7ff}
+  html[data-ev="usopen"]:not([data-theme="light"]){--hdr:#062a47;--th:#0b3a63;--green:#8cc2f0;--over:#8cc2f0}
+  html[data-ev="open"]:not([data-theme="light"]){--hdr:#071a33;--th:#0f2c52;--green:#ffd75a;--over:#9fbbe0}
+  html[data-ev="fedex"]:not([data-theme="light"]){--hdr:#2e0b57;--th:#45177d;--green:#c9a3ff;--over:#c9a3ff}}
+html[data-ev="pga"] header h1{text-transform:uppercase;letter-spacing:.12em;font-size:23px}
+html[data-ev="usopen"] header h1{font-weight:700;letter-spacing:.02em;text-transform:uppercase;font-size:24px}
+html[data-ev="open"] header h1{font-weight:600;font-size:30px}
+html[data-ev="fedex"] header h1{font-weight:600;text-transform:uppercase;letter-spacing:.08em;font-size:22px}
+/* ===== movement arrows ===== */
+.pos{display:flex;flex-direction:column;line-height:1.1}
+.mv{font:600 9.5px Inter,sans-serif;font-style:normal;letter-spacing:.02em;margin-top:2px}
+.mv.up{color:var(--pos)}.mv.dn{color:var(--neg)}
+.lb .r[data-p]{cursor:pointer}
+.lb .r[data-p]:active{filter:brightness(.97)}
+/* ===== scorecard sheet ===== */
+.sheet{position:fixed;inset:0;z-index:50;display:none}
+.sheet.on{display:block}
+.sheet-bg{position:absolute;inset:0;background:rgba(10,20,14,.45);animation:fade .15s}
+.sheet-card{position:absolute;left:0;right:0;bottom:0;max-height:88vh;overflow:auto;background:var(--bg);border-radius:14px 14px 0 0;box-shadow:0 -6px 30px rgba(0,0,0,.25);animation:up .2s ease-out;padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (min-width:640px){.sheet-card{left:50%;right:auto;width:600px;transform:translateX(-50%);bottom:auto;top:8vh;border-radius:8px;animation:fade .15s}}
+@keyframes up{from{transform:translateY(40px);opacity:.4}to{transform:none;opacity:1}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.sc-head{background:var(--hdr);color:#fff;padding:14px 16px 12px;position:sticky;top:0;z-index:1}
+.sc-head h3{margin:0;font:400 21px/1.15 var(--serif);padding-right:36px}
+.sc-head .meta{display:flex;align-items:center;gap:8px;margin-top:6px;font-size:12px;color:rgba(255,255,255,.8);flex-wrap:wrap}
+.sc-head .x{position:absolute;right:10px;top:10px;width:32px;height:32px;border-radius:50%;border:1px solid rgba(255,255,255,.35);background:none;color:#fff;font-size:16px;cursor:pointer}
+.sc-head .big{margin-left:auto;font:700 18px Inter,sans-serif}
+.rtabs{display:flex;gap:6px;padding:12px 16px 4px}
+.rtabs button{flex:1;appearance:none;border:1px solid var(--line);background:var(--card);color:var(--mut);border-radius:4px;padding:8px 0;font:600 11px Inter,sans-serif;letter-spacing:.1em;cursor:pointer}
+.rtabs button.on{background:var(--green);border-color:var(--green);color:#fff}
+.rtabs button:disabled{opacity:.35;cursor:default}
+.scw{padding:8px 12px 16px}
+.sct{width:100%;border-collapse:collapse;table-layout:fixed;background:var(--card);border:1px solid var(--line);margin-bottom:10px;font-variant-numeric:tabular-nums}
+.sct th,.sct td{padding:6px 0!important;text-align:center!important;font-size:12.5px;border-bottom:1px solid var(--line)}
+.sct th{font-size:10px!important;letter-spacing:.04em!important}
+.sct td.lab,.sct th:first-child{font:600 9px Inter,sans-serif!important;letter-spacing:.06em!important;text-transform:uppercase;text-align:left!important;padding-left:7px!important;width:50px}
+.sct td.lab{color:var(--mut)}
+.sct td.sum{font-weight:700;background:var(--row)}
+.sct tr.par td{color:var(--mut)}
+.hs{display:inline-flex;align-items:center;justify-content:center;width:23px;height:23px;font-weight:600;box-sizing:border-box}
+.hs.b{border:1.5px solid var(--under);border-radius:50%;color:var(--under)}
+.hs.e{border:1.5px solid var(--under);border-radius:50%;color:var(--under);box-shadow:0 0 0 2px var(--card),0 0 0 3.5px var(--under)}
+.hs.g{border:1.5px solid var(--over);color:var(--over)}
+.hs.d{border:1.5px solid var(--over);color:var(--over);box-shadow:0 0 0 2px var(--card),0 0 0 3.5px var(--over)}
+.sc-foot{display:flex;justify-content:space-between;padding:4px 4px 0;font-size:12px;color:var(--mut)}
+.sc-foot b{color:var(--fg)}
+.legend{display:flex;gap:12px;justify-content:center;font-size:11px;color:var(--mut);padding:2px 0 4px;flex-wrap:wrap}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.legend .hs{width:15px;height:15px;font-size:0}
+.tag.lite,.bar.lite{box-shadow:inset 0 0 0 1px rgba(0,0,0,.22)}
 </style>
 </head>
 <body>
@@ -123,6 +180,7 @@ footer{text-align:center;font:italic 400 12px var(--serif);color:var(--mut);padd
   <button data-v="st">Standings</button>
   <button data-v="lots">Auction</button>
 </nav>
+<div class="sheet" id="sheet"><div class="sheet-bg" data-close></div><div class="sheet-card" id="sheetCard"></div></div>
 <div class="wrap">
   <div id="err"></div>
   <div class="status" id="status"></div>
@@ -145,6 +203,45 @@ const CFG = {
     payouts:     "",   // Item | % of Pot
     bonuses:     ""    // Award | Player   (Hole-in-One or Most Eagles, one row per player)
   },
+  // Bidder colors, in order of seniority (most senior first). Same for every event.
+  // Name must match the Owner column exactly. text = lettering color on top of it.
+  // If two bidders who share a color are both at an event, the more senior one keeps it
+  // and the other gets a spare color for that event (listed at the bottom of the Auction tab).
+  bidders: [
+    ["STONE. B",        "#BDFD50", "#000"],
+    ["MILLER. J",       "#D7BFFA", "#000"],
+    ["WYNDHAM. R",      "#DD45DF", "#fff"],
+    ["BOYD. D",         "#926531", "#fff"],
+    ["BOYD IV. B",      "#CCD9F5", "#000"],
+    ["HOUSE. C",        "#BDFDC8", "#000"],
+    ["WOODWARD. R",     "#D7BFFA", "#000"],
+    ["STONE. J",        "#FEFACD", "#000"],
+    ["BOHNERT. J",      "#60B158", "#fff"],
+    ["FLATH. B",        "#F19E38", "#000"],
+    ["WILLIAMS. K",     "#60B158", "#fff"],
+    ["CLAYTON. D",      "#000070", "#fff"],
+    ["BRADBURY. C",     "#B2A7D2", "#000"],
+    ["FLATH. H",        "#4A62D1", "#fff"],
+    ["FRENCH. C",       "#D3354F", "#fff"],
+    ["FOUGEROUSSE. D",  "#70D1F0", "#000"],
+    ["KAISER. K",       "#FAE250", "#000"],
+    ["BOYD II. B",      "#8529AE", "#fff"],
+    ["OLSON. T",        "#F1C0D3", "#000"],
+    ["BRADBURY. D",     "#EC5E2B", "#000"],
+    ["BOYD III. B",     "#75140C", "#fff"],
+    ["FIDLER. J",       "#BDFD50", "#000"],
+    ["WOODWARD. N",     "#75140C", "#fff"],
+    ["BOYD. B",         "#5C9790", "#fff"],
+    ["MYERS. J",        "#EC5E2B", "#000"],
+    ["POWELL. H",       "#F1C0D3", "#000"],
+    ["THOMPSON. J",     "#BDFD50", "#000"],
+    ["JERRELLS. L",     "#5D0E07", "#fff"],
+    ["FLATER. B",       "#75FB4C", "#000"],
+    ["FISH. JD",        "#926531", "#fff"]
+  ],
+  // Spare colors, used in order when a regular color is already taken at an event.
+  spareColors: ["#1B3459","#8C2A65","#3A591B","#12B886","#F29085","#8C8C07","#499DF2","#E0177F","#2B2BD9","#AD0CF2"],
+  theme: "auto",   // auto = match the ESPN event; or "masters", "pga", "usopen", "open", "fedex"
   refreshSeconds: 60
 };
 const DEMO = {"leaderboard": "POS,PLAYER,SCORE,TODAY,THRU,R1,R2,R3,R4,TOT\n1,Rory McIlroy,-12,,F,67,65,73,71,276\n2,Scottie Scheffler,-11,,F,70,74,65,68,277\nT3,Tyrrell Hatton,-10,,F,74,66,72,66,278\nT3,Russell Henley,-10,,F,73,71,66,68,278\nT3,Justin Rose,-10,,F,70,69,69,70,278\nT3,Cameron Young,-10,,F,73,67,65,73,278\nT7,Collin Morikawa,-9,,F,74,69,68,68,279\nT7,Sam Burns,-9,,F,67,71,68,73,279\nT9,Max Homa,-8,,F,72,70,71,67,280\nT9,Xander Schauffele,-8,,F,70,72,70,68,280\n11,Jake Knapp,-7,,F,73,69,69,70,281\nT12,Jordan Spieth,-5,,F,72,73,70,68,283\nT12,Hideki Matsuyama,-5,,F,72,70,72,69,283\nT12,Brooks Koepka,-5,,F,72,69,71,71,283\nT12,Patrick Cantlay,-5,,F,77,67,66,73,283\nT12,Patrick Reed,-5,,F,69,69,72,73,283\nT12,Jason Day,-5,,F,69,71,68,75,283\nT18,Maverick McNealy,-4,,F,77,70,70,67,284\nT18,Viktor Hovland,-4,,F,75,71,71,67,284\nT18,Matt Fitzpatrick,-4,,F,74,69,70,71,284\nT21,Keegan Bradley,-3,,F,72,74,73,66,285\nT21,Ludvig Åberg,-3,,F,74,70,69,72,285\nT21,Wyndham Clark,-3,,F,72,68,72,73,285\nT24,Matt McCarty,-2,,F,72,73,72,69,286\nT24,Adam Scott,-2,,F,72,74,70,70,286\nT24,Sam Stevens,-2,,F,72,74,70,70,286\nT24,Brian Campbell,-2,,F,71,73,69,73,286\nT24,Michael Brennan,-2,,F,72,71,70,73,286\nT24,Chris Gotterup,-2,,F,72,69,72,73,286\nT30,Shane Lowry,-1,,F,70,69,68,80,287\nT30,Alex Noren,-1,,F,77,71,69,70,287\nT30,Harris English,-1,,F,73,71,71,72,287\nT33,Gary Woodland,E,,F,71,75,76,66,288\nT33,Dustin Johnson,E,,F,73,71,75,69,288\nT33,Brian Harman,E,,F,79,69,67,73,288\nT33,Tommy Fleetwood,E,,F,71,68,73,76,288\nT33,Ben Griffin,E,,F,72,69,70,77,288\nT38,Jon Rahm,+1,,F,78,70,73,68,289\nT38,Ryan Gerard,+1,,F,72,72,68,77,289\nT38,Haotong Li,+1,,F,71,69,69,80,289\nT41,Justin Thomas,+2,,F,72,74,71,73,290\nT41,Jacob Bridgeman,+2,,F,71,74,69,76,290\nT41,Sepp Straka,+2,,F,73,72,69,76,290\nT41,Nick Taylor,+2,,F,71,72,70,77,290\nT41,Kristoffer Reitan,+2,,F,72,68,73,77,290\n46,Sungjae Im,+3,,F,76,69,69,77,291\n47,Si Woo Kim,+4,,F,75,73,72,72,292\n48,Aaron Rai,+5,,F,71,74,78,70,293\nT49,Corey Conners,+6,,F,75,73,71,75,294\nT49,Marco Penge,+6,,F,76,69,71,78,294\n51,Kurt Kitayama,+7,,F,69,79,75,72,295\n52,Sergio Garcia,+8,,F,72,75,74,75,296\n53,Rasmus Højgaard,+10,,F,78,70,73,77,298\n54,Charl Schwartzel,+12,,F,75,73,77,75,300\nCUT,Ryan Fox,+5,,,77,72,,,149\nCUT,Harry Hall,+5,,,77,72,,,149\nCUT,J.J. Spaun,+5,,,74,75,,,149\nCUT,Bubba Watson,+5,,,76,73,,,149\nCUT,Danny Willett,+5,,,76,73,,,149\nCUT,Akshay Bhatia,+6,,,73,77,,,150\nCUT,Bryson DeChambeau,+6,,,76,74,,,150\nCUT,Nicolai Højgaard,+6,,,76,74,,,150\nCUT,Zach Johnson,+6,,,75,75,,,150\nCUT,Robert MacIntyre,+7,,,80,71,,,151\nCUT,Tom McKibbin,+7,,,75,76,,,151\nCUT,Rasmus Neergaard-Petersen,+7,,,77,74,,,151\nCUT,Andrew Novak,+7,,,75,76,,,151\nCUT,Cameron Smith,+7,,,74,77,,,151\nCUT,Daniel Berger,+8,,,76,76,,,152\nCUT,Ethan Fang (a),+8,,,74,78,,,152\nCUT,Jackson Herrington (a),+8,,,76,76,,,152\nCUT,Casey Jarvis,+8,,,77,75,,,152\nCUT,Michael Kim,+8,,,75,77,,,152\nCUT,Fred Couples,+9,,,78,75,,,153\nCUT,Mason Howell (a),+9,,,77,76,,,153\nCUT,José María Olazábal,+9,,,74,79,,,153\nCUT,Vijay Singh,+10,,,79,75,,,154\nCUT,Mike Weir,+10,,,81,73,,,154\nCUT,Johnny Keefer,+11,,,76,79,,,155\nCUT,Fifa Laopakdee (a),+11,,,80,75,,,155\nCUT,Min Woo Lee,+11,,,78,77,,,155\nCUT,Carlos Ortiz,+11,,,80,75,,,155\nCUT,Sami Välimäki,+11,,,80,75,,,155\nCUT,Max Greyserman,+12,,,79,77,,,156\nCUT,Nico Echavarría,+13,,,79,78,,,157\nCUT,Brandon Holtz (a),+15,,,81,78,,,159\nCUT,Naoyuki Kataoka,+15,,,84,75,,,159\nCUT,Aldrich Potgieter,+15,,,84,75,,,159\nCUT,Mateo Pulcini (a),+15,,,81,78,,,159\nCUT,Ángel Cabrera,+16,,,79,81,,,160\nCUT,Davis Riley,+18,,,82,80,,,162\n", "players": "Player,Lot,OWGR\nScottie Scheffler,Scottie Scheffler,1\nRory McIlroy,Rory McIlroy,2\nCameron Young,Cameron Young,3\nTommy Fleetwood,Tommy Fleetwood,4\nJ.J. Spaun,J.J. Spaun,5\nMatt Fitzpatrick,Matt Fitzpatrick,6\nCollin Morikawa,Collin Morikawa,7\nRobert MacIntyre,Robert MacIntyre,8\nJustin Rose,Justin Rose,9\nXander Schauffele,Xander Schauffele,10\nChris Gotterup,Chris Gotterup,11\nRussell Henley,Russell Henley,12\nSepp Straka,Sepp Straka,13\nHideki Matsuyama,Hideki Matsuyama,14\nJustin Thomas,Justin Thomas,15\nBen Griffin,Ben Griffin,16\nLudvig Åberg,Ludvig Åberg,17\nJacob Bridgeman,Jacob Bridgeman,18\nAlex Noren,Alex Noren,19\nHarris English,Harris English,20\nAkshay Bhatia,Akshay Bhatia,21\nViktor Hovland,Viktor Hovland,22\nPatrick Reed,Patrick Reed,23\nBryson DeChambeau,Bryson DeChambeau,24\nMin Woo Lee,Min Woo Lee,25\nKeegan Bradley,Keegan Bradley,26\nMaverick McNealy,Maverick McNealy,27\nSi Woo Kim,Si Woo Kim,28\nRyan Gerard,Ryan Gerard,29\nJon Rahm,Jon Rahm,30\nTyrrell Hatton,Tyrrell Hatton,31\nShane Lowry,Shane Lowry,32\nSam Burns,Sam Burns,33\nKurt Kitayama,Kurt Kitayama,34\nPatrick Cantlay,Patrick Cantlay,35\nNicolai Højgaard,Nicolai Højgaard,36\nMarco Penge,Marco Penge,37\nDaniel Berger,Daniel Berger,38\nAaron Rai,Aaron Rai,39\nNico Echavarria,Nico Echavarria,40\nJason Day,Jason Day,41\nJake Knapp,Jake Knapp,42\nMichael Kim,Michael Kim,43\nCorey Conners,Corey Conners,44\nSam Stevens,Sam Stevens,45\nKristoffer Reitan,Kristoffer Reitan,46\nMichael Brennan,Michael Brennan,47\nAndrew Novak,Andrew Novak,48\nMatt McCarty,Matt McCarty,49\nBrian Harman,Brian Harman,50\nJordan Spieth,Group A,\nCharl Schwartzel,Group A,\nAldrich Potgieter,Group A,\nSergio García,Group A,\nBubba Watson,Group A,\nAdam Scott,Group B,\nSungjae Im,Group B,\nMax Homa,Group B,\nRasmus Neergaard-Petersen,Group B,\nSami Välimäki,Group B,\nBrooks Koepka,Group C,\nNick Taylor,Group C,\nRyan Fox,Group C,\nTom McKibbin,Group C,\nDustin Johnson,Group C,\nHarry Hall,Group D,\nGary Woodland,Group D,\nMax Greyserman,Group D,\nCasey Jarvis,Group D,\nHaotong Li,Group D,\nRasmus Højgaard,Group E,\nCameron Smith,Group E,\nWyndham Clark,Group E,\nCarlos Ortiz,Group E,\nJohnny Keefer,Group E,\nZach Johnson,Field,\nDavis Riley,Field,\nDanny Willett,Field,\nMason Howell (a),Field,\nNaoyuki Kataoka,Field,\nBrian Campbell,Field,\nÁngel Cabrera,Field,\nEthan Fang (a),Field,\nVijay Singh,Field,\nFred Couples,Field,\nFifa Laopakdee (a),Field,\nJackson Herrington (a),Field,\nBrandon Holtz (a),Field,\nMike Weir,Field,\nMateo Pulcini (a),Field,\nJosé María Olazábal,Field,\n", "lots": "Lot,Owner,Price\nScottie Scheffler,STONE. B,200\nRory McIlroy,KAISER. K,180\nCameron Young,FLATH. B,130\nTommy Fleetwood,FLATH. B,75\nJ.J. Spaun,MILLER. J,55\nMatt Fitzpatrick,FLATH. H,68\nCollin Morikawa,FLATH. B,50\nRobert MacIntyre,KAISER. K,55\nJustin Rose,MILLER. J,52\nXander Schauffele,WILLIAMS. K,65\nChris Gotterup,WYNDHAM. R,50\nRussell Henley,BOYD. D,33\nSepp Straka,KAISER. K,30\nHideki Matsuyama,FLATH. H,65\nJustin Thomas,BOYD IV. B,40\nBen Griffin,OLSON. T,33\nLudvig Åberg,WYNDHAM. R,136\nJacob Bridgeman,CLAYTON. D,35\nAlex Noren,KAISER. K,22\nHarris English,FLATH. H,30\nAkshay Bhatia,KAISER. K,80\nViktor Hovland,FOUGEROUSSE. D,66\nPatrick Reed,OLSON. T,50\nBryson DeChambeau,MILLER. J,120\nMin Woo Lee,WYNDHAM. R,60\nKeegan Bradley,KAISER. K,26\nMaverick McNealy,FLATH. H,30\nSi Woo Kim,FLATH. H,35\nRyan Gerard,MILLER. J,22\nJon Rahm,STONE. B,140\nTyrrell Hatton,CLAYTON. D,27\nShane Lowry,FLATH. B,35\nSam Burns,STONE. J,20\nKurt Kitayama,STONE. J,17\nPatrick Cantlay,FLATH. H,40\nNicolai Højgaard,BOYD. D,33\nMarco Penge,OLSON. T,20\nDaniel Berger,FOUGEROUSSE. D,32\nAaron Rai,KAISER. K,20\nNico Echavarria,FOUGEROUSSE. D,16\nJason Day,WYNDHAM. R,40\nJake Knapp,FLATH. H,29\nMichael Kim,MILLER. J,16\nCorey Conners,CLAYTON. D,45\nSam Stevens,KAISER. K,15\nKristoffer Reitan,OLSON. T,15\nMichael Brennan,WILLIAMS. K,15\nAndrew Novak,STONE. J,12\nMatt McCarty,BOYD IV. B,12\nBrian Harman,BOYD. D,15\nGroup A,MILLER. J,35\nGroup B,BOYD IV. B,47\nGroup C,STONE. B,50\nGroup D,STONE. J,50\nGroup E,STONE. J,55\nField,FLATH. B,30\n", "payouts": "Item,% of Pot\n1st,20%\n2nd,15%\n3rd,12%\n4th,9%\n5th,8%\n6th,7%\n7th,6%\n8th,5%\n9th,4%\n10th,3%\nLow Round Rd1,1%\nLow Round Rd2,1%\nLow Round Rd3,1%\nLow Round Rd4,2%\nHole-in-One,2%\nWorst Finish Miss Cut,2%\nWorst Finish Make Cut,2%\n", "bonuses": "Award,Player\nHole-in-One,Shane Lowry\n"};
@@ -168,7 +265,7 @@ function table(csv){const r=parseCSV(csv);if(!r.length)return{h:[],rows:[]};retu
 function col(h,re,not){return h.findIndex(x=>re.test(x)&&!(not&&not.test(x)))}
 function toPar(s){s=String(s||"").trim().toUpperCase();if(s==="E"||s==="EVEN")return 0;const n=parseInt(s.replace("+",""),10);return /^[+-]?\d+$/.test(s)?n:null}
 function lum(hex){const n=parseInt(hex.slice(1),16),r=n>>16,g=n>>8&255,b=n&255;return(.299*r+.587*g+.114*b)/255}
-function tagHTML(o){if(!o)return"";return`<span class="tag" style="background:${o.color};color:${lum(o.color)>.6?"#111":"#fff"}">${esc(o.tag)}</span>`}
+function tagHTML(o){if(!o)return"";return`<span class="tag${o.light?" lite":""}" style="background:${o.color};color:${o.text}">${esc(o.tag)}</span>`}
 
 /* ====== load ====== */
 /* ====== ESPN ======
@@ -182,7 +279,7 @@ function espnToRows(j){
   const comp=(ev.competitions||[])[0]||{};const cs=comp.competitors||[];
   const parTxt=v=>{v=String(v??"").trim().toUpperCase();if(v==="E")return 0;return /^[+-]?\d+$/.test(v)?parseInt(v.replace("+",""),10):null};
   const fmt=v=>v===0?"E":(v>0?"+"+v:""+v);
-  const rows=[["POS","PLAYER","SCORE","TODAY","THRU","R1","R2","R3","R4","TOT"]];
+  const rows=[["POS","PLAYER","SCORE","TODAY","THRU","R1","R2","R3","R4","TOT","ID","MOVE"]];
   for(const c of cs.slice().sort((a,b)=>(a.sortOrder??a.order??999)-(b.sortOrder??b.order??999))){
     const st=c.status||{},ty=((st.type&&st.type.name)||"").toUpperCase(),name=(c.athlete&&c.athlete.displayName)||"";
     if(!name)continue;
@@ -202,24 +299,26 @@ function espnToRows(j){
     else if(st.teeTime){const d=new Date(st.teeTime);thru=isNaN(d)?"":d.toLocaleTimeString([],{hour:"numeric",minute:"2-digit"})}
     const today=ls[period]?ls[period].displayValue||"":"";
     const tot=[1,2,3,4].reduce((a,k)=>a+(r[k]||0),0);
-    rows.push([pos,name,score,/^(CUT|WD|DQ)$/.test(pos)?"":today,thru,r[1]??"",r[2]??"",r[3]??"",r[4]??"",tot||""])}
+    const cl=ls[period]||{};const move=/^(CUT|WD|DQ)$/.test(pos)||!(cl.startPosition>0&&cl.currentPosition>0)?"":String(cl.startPosition-cl.currentPosition);
+    rows.push([pos,name,score,/^(CUT|WD|DQ)$/.test(pos)?"":today,thru,r[1]??"",r[2]??"",r[3]??"",r[4]??"",tot||"",(c.athlete&&c.athlete.id)||c.id||"",move])}
   const sType=((ev.status&&ev.status.type)||(comp.status&&comp.status.type)||{});
-  return{rows,event:ev.name||"",final:!!sType.completed}}
+  return{rows,event:ev.name||"",id:ev.id||"",final:!!sType.completed}}
 async function getESPN(){const r=await fetch(espnURL()+"&_="+Date.now(),{cache:"no-store"});
   if(!r.ok)throw new Error("ESPN ("+r.status+")");const j=await r.json();const x=espnToRows(j);
   const s=io=>io.map(row=>row.map(v=>{v=String(v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}).join(",")).join("\n");
-  return{csv:s(x.rows),event:x.event,final:x.final}}
+  EVENT={name:x.event,id:x.id};return{csv:s(x.rows),event:x.event,final:x.final}}
 
-let SOURCE="";
+let SOURCE="",EVENT={name:"",id:""},UPDATED=null;
 async function getSheet(k){const u=CFG.sheets[k];if(!u)return DEMO[k];
   const r=await fetch(u+(u.includes("?")?"&":"?")+"t="+Date.now(),{cache:"no-store"});
   if(!r.ok)throw new Error(k+" tab ("+r.status+")");return r.text()}
 async function getTab(k){
   if(k==="leaderboard"&&CFG.espnEvent!=="off"){
-    try{const x=await getESPN();if(!x.rows&&x.csv.split("\n").length<20)throw new Error("ESPN feed empty");SOURCE="";return x.csv}
+    try{const x=await getESPN();applyTheme(x.event);if(!x.rows&&x.csv.split("\n").length<20)throw new Error("ESPN feed empty");SOURCE="";return x.csv}
     catch(e){if(CFG.sheets.leaderboard){SOURCE="sheet";return getSheet(k)}
       if(!GOOD.leaderboard&&DEMO.leaderboard){SOURCE="sample";return DEMO.leaderboard}throw e}}
   return getSheet(k)}
+let SWAPS_NOW=[];
 let D=null,STATE={view:"lb",sel:null};
 try{const s=localStorage.getItem("osa-golf");if(s)Object.assign(STATE,JSON.parse(s))}catch(e){}
 function save(){try{localStorage.setItem("osa-golf",JSON.stringify(STATE))}catch(e){}}
@@ -252,6 +351,7 @@ async function load(){
   if(txt.some(t=>t==null)){$("#err").innerHTML=`<div class="err">Waiting on the leaderboard to load. Trying again in ${CFG.refreshSeconds} seconds.</div>`;return}
   const T={};keys.forEach((k,i)=>T[k]=table(txt[i]));
   try{D=compute(T)}catch(e){if(!D){$("#err").innerHTML=`<div class="err">Something in the sheet couldn't be read.</div>`;return}}
+  if(!bad.includes("leaderboard")&&SOURCE!=="sample")UPDATED=new Date();
   STALE=SOURCE==="sample"?"Can't reach ESPN, so this is saved sample data":bad.length?"Showing the last good update":"";
   $("#err").innerHTML="";render();
 }
@@ -260,14 +360,14 @@ async function load(){
 function compute(T){
   // players on the leaderboard
   const L=T.leaderboard,h=L.h;
-  const c={pos:col(h,/^pos/),name:col(h,/player|name|golfer/),score:col(h,/score|to ?par/),today:col(h,/today/),thru:col(h,/thru/),tot:col(h,/^tot/),
+  const c={pos:col(h,/^pos/),name:col(h,/player|name|golfer/),score:col(h,/score|to ?par/),today:col(h,/today/),thru:col(h,/thru/),tot:col(h,/^tot/),id:col(h,/^id$/),move:col(h,/^move/),
     r:[null,col(h,/^r(ound)? ?1$/),col(h,/^r(ound)? ?2$/),col(h,/^r(ound)? ?3$/),col(h,/^r(ound)? ?4$/)]};
   const P=[];
   for(const r of L.rows){const name=(r[c.name]||"").trim();if(!name)continue;
     const pos=(r[c.pos]||"").trim().toUpperCase();const sc=(r[c.score]||"").trim();
     let st="active";if(/^(CUT|MC)$/.test(pos)||/^(CUT|MC)$/i.test(sc))st="cut";else if(/^(WD|DQ)$/.test(pos)||/^(WD|DQ)$/i.test(sc))st="wd";
     const rd=[null];for(let k=1;k<=4;k++){const v=c.r[k]>=0?num(r[c.r[k]]):null;rd.push(v&&v>50?v:null)}
-    P.push({name,key:norm(name),pos:pos||"–",status:st,toPar:toPar(sc),scoreTxt:sc,today:c.today>=0?(r[c.today]||"").trim():"",thru:c.thru>=0?(r[c.thru]||"").trim():"",r:rd,won:0,awards:[]})}
+    P.push({name,key:norm(name),pos:pos||"–",status:st,toPar:toPar(sc),scoreTxt:sc,today:c.today>=0?(r[c.today]||"").trim():"",thru:c.thru>=0?(r[c.thru]||"").trim():"",r:rd,id:c.id>=0?(r[c.id]||"").trim():"",move:c.move>=0?(parseInt(r[c.move],10)||0):0,won:0,awards:[]})}
   const byKey={};P.forEach(p=>byKey[p.key]=p);
 
   // players -> lots
@@ -288,10 +388,28 @@ function compute(T){
   // owners, tags, colors
   const names=Object.keys(ownersMap).sort();const used={};const owners={};
   const parse=o=>{const m=o.match(/^([^.,]+)[.,]\s*(.+)$/);return m?{last:m[1].trim(),first:m[2].trim()}:{last:o,first:""}};
-  names.forEach((o,i)=>{const{last,first}=parse(o);const L2=last.replace(/[^A-Za-z]/g,"").toUpperCase(),F=first.replace(/[^A-Za-z]/g,"").toUpperCase();
-    let t=(F[0]||"")+(L2[0]||"");if(!t)t=o.slice(0,2).toUpperCase();
-    let j=1;while(used[t]&&j<L2.length){t=(F[0]||"")+L2[0]+L2[j];j++}let n=2;const b=t;while(used[t])t=b+(n++);used[t]=1;
-    owners[o]={name:o,tag:t,color:PALETTE[i%PALETTE.length],paid:0,won:0,lots:[]}});
+  const nk=x=>String(x).toUpperCase().replace(/\s+/g," ").trim();
+  const ROSTER=(CFG.bidders||[]).map((b,i)=>({name:b[0],key:nk(b[0]),color:b[1].toUpperCase(),text:b[2],rank:i}));
+  const RB={};ROSTER.forEach(b=>RB[b.key]=b);
+  // tags: worked out over the whole roster in seniority order so they never change between events
+  const ROMAN={II:"2",III:"3",IV:"4",V:"5",JR:"J",SR:"S"};const TAG={};
+  const mkTag=o=>{const{last,first}=parse(o);const words=last.toUpperCase().split(/\s+/);
+    const suf=words.length>1&&ROMAN[words[words.length-1].replace(/\W/g,"")]?ROMAN[words.pop().replace(/\W/g,"")]:"";
+    const L2=words.join("").replace(/[^A-Z]/g,""),F=first.replace(/[^A-Za-z]/g,"").toUpperCase();
+    let t=(F[0]||"")+(L2[0]||"")+suf;if(!t)t=o.slice(0,2).toUpperCase();
+    let j=1;while(used[t]&&j<L2.length){t=(F[0]||"")+L2[0]+L2[j]+suf;j++}let n=2;const base=t;while(used[t])t=base+(n++);used[t]=1;return t};
+  ROSTER.forEach(b=>TAG[b.key]=mkTag(b.name));
+  // colors: present bidders in seniority order (unknown names last); a repeated color goes to the senior bidder
+  const present=names.slice().sort((a,b)=>((RB[nk(a)]||{rank:999}).rank-(RB[nk(b)]||{rank:999}).rank)||a.localeCompare(b));
+  const taken=new Set();const spare=(CFG.spareColors||[]).map(c=>c.toUpperCase()).concat(PALETTE.map(c=>c.toUpperCase()));
+  const nextSpare=()=>spare.find(c=>!taken.has(c))||"#888888";const SWAPS=[];
+  present.forEach(o=>{const b=RB[nk(o)];let color,text;
+    if(b&&!taken.has(b.color)){color=b.color;text=b.text}
+    else{color=nextSpare();text=lum(color)>.6?"#000":"#fff";
+      SWAPS.push({name:o,color,why:b?`${b.color} belongs to ${present.find(x=>RB[nk(x)]&&RB[nk(x)].color===b.color&&x!==o)}`:"not on the color list yet"})}
+    taken.add(color);
+    owners[o]={name:o,tag:TAG[nk(o)]||mkTag(o),color,text,light:lum(color)>.82,paid:0,won:0,lots:[]}});
+  SWAPS_NOW=SWAPS;
   for(const l of Object.values(lots))if(l.owner){owners[l.owner].paid+=l.price;owners[l.owner].lots.push(l)}
 
   // payout table
@@ -361,7 +479,9 @@ const ownerOf=p=>{const l=D.lots[p.lot];return l&&l.owner?D.owners[l.owner]:null
 function render(){
   document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("on",b.dataset.v===STATE.view));
   const st=D.final?"Final":D.curRound?`Round ${D.curRound} · live, projected payouts`:"Waiting on first round";
-  $("#status").innerHTML=`<b>${st}</b>`+(STALE?`<span class="stale">${STALE}</span>`:"");
+  const tm=d=>d.toLocaleTimeString([],{hour:"numeric",minute:"2-digit"});
+  const sub=SOURCE==="sample"?STALE:UPDATED?(STALE?`Showing the update from ${tm(UPDATED)}`:`Updated ${tm(UPDATED)}`):STALE;
+  $("#status").innerHTML=`<b>${st}</b>`+(sub?`<span class="stale">${sub}</span>`:"");
   const os=Object.values(D.owners);
   const sorted=os.slice().sort((a,b)=>a.name.localeCompare(b.name));const cur=STATE.sel&&D.owners[STATE.sel];
   $("#pick").innerHTML=`<span class="lbl">Bidder</span>${cur?`<span class="sw" style="background:${cur.color};border-color:${cur.color}"></span>`:""}<span class="val">${cur?esc(cur.name):"Everyone"}</span><span class="car2">▾</span>
@@ -372,6 +492,7 @@ function render(){
     $("#selbar").innerHTML=`<div class="selbar"><div style="min-width:0"><div class="who2">${tagHTML(so)}${esc(so.name)}</div><div class="nums">Paid <b>${money(so.paid)}</b> · Won <b>${money(so.won)}</b> · Net <b class="${net>0?"posv":net<0?"negv":""}">${money(net)}</b></div></div><button data-o="${esc(so.name)}">Show all</button></div>`}
   else $("#selbar").innerHTML="";
   ({lb:renderLB,st:renderST,lots:renderLots,pay:renderPay})[STATE.view]();
+  if(CARD){const p=D.byKey[CARD.key];if(p&&p.id&&EVENT.id)summary(p.id).then(j=>{if(CARD){CARD.j=j;drawCard()}}).catch(()=>{})}
 }
 function mine(o){return !STATE.sel||(o&&o.name===STATE.sel)}
 function dimCls(o){return""}
@@ -380,7 +501,7 @@ function rk(p){const l=D.lots[p.lot];if(!l)return"";if(l.players.length>1)return
 function lbRow(p,cut){const o=ownerOf(p);
   const score=p.status==="wd"?"WD":cut?fmtPar(p.r[1]+p.r[2]-144):fmtPar(p.toPar);const cls=p.status==="wd"?"":parClass(cut?p.r[1]+p.r[2]-144:p.toPar);
   const thru=cut||p.status==="wd"?"":(p.thru||"");
-  return`<div class="r${cut?" cutrow":""}${dimCls(o)}"><span class="pos">${esc(cut?"":p.pos)}</span><span class="bar" style="background:${o?o.color:"transparent"}"></span>
+  return`<div class="r${cut?" cutrow":""}${dimCls(o)}" data-p="${esc(p.key)}"><span class="pos">${esc(cut?"":p.pos)}${!cut&&p.move?`<i class="mv ${p.move>0?"up":"dn"}">${p.move>0?"▲":"▼"}${Math.abs(p.move)}</i>`:""}</span><span class="bar${o&&o.light?" lite":""}" style="background:${o?o.color:"transparent"}"></span>
   <span class="nm"><b><span class="n1">${esc(p.name)}</span></b><small>${o?tagHTML(o)+esc(o.name):"Unsold"}</small></span>
   <span class="lc">${lotLabel(p)}</span><span class="sc ${cls}">${score}</span><span class="th">${esc(thru)}</span></div>`}
 function renderLB(){
@@ -408,7 +529,8 @@ function lotBlock(title,list,ranked){list=list.filter(l=>mine(l.owner?D.owners[l
   return h+"</div>"}
 function renderLots(){const all=Object.values(D.lots);
   const ind=all.filter(l=>l.players.length===1),fld=all.filter(l=>l.players.length>1&&/field/i.test(l.lot)),grp=all.filter(l=>l.players.length>1&&!/field/i.test(l.lot));
-  $("#view").innerHTML=(lotBlock("Individuals",ind,true)+lotBlock("Groups",grp)+lotBlock("Field",fld))||`<div class="card"><div class="empty">No lots</div></div>`}
+  const sw=SWAPS_NOW.length?`<div class="note">Color changes for this event: ${SWAPS_NOW.map(x=>`${esc(x.name)} → ${x.color}`).join(" · ")}</div>`:"";
+  $("#view").innerHTML=(lotBlock("Individuals",ind,true)+lotBlock("Groups",grp)+lotBlock("Field",fld))+sw||`<div class="card"><div class="empty">No lots</div></div>`}
 function renderPay(){
   const paid=D.awards.reduce((a,x)=>a+(x.holders.length?x.pct:0),0);
   let h=`<div class="card"><div class="pot"><span>Pot</span><span>${money(D.pot)}</span></div></div>`;
@@ -426,6 +548,57 @@ function renderPay(){
 /* ====== events ====== */
 $("#nav").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;STATE.view=b.dataset.v;save();render();window.scrollTo(0,0)});
 document.addEventListener("click",e=>{const t=e.target.closest("[data-o]");if(!t||t.closest("#nav"))return;const o=t.dataset.o;STATE.sel=STATE.sel===o?null:o;save();render()});
+
+/* ====== themes ====== */
+function evKey(n){n=String(n||"").toLowerCase();
+  if(/masters/.test(n))return"masters";if(/pga championship/.test(n))return"pga";
+  if(/u\.?\s?s\.? open/.test(n))return"usopen";if(/open championship|^the open/.test(n))return"open";
+  if(/fedex|tour championship|st\.? jude|bmw championship|playoff/.test(n))return"fedex";return"masters"}
+function applyTheme(name){const k=CFG.theme&&CFG.theme!=="auto"?CFG.theme:evKey(name);
+  if(document.documentElement.dataset.ev!==k){document.documentElement.dataset.ev=k;try{localStorage.setItem("osa-ev",k)}catch(e){}}}
+try{applyTheme(CFG.theme&&CFG.theme!=="auto"?CFG.theme:"");const k=localStorage.getItem("osa-ev");if(k&&(!CFG.theme||CFG.theme==="auto"))document.documentElement.dataset.ev=k}catch(e){}
+
+/* ====== scorecards (tap a golfer) ====== */
+const CARDS={};let CARD=null;
+async function summary(id){const c=CARDS[id];if(c&&Date.now()-c.t<55000)return c.j;
+  const r=await fetch(`https://site.web.api.espn.com/apis/site/v2/sports/golf/pga/leaderboard/${EVENT.id}/playersummary?player=${id}&_=${Date.now()}`,{cache:"no-store"});
+  if(!r.ok)throw new Error("ESPN "+r.status);const j=await r.json();CARDS[id]={t:Date.now(),j};return j}
+function openCard(key){const p=D.byKey[key];if(!p)return;CARD={key,round:null};drawCard();
+  $("#sheet").classList.add("on");document.body.style.overflow="hidden";
+  if(p.id&&EVENT.id)summary(p.id).then(j=>{if(CARD&&CARD.key===key){CARD.j=j;drawCard()}}).catch(()=>{if(CARD&&CARD.key===key){CARD.err=1;drawCard()}})}
+function closeCard(){CARD=null;$("#sheet").classList.remove("on");document.body.style.overflow=""}
+function drawCard(){if(!CARD)return;const p=D.byKey[CARD.key];if(!p)return closeCard();const o=ownerOf(p);
+  const cut=p.status==="cut",v=cut?p.r[1]+p.r[2]-144:p.toPar;
+  let h=`<div class="sc-head"><button class="x" data-close aria-label="Close">✕</button><h3>${esc(p.name)}</h3>
+    <div class="meta">${o?tagHTML(o)+esc(o.name):"Unsold"}${lotLabel(p)?` · ${lotLabel(p).replace(/^#/,"RK #")}`:""}
+    <span class="big">${p.status==="wd"?"WD":cut?"CUT":esc(p.pos)+"&nbsp;&nbsp;"+fmtPar(v)}</span></div></div>`;
+  if(!p.id||!EVENT.id){$("#sheetCard").innerHTML=h+`<div class="empty">Scorecards come from ESPN and aren't available right now.</div>`;return}
+  if(CARD.err){$("#sheetCard").innerHTML=h+`<div class="empty">Couldn't load the scorecard. Try again in a minute.</div>`;return}
+  if(!CARD.j){$("#sheetCard").innerHTML=h+`<div class="empty">Loading scorecard…</div>`;return}
+  const rounds=(CARD.j.rounds||[]).filter(r=>(r.linescores||[]).length).sort((a,b)=>a.period-b.period);
+  const pars={};(CARD.j.rounds||[]).forEach(r=>(r.linescores||[]).forEach(x=>{if(x.par)pars[x.period]=x.par}));
+  if(!rounds.length){$("#sheetCard").innerHTML=h+`<div class="empty">No holes played yet.</div>`;return}
+  if(!CARD.round||!rounds.some(r=>r.period===CARD.round))CARD.round=rounds[rounds.length-1].period;
+  const R=rounds.find(r=>r.period===CARD.round);const holes={};R.linescores.forEach(x=>holes[x.period]=x);
+  const cell=n=>{const x=holes[n];if(!x||x.value==null)return"";const d=x.value-(x.par||pars[n]||0);
+    const cls=!(x.par||pars[n])?"":d<=-2?"e":d===-1?"b":d===1?"g":d>=2?"d":"";return`<span class="hs ${cls}">${x.value}</span>`};
+  const half=(a,lab)=>{const ns=[...Array(9)].map((_,i)=>a+i);const played=ns.filter(n=>holes[n]&&holes[n].value!=null);
+    const ps=ns.reduce((t,n)=>t+(pars[n]||0),0),ss=played.reduce((t,n)=>t+holes[n].value,0);
+    return`<table class="sct"><thead><tr><th style="text-align:left;padding-left:8px!important">Hole</th>${ns.map(n=>`<th>${n}</th>`).join("")}<th>${lab}</th></tr></thead><tbody>
+      <tr class="par"><td class="lab">Par</td>${ns.map(n=>`<td>${pars[n]||""}</td>`).join("")}<td class="sum">${ps||""}</td></tr>
+      <tr><td class="lab">Score</td>${ns.map(n=>`<td>${cell(n)}</td>`).join("")}<td class="sum">${played.length?ss:""}</td></tr></tbody></table>`};
+  const played=R.linescores.filter(x=>x.value!=null).length;
+  h+=`<div class="rtabs">${[1,2,3,4].map(k=>`<button data-round="${k}"${rounds.some(r=>r.period===k)?"":" disabled"} class="${k===CARD.round?"on":""}">R${k}</button>`).join("")}</div>
+   <div class="scw">${half(1,"Out")}${half(10,"In")}
+   <div class="legend"><span><i class="hs e"></i>Eagle</span><span><i class="hs b"></i>Birdie</span><span><i class="hs g"></i>Bogey</span><span><i class="hs d"></i>Double+</span></div>
+   <div class="sc-foot"><span>Round ${CARD.round}${played<18?` · thru ${played}`:""}</span><span>${R.value?`<b>${played<18?"":R.value+" "}</b>`:""}${R.displayValue?`(${esc(R.displayValue)})`:""}</span></div></div>`;
+  $("#sheetCard").innerHTML=h}
+document.addEventListener("click",e=>{
+  if(e.target.closest("[data-close]")){closeCard();return}
+  const rb=e.target.closest("[data-round]");if(rb&&CARD&&!rb.disabled){CARD.round=+rb.dataset.round;drawCard();return}
+  const row=e.target.closest("[data-p]");if(row&&!e.target.closest("[data-o]")){openCard(row.dataset.p)}});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeCard()});
+
 document.addEventListener("change",e=>{if(e.target.id!=="sel")return;STATE.sel=e.target.value||null;save();render()});
 load();
 if(CFG.espnEvent!=="off"||Object.values(CFG.sheets).some(Boolean))setInterval(load,CFG.refreshSeconds*1000);
