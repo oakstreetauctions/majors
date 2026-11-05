@@ -79,7 +79,6 @@ td{padding:11px 10px;border-bottom:1px solid var(--line);text-align:right}
 tbody tr:nth-child(even) td{background:var(--row)}
 tr:last-child td{border-bottom:0}
 .who{display:flex;align-items:center;gap:9px;font-weight:600}
-.who>span:first-child{font:400 15px var(--serif)!important;color:var(--fg)!important}
 .posv{color:var(--pos)}.negv{color:var(--neg)}
 details>summary{list-style:none;cursor:pointer}
 details>summary::-webkit-details-marker{display:none}
@@ -391,7 +390,7 @@ function renderLB(){
 function renderST(){
   const os=Object.values(D.owners).map(o=>({...o,net:Math.round(o.won)-o.paid})).sort((a,b)=>b.net-a.net||b.won-a.won);
   let h=`<div class="card"><table><thead><tr><th>Bidder</th><th>Paid</th><th>Won</th><th>Net</th></tr></thead><tbody>`;
-  os.forEach((o,i)=>{h+=`<tr class="${STATE.sel===o.name?"me":""}" data-o="${esc(o.name)}" style="cursor:pointer"><td><div class="who"><span style="color:var(--mut);width:18px;font-weight:500">${i+1}</span>${tagHTML(o)}${esc(o.name)}</div></td><td>${money(o.paid)}</td><td>${money(o.won)}</td><td class="${o.net>0?"posv":o.net<0?"negv":""}" style="font-weight:700">${money(o.net)}</td></tr>`});
+  os.forEach((o,i)=>{h+=`<tr class="${STATE.sel===o.name?"me":""}" data-o="${esc(o.name)}" style="cursor:pointer"><td><div class="who">${tagHTML(o)}${esc(o.name)}</div></td><td>${money(o.paid)}</td><td>${money(o.won)}</td><td class="${o.net>0?"posv":o.net<0?"negv":""}" style="font-weight:700">${money(o.net)}</td></tr>`});
   h+=`</tbody></table></div><div class="note">Projected until the tournament is final. Tap a bidder to see only their golfers.</div>`;
   $("#view").innerHTML=h}
 function lotBlock(title,list,ranked){list=list.filter(l=>mine(l.owner?D.owners[l.owner]:null));if(!list.length)return"";
