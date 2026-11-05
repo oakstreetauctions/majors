@@ -44,13 +44,14 @@ nav button.on{color:#fff;border-bottom-color:var(--gold)}
 .card{background:var(--card);border:1px solid var(--line);border-radius:4px;overflow:hidden;margin-bottom:16px;box-shadow:var(--shadow)}
 .sec{font:400 15px var(--serif);color:var(--green);padding:12px 12px 10px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:baseline}
 .sec span:last-child:not(:first-child){font:600 10.5px Inter,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)}
-.lb .r{display:grid;grid-template-columns:28px 3px minmax(0,1fr) 40px 40px 28px;align-items:center;gap:6px;padding:9px 10px 9px 10px;border-bottom:1px solid var(--line)}
+.lb .r{display:grid;grid-template-columns:30px 3px minmax(0,1fr) 40px 40px 28px;align-items:center;gap:6px;padding:9px 10px 9px 10px;border-bottom:1px solid var(--line)}
 .lb .r:last-child{border-bottom:0}
 .lb .r:not(.h):nth-child(odd){background:var(--row)}
 .lb .h,th,.lot.h{background:var(--th)!important;color:var(--thfg)!important;font:600 10.5px Inter,sans-serif!important;letter-spacing:.12em!important;text-transform:uppercase;border-bottom:0!important}
 .lb .h{padding-top:9px;padding-bottom:9px;letter-spacing:.07em!important;font-size:10px!important}
 .bar{width:3px;height:32px;border-radius:2px;background:transparent}
-.pos{font:400 15px var(--serif);color:var(--fg)}
+.pos{font:600 14px Inter,sans-serif;color:var(--fg);font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.pos .t{font-size:10px;font-weight:600;color:var(--mut);margin-right:1px;vertical-align:1px}
 .nm{min-width:0}
 .nm b{display:flex;align-items:baseline;font-weight:600;font-size:14px;letter-spacing:-.005em;min-width:0}
 .nm b .n1{min-width:0;line-height:1.2;overflow-wrap:anywhere}
@@ -129,7 +130,8 @@ html[data-ev="usopen"] header h1{font-weight:700;letter-spacing:.02em;text-trans
 html[data-ev="open"] header h1{font-weight:600;font-size:30px}
 html[data-ev="fedex"] header h1{font-weight:600;text-transform:uppercase;letter-spacing:.08em;font-size:22px}
 /* ===== movement arrows ===== */
-.pos{display:flex;flex-direction:column;line-height:1.1}
+.pos{display:flex;flex-direction:column;align-items:center;text-align:center;line-height:1.1}
+.lb .h span:first-child{text-align:center}
 .mv{font:600 9.5px Inter,sans-serif;font-style:normal;letter-spacing:.02em;margin-top:2px}
 .mv.up{color:var(--pos)}.mv.dn{color:var(--neg)}
 .lb .r[data-p]{cursor:pointer}
@@ -498,17 +500,17 @@ function mine(o){return !STATE.sel||(o&&o.name===STATE.sel)}
 function dimCls(o){return""}
 function lotLabel(p){const l=D.lots[p.lot];if(!l)return"";if(l.players.length>1)return /field/i.test(p.lot)?"Field":esc(p.lot.replace(/^group\s*/i,""));const n=D.owgrOf[p.key];return n?"#"+n:""}
 function rk(p){const l=D.lots[p.lot];if(!l)return"";if(l.players.length>1)return`<span class="rk">${esc(p.lot)}</span>`;const n=D.owgrOf[p.key];return n?`<span class="rk">#${n}</span>`:""}
-function lbRow(p,cut){const o=ownerOf(p);
+function lbRow(p,cut,showPos=true){const o=ownerOf(p);
   const score=p.status==="wd"?"WD":cut?fmtPar(p.r[1]+p.r[2]-144):fmtPar(p.toPar);const cls=p.status==="wd"?"":parClass(cut?p.r[1]+p.r[2]-144:p.toPar);
   const thru=cut||p.status==="wd"?"":(p.thru||"");
-  return`<div class="r${cut?" cutrow":""}${dimCls(o)}" data-p="${esc(p.key)}"><span class="pos">${esc(cut?"":p.pos)}${!cut&&p.move?`<i class="mv ${p.move>0?"up":"dn"}">${p.move>0?"▲":"▼"}${Math.abs(p.move)}</i>`:""}</span><span class="bar${o&&o.light?" lite":""}" style="background:${o?o.color:"transparent"}"></span>
+  return`<div class="r${cut?" cutrow":""}${dimCls(o)}" data-p="${esc(p.key)}"><span class="pos"><span>${cut||!showPos?"":esc(p.pos.replace(/^T(?=\d)/,""))}</span>${!cut&&p.move?`<i class="mv ${p.move>0?"up":"dn"}">${p.move>0?"▲":"▼"}${Math.abs(p.move)}</i>`:""}</span><span class="bar${o&&o.light?" lite":""}" style="background:${o?o.color:"transparent"}"></span>
   <span class="nm"><b><span class="n1">${esc(p.name)}</span></b><small>${o?tagHTML(o)+esc(o.name):"Unsold"}</small></span>
   <span class="lc">${lotLabel(p)}</span><span class="sc ${cls}">${score}</span><span class="th">${esc(thru)}</span></div>`}
 function renderLB(){
   const act=D.P.filter(p=>p.status==="active"&&mine(ownerOf(p))).sort((a,b)=>(a.toPar??99)-(b.toPar??99));
   const cut=D.P.filter(p=>p.status!=="active"&&mine(ownerOf(p))).sort((a,b)=>(a.status==="wd")-(b.status==="wd")||((a.r[1]||0)+(a.r[2]||0))-((b.r[1]||0)+(b.r[2]||0)));
   const head=`<div class="r h"><span>Pos</span><span></span><span>Player</span><span style="text-align:center">RK</span><span style="text-align:right">Score</span><span style="text-align:center">Thru</span></div>`;
-  let h=`<div class="card lb">${head}${act.length?act.map(p=>lbRow(p,false)).join(""):`<div class="empty">${STATE.sel?"None of your golfers made the cut":"No scores yet"}</div>`}</div>`;
+  let h=`<div class="card lb">${head}${act.length?act.map((p,i)=>lbRow(p,false,i===0||act[i-1].pos!==p.pos)).join(""):`<div class="empty">${STATE.sel?"None of your golfers made the cut":"No scores yet"}</div>`}</div>`;
   if(cut.length)h+=`<div class="card lb"><div class="sec"><span>Missed cut</span><span>36 holes</span></div>${cut.map(p=>lbRow(p,true)).join("")}</div>`;
   if(D.missing.length)h+=`<div class="note">Not matched to the leaderboard (check ESPN spelling): ${D.missing.map(esc).join(", ")}</div>`;
   $("#view").innerHTML=h}
