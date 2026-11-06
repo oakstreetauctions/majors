@@ -247,26 +247,27 @@ details.many[open] .mc-counts{display:none}
 const CFG = {
   // ===== EVENTS =====  Newest first. The first one is what the site opens to.
   // espnEvent = the number after tournamentId= in the ESPN leaderboard link.
+  // short     = optional shorter name for the event dropdown list (the header shows the full name).
   // sheets    = published CSV links for that event's tabs (leave blank for past events;
   //             their auction data is saved inside this file).
   events: [
-    { id: "2026-pga", name: "2026 PGA", espnEvent: "401811947",
+    { id: "2026-pga", name: "2026 PGA Championship", short: "2026 PGA", espnEvent: "401811947",
       sheets: { leaderboard: "", players: "", lots: "", payouts: "", bonuses: "" } },
     { id: "2026-masters", name: "2026 Masters", espnEvent: "401811941",
       sheets: { leaderboard: "", players: "", lots: "", payouts: "", bonuses: "" } },
-    { id: "2025-pga", name: "2025 PGA", espnEvent: "401703511",
+    { id: "2025-pga", name: "2025 PGA Championship", short: "2025 PGA", espnEvent: "401703511",
       sheets: { leaderboard: "", players: "", lots: "", payouts: "", bonuses: "" } },
     { id: "2025-masters", name: "2025 Masters", espnEvent: "401703504",
       sheets: { leaderboard: "", players: "", lots: "", payouts: "", bonuses: "" } },
-    { id: "2024-pga", name: "2024 PGA", espnEvent: "401580351",
+    { id: "2024-pga", name: "2024 PGA Championship", short: "2024 PGA", espnEvent: "401580351",
       sheets: { leaderboard: "", players: "", lots: "", payouts: "", bonuses: "" } },
     { id: "2024-masters", name: "2024 Masters", espnEvent: "401580344",
       sheets: { leaderboard: "", players: "", lots: "", payouts: "", bonuses: "" } },
-    { id: "2023-pga", name: "2023 PGA", espnEvent: "401465523",
+    { id: "2023-pga", name: "2023 PGA Championship", short: "2023 PGA", espnEvent: "401465523",
       sheets: { leaderboard: "", players: "", lots: "", payouts: "", bonuses: "" } },
     { id: "2023-masters", name: "2023 Masters", espnEvent: "401465508",
       sheets: { leaderboard: "", players: "", lots: "", payouts: "", bonuses: "" } },
-    { id: "2022-pga", name: "2022 PGA", espnEvent: "401353226",
+    { id: "2022-pga", name: "2022 PGA Championship", short: "2022 PGA", espnEvent: "401353226",
       sheets: { leaderboard: "", players: "", lots: "", payouts: "", bonuses: "" } },
     { id: "2022-masters", name: "2022 Masters", espnEvent: "401353232",
       sheets: { leaderboard: "", players: "", lots: "", payouts: "", bonuses: "" } }
@@ -600,7 +601,7 @@ function render(){
   $("#status").innerHTML=`<b>${st}</b>`+(sub?`<span class="stale">${sub}</span>`:"");
   const os=Object.values(D.owners);
   const sorted=os.slice().sort((a,b)=>a.name.localeCompare(b.name));const cur=STATE.sel&&D.owners[STATE.sel];
-  $("#evpick").innerHTML=`<span>${esc(CUR.name)}</span><span class="car3">▾</span><select id="evsel" aria-label="Pick an event">${CFG.events.map(e=>`<option value="${esc(e.id)}"${e.id===CUR.id?" selected":""}>${esc(e.name)}</option>`).join("")}</select>`;
+  $("#evpick").innerHTML=`<span>${esc(CUR.name)}</span><span class="car3">▾</span><select id="evsel" aria-label="Pick an event">${CFG.events.map(e=>`<option value="${esc(e.id)}"${e.id===CUR.id?" selected":""}>${esc(e.short||e.name)}</option>`).join("")}</select>`;
   $("#pick").innerHTML=`<span class="lbl">Bidder</span>${cur?`<span class="sw" style="background:${cur.color};border-color:${cur.color}"></span>`:""}<span class="val">${cur?esc(cur.name):"Everyone"}</span><span class="car2">▾</span>
     <select id="sel" aria-label="Pick a bidder"><option value="">Everyone</option>${sorted.map(o=>`<option value="${esc(o.name)}"${STATE.sel===o.name?" selected":""}>${esc(o.name)}</option>`).join("")}</select>`;
   if(STATE.sel&&!D.owners[STATE.sel])STATE.sel=null;
