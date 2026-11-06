@@ -250,23 +250,23 @@ const CFG = {
   // sheets    = published CSV links for that event's tabs (leave blank for past events;
   //             their auction data is saved inside this file).
   events: [
-    { id: "2026-pga", name: "2026 PGA Championship", espnEvent: "401811947",
+    { id: "2026-pga", name: "2026 PGA", espnEvent: "401811947",
       sheets: { leaderboard: "", players: "", lots: "", payouts: "", bonuses: "" } },
     { id: "2026-masters", name: "2026 Masters", espnEvent: "401811941",
       sheets: { leaderboard: "", players: "", lots: "", payouts: "", bonuses: "" } },
-    { id: "2025-pga", name: "2025 PGA Championship", espnEvent: "401703511",
+    { id: "2025-pga", name: "2025 PGA", espnEvent: "401703511",
       sheets: { leaderboard: "", players: "", lots: "", payouts: "", bonuses: "" } },
     { id: "2025-masters", name: "2025 Masters", espnEvent: "401703504",
       sheets: { leaderboard: "", players: "", lots: "", payouts: "", bonuses: "" } },
-    { id: "2024-pga", name: "2024 PGA Championship", espnEvent: "401580351",
+    { id: "2024-pga", name: "2024 PGA", espnEvent: "401580351",
       sheets: { leaderboard: "", players: "", lots: "", payouts: "", bonuses: "" } },
     { id: "2024-masters", name: "2024 Masters", espnEvent: "401580344",
       sheets: { leaderboard: "", players: "", lots: "", payouts: "", bonuses: "" } },
-    { id: "2023-pga", name: "2023 PGA Championship", espnEvent: "401465523",
+    { id: "2023-pga", name: "2023 PGA", espnEvent: "401465523",
       sheets: { leaderboard: "", players: "", lots: "", payouts: "", bonuses: "" } },
     { id: "2023-masters", name: "2023 Masters", espnEvent: "401465508",
       sheets: { leaderboard: "", players: "", lots: "", payouts: "", bonuses: "" } },
-    { id: "2022-pga", name: "2022 PGA Championship", espnEvent: "401353226",
+    { id: "2022-pga", name: "2022 PGA", espnEvent: "401353226",
       sheets: { leaderboard: "", players: "", lots: "", payouts: "", bonuses: "" } },
     { id: "2022-masters", name: "2022 Masters", espnEvent: "401353232",
       sheets: { leaderboard: "", players: "", lots: "", payouts: "", bonuses: "" } }
@@ -689,7 +689,7 @@ document.addEventListener("click",e=>{const t=e.target.closest("[data-o]");if(!t
 
 /* ====== themes ====== */
 function evKey(n){n=String(n||"").toLowerCase();
-  if(/masters/.test(n))return"masters";if(/pga championship/.test(n))return"pga";
+  if(/masters/.test(n))return"masters";if(/pga championship|\bpga$/.test(n))return"pga";
   if(/u\.?\s?s\.? open/.test(n))return"usopen";if(/open championship|^the open/.test(n))return"open";
   if(/fedex|tour championship|st\.? jude|bmw championship|playoff/.test(n))return"fedex";return"masters"}
 function applyTheme(name){const k=CFG.theme&&CFG.theme!=="auto"?CFG.theme:evKey(name);
