@@ -326,7 +326,8 @@ const PALETTE=["#1f77b4","#e6194b","#3cb44b","#f58231","#911eb4","#00a3a3","#f03
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const norm=s=>String(s||"").replace(/\(a\)/gi,"").normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/ø/gi,"o").replace(/æ/gi,"ae").replace(/ß/g,"ss").toLowerCase().replace(/[^a-z0-9]/g,"");
-const money=v=>(v<0?"-$":"$")+Math.abs(Math.round(v)).toLocaleString();
+// money: whole dollars unless the amount has cents (prices, pot); money2: always to the cent (winnings, net, payouts)
+const money=v=>{const c=Math.round(v*100)/100;return Number.isInteger(c)?(c<0?"-$":"$")+Math.abs(c).toLocaleString():money2(c)};
 const money2=v=>(v<0?"-$":"$")+Math.abs(v).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
 const num=v=>{const n=parseFloat(String(v).replace(/[$,%\s]/g,""));return isFinite(n)?n:null};
 function parseCSV(t){const out=[];let row=[],f="",q=false;t=String(t).replace(/^﻿/,"");
@@ -604,8 +605,8 @@ function render(){
     <select id="sel" aria-label="Pick a bidder"><option value="">Everyone</option>${sorted.map(o=>`<option value="${esc(o.name)}"${STATE.sel===o.name?" selected":""}>${esc(o.name)}</option>`).join("")}</select>`;
   if(STATE.sel&&!D.owners[STATE.sel])STATE.sel=null;
   const so=STATE.sel&&D.owners[STATE.sel];
-  if(so){const net=Math.round(so.won)-so.paid;
-    $("#selbar").innerHTML=`<div class="selbar"><div style="min-width:0"><div class="who2">${tagHTML(so)}${esc(so.name)}</div><div class="nums">Paid <b>${money(so.paid)}</b> · Won <b>${money(so.won)}</b> · Net <b class="${net>0?"posv":net<0?"negv":""}">${money(net)}</b></div></div><button data-o="${esc(so.name)}">Show all</button></div>`}
+  if(so){const net=Math.round((so.won-so.paid)*100)/100;
+    $("#selbar").innerHTML=`<div class="selbar"><div style="min-width:0"><div class="who2">${tagHTML(so)}${esc(so.name)}</div><div class="nums">Paid <b>${money(so.paid)}</b> · Won <b>${money2(so.won)}</b> · Net <b class="${net>0?"posv":net<0?"negv":""}">${money2(net)}</b></div></div><button data-o="${esc(so.name)}">Show all</button></div>`}
   else $("#selbar").innerHTML="";
   ({lb:renderLB,st:renderST,lots:renderLots,pay:renderPay})[STATE.view]();
   if(CARD){const p=D.byKey[CARD.key];if(p&&p.id&&EVENT.id)summary(p.id).then(j=>{if(CARD){CARD.j=j;drawCard()}}).catch(()=>{})}
@@ -632,18 +633,18 @@ function renderLB(){
   if(D.missing.length)h+=`<div class="note">Not matched to the leaderboard (check ESPN spelling): ${D.missing.map(esc).join(", ")}</div>`;
   $("#view").innerHTML=h}
 function renderST(){
-  const os=Object.values(D.owners).map(o=>({...o,net:Math.round(o.won)-o.paid})).sort((a,b)=>b.net-a.net||b.won-a.won);
+  const os=Object.values(D.owners).map(o=>({...o,net:Math.round((o.won-o.paid)*100)/100})).sort((a,b)=>b.net-a.net||b.won-a.won);
   let h=`<div class="card"><table><thead><tr><th>Bidder</th><th>Paid</th><th>Won</th><th>Net</th></tr></thead><tbody>`;
-  os.forEach((o,i)=>{h+=`<tr class="${STATE.sel===o.name?"me":""}" data-o="${esc(o.name)}" style="cursor:pointer"><td><div class="who">${tagHTML(o)}${esc(o.name)}</div></td><td>${money(o.paid)}</td><td>${money(o.won)}</td><td class="${o.net>0?"posv":o.net<0?"negv":""}" style="font-weight:700">${money(o.net)}</td></tr>`});
+  os.forEach((o,i)=>{h+=`<tr class="${STATE.sel===o.name?"me":""}" data-o="${esc(o.name)}" style="cursor:pointer"><td><div class="who">${tagHTML(o)}${esc(o.name)}</div></td><td>${money(o.paid)}</td><td>${money2(o.won)}</td><td class="${o.net>0?"posv":o.net<0?"negv":""}" style="font-weight:700">${money2(o.net)}</td></tr>`});
   h+=`</tbody></table></div><div class="note">Projected until the tournament is final. Tap a bidder to see only their golfers.</div>`;
   $("#view").innerHTML=h}
 function lotBlock(title,list,ranked){list=list.filter(l=>mine(l.owner?D.owners[l.owner]:null));if(!list.length)return"";
   let h=`<div class="card"><div class="sec"><span>${title}</span><span>${list.length}</span></div><div class="lot h${ranked?" rkd":""}">${ranked?"<span>RK</span><span>Player</span>":"<span>Lot</span>"}<span class="n">Paid</span><span class="n">Won</span><span class="n">Net</span></div>`;
-  for(const l of list){const o=l.owner?D.owners[l.owner]:null;const net=Math.round(l.won)-l.price;
-    const row=`${ranked?`<span class="lr">${D.owgrOf[norm(l.lot)]?"#"+D.owgrOf[norm(l.lot)]:""}</span>`:""}<span class="ln">${l.players.length>1?'<span class="car">▶</span>':""}${tagHTML(o)}<span class="lnm"><span class="n1">${esc(l.lot)}</span></span></span><span class="n">${money(l.price)}</span><span class="n">${l.won?money(l.won):"–"}</span><span class="n ${net>0?"posv":net<0?"negv":""}" style="font-weight:700">${money(net)}</span>`;
+  for(const l of list){const o=l.owner?D.owners[l.owner]:null;const net=Math.round((l.won-l.price)*100)/100;
+    const row=`${ranked?`<span class="lr">${D.owgrOf[norm(l.lot)]?"#"+D.owgrOf[norm(l.lot)]:""}</span>`:""}<span class="ln">${l.players.length>1?'<span class="car">▶</span>':""}${tagHTML(o)}<span class="lnm"><span class="n1">${esc(l.lot)}</span></span></span><span class="n">${money(l.price)}</span><span class="n">${l.won?money2(l.won):"–"}</span><span class="n ${net>0?"posv":net<0?"negv":""}" style="font-weight:700">${money2(net)}</span>`;
     if(l.players.length>1){const ps=l.players.map(n=>D.byKey[norm(n)]||{name:n,pos:"?",toPar:null,status:"",won:0,r:[]});
       h+=`<details class="${dimCls(o)}"><summary class="lot">${row}</summary><div class="sub">${ps.map(p=>{const cut=p.status==="cut";const v=cut?p.r[1]+p.r[2]-2*D.par:p.toPar;
-        return`<div><span>${esc(p.name)}</span><span>${esc(p.status==="active"?p.pos:p.status==="cut"?"MC":p.pos)}</span><span class="${parClass(v)}">${p.status==="wd"?"WD":v==null?"":fmtPar(v)}</span><span>${p.won?money(p.won):"–"}</span></div>`}).join("")}</div></details>`}
+        return`<div><span>${esc(p.name)}</span><span>${esc(p.status==="active"?p.pos:p.status==="cut"?"MC":p.pos)}</span><span class="${parClass(v)}">${p.status==="wd"?"WD":v==null?"":fmtPar(v)}</span><span>${p.won?money2(p.won):"–"}</span></div>`}).join("")}</div></details>`}
     else h+=`<div class="lot${ranked?" rkd":""}${dimCls(o)}">${row}</div>`}
   return h+"</div>"}
 function renderLots(){const all=Object.values(D.lots);
@@ -673,8 +674,8 @@ function renderPay(){
         // per bidder: golfers who made the cut / golfers owned, and what that bidder's share of the pool pays
         const each=a.amount/a.holders.length;
         const owned=o=>Object.values(D.lots).filter(l=>l.owner===(o&&o.name)).reduce((n,l)=>n+l.players.length,0);
-        return counts?`<details class="many"><summary><span class="mc-tot">${hs.length} golfers <span class="car">▶</span></span><span class="mc-counts">${counts.map(c=>`<span class="mc-c">${c.o?tagHTML(c.o):'<span class="nob">–</span>'}<span class="mc-n"><b>${c.ps.length}</b>/${owned(c.o)}</span><span class="mc-amt">${money(each*c.ps.length)}</span></span>`).join("")}</span></summary>${list}</details>`:list})()}</td>
-      <td><b>${money(a.amount)}</b>${a.holders.length>1?`<br><small style="color:var(--mut)">${money2(a.amount/a.holders.length)} each</small>`:""}</td></tr>`}
+        return counts?`<details class="many"><summary><span class="mc-tot">${hs.length} golfers <span class="car">▶</span></span><span class="mc-counts">${counts.map(c=>`<span class="mc-c">${c.o?tagHTML(c.o):'<span class="nob">–</span>'}<span class="mc-n"><b>${c.ps.length}</b>/${owned(c.o)}</span><span class="mc-amt">${money2(each*c.ps.length)}</span></span>`).join("")}</span></summary>${list}</details>`:list})()}</td>
+      <td><b>${money2(a.amount)}</b>${a.holders.length>1?`<br><small style="color:var(--mut)">${money2(a.amount/a.holders.length)} each</small>`:""}</td></tr>`}
     return s+"</tbody></table></div>"};
   h+=sect("Finishing position",D.awards.filter(a=>a.kind==="place"));
   h+=sect("Bonuses",D.awards.filter(a=>a.kind==="bonus"));
