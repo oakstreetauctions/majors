@@ -181,7 +181,7 @@ html[data-ev="fedex"] header h1{font-weight:600;text-transform:uppercase;letter-
 
 /* ===== leaderboard, PGA Tour style ===== */
 .plb{border-radius:4px}
-.pr{display:grid;grid-template-columns:26px 34px minmax(0,1fr) 30px 34px 30px 30px;align-items:center;gap:6px;padding:0 10px;min-height:46px;border-bottom:1px solid var(--line);background:var(--card);cursor:pointer}
+.pr{display:grid;grid-template-columns:24px 34px minmax(0,1fr) 30px 34px 38px 30px;align-items:center;gap:6px;padding:0 10px;min-height:46px;border-bottom:1px solid var(--line);background:var(--card);cursor:pointer}
 .pr:last-child{border-bottom:0}
 .pr:active{background:var(--row)}
 .pr.ph{min-height:0;padding-top:12px;padding-bottom:8px;border-bottom:2px solid var(--fg);cursor:default;font:600 10.5px Inter,sans-serif;letter-spacing:.06em;text-transform:uppercase;color:var(--mut)}
@@ -195,11 +195,12 @@ html[data-ev="fedex"] header h1{font-weight:600;text-transform:uppercase;letter-
 .prk{text-align:center;font:italic 400 12.5px var(--serif);color:var(--mut)}
 .ptot,.prd{text-align:center;font:700 14.5px Inter,sans-serif;font-variant-numeric:tabular-nums;color:var(--fg)}
 .prd{font-weight:500}
-.pthru{text-align:center;font:600 13.5px Inter,sans-serif;color:var(--fg)}
+.pthru{text-align:center;font:600 13.5px Inter,sans-serif;color:var(--fg);white-space:nowrap}
+.pthru.tt{font:500 11px Inter,sans-serif;letter-spacing:-.03em;color:var(--mut)}
 .red{color:var(--under)!important}
 .pr.cut .pname,.pr.cut .ptot{color:var(--mut);font-weight:500}
 .pr.cut .pthru{font-size:10.5px;letter-spacing:.06em;color:var(--mut)}
-@media (max-width:380px){.pr{grid-template-columns:22px 32px minmax(0,1fr) 28px 32px 28px 28px;gap:5px;padding:0 8px}.pname{font-size:14px}}
+@media (max-width:380px){.pr{grid-template-columns:20px 31px minmax(0,1fr) 27px 31px 36px 27px;gap:5px;padding:0 8px}.pname{font-size:14px}}
 
 
 /* ===== event picker in the header ===== */
@@ -348,7 +349,8 @@ function espnToRows(j){
     else if(/CUT/.test(ty)){pos="CUT";score="CUT"}
     else if(finishedNow)thru="F";
     else if(thruN>0)thru=String(thruN);
-    else if(st.teeTime){const d=new Date(st.teeTime);thru=isNaN(d)?"":d.toLocaleTimeString([],{hour:"numeric",minute:"2-digit"})}
+    else if(st.teeTime){const d=new Date(st.teeTime);thru=isNaN(d)?"":d.toLocaleTimeString([],{hour:"numeric",minute:"2-digit"}).replace(/\s?[AP]\.?M\.?/i,"")}
+    if(thru&&+st.startHole===10)thru+="*";   // started on the back nine
     const today=ls[period]?ls[period].displayValue||"":"";
     const tot=[1,2,3,4].reduce((a,k)=>a+(r[k]||0),0);
     const cl=ls[period]||{};const move=/^(CUT|WD|DQ)$/.test(pos)||!(cl.startPosition>0&&cl.currentPosition>0)?"":String(cl.startPosition-cl.currentPosition);
@@ -578,7 +580,7 @@ function lbRow(p,cut,showPos=true){const o=ownerOf(p);const wd=p.status==="wd";
   const thru=wd?"":cut?"CUT":(p.thru||"");const td=cut||wd?"":(p.today||"");const tdv=toPar(td);
   return`<div class="pr${cut?" cut":""}" data-p="${esc(p.key)}"><span class="ppos">${cut||!showPos?"":esc(p.pos.replace(/^T(?=\d)/,""))}</span>
   <span class="ptag">${o?tagHTML(o):'<span class="nob">–</span>'}</span><span class="pname">${esc(shortName(p))}</span>
-  <span class="prk">${lotLabel(p)}</span><span class="ptot ${tv!=null&&tv<0&&!wd?"red":""}">${tot}</span><span class="pthru">${esc(thru)}</span><span class="prd ${tdv!=null&&tdv<0?"red":""}">${esc(td)}</span></div>`}
+  <span class="prk">${lotLabel(p)}</span><span class="ptot ${tv!=null&&tv<0&&!wd?"red":""}">${tot}</span><span class="pthru${/:/.test(thru)?" tt":""}">${esc(thru)}</span><span class="prd ${tdv!=null&&tdv<0?"red":""}">${esc(td)}</span></div>`}
 function renderLB(){
   const act=D.P.filter(p=>p.status==="active"&&mine(ownerOf(p))).sort((a,b)=>(a.toPar??99)-(b.toPar??99));
   const cut=D.P.filter(p=>p.status!=="active"&&mine(ownerOf(p))).sort((a,b)=>(a.status==="wd")-(b.status==="wd")||((a.r[1]||0)+(a.r[2]||0))-((b.r[1]||0)+(b.r[2]||0)));
