@@ -122,16 +122,24 @@ footer{text-align:center;font:italic 400 12px var(--serif);color:var(--mut);padd
 /* ===== per-major themes (set automatically from the ESPN event name) ===== */
 html[data-ev="pga"]{--hdr:#00205B;--th:#00205B;--green:#00205B;--over:#00205B;--gold:#C9A961;--serif:"Cinzel",Georgia,serif}
 html[data-ev="usopen"]{--hdr:#00365F;--th:#00365F;--green:#00365F;--over:#00365F;--gold:#BF0D3E;--serif:"Libre Franklin",Inter,sans-serif}
-html[data-ev="open"]{--hdr:#0B2545;--th:#0B2545;--green:#0B2545;--over:#0B2545;--gold:#FFD100;--serif:"Cormorant Garamond",Georgia,serif}
+html[data-ev="open"]{--hdr:#FFD100;--hdrfg:#0B2545;--th:#FFD100;--thfg:#0B2545;--green:#0B2545;--over:#0B2545;--gold:#0B2545;--serif:"Cormorant Garamond",Georgia,serif}
 html[data-ev="fedex"]{--hdr:#4D148C;--th:#4D148C;--green:#4D148C;--over:#4D148C;--gold:#FF6200;--serif:"Montserrat",Inter,sans-serif}
 @media (prefers-color-scheme:dark){
   html[data-ev="pga"]:not([data-theme="light"]){--hdr:#0d1d44;--th:#132a5e;--green:#9db7ff;--over:#9db7ff}
   html[data-ev="usopen"]:not([data-theme="light"]){--hdr:#062a47;--th:#0b3a63;--green:#8cc2f0;--over:#8cc2f0}
-  html[data-ev="open"]:not([data-theme="light"]){--hdr:#071a33;--th:#0f2c52;--green:#ffd75a;--over:#9fbbe0}
+  html[data-ev="open"]:not([data-theme="light"]){--hdr:#E8BE00;--th:#E8BE00;--green:#ffd75a;--over:#9fbbe0;--gold:#ffd75a}
   html[data-ev="fedex"]:not([data-theme="light"]){--hdr:#2e0b57;--th:#45177d;--green:#c9a3ff;--over:#c9a3ff}}
 html[data-ev="pga"] header h1{text-transform:uppercase;letter-spacing:.12em;font-size:23px}
 html[data-ev="usopen"] header h1{font-weight:700;letter-spacing:.02em;text-transform:uppercase;font-size:24px}
 html[data-ev="open"] header h1{font-weight:600;font-size:30px}
+/* The Open: yellow bar with navy lettering (the reverse of the navy majors) */
+html[data-ev="open"] header .rule{background:#0B2545}
+html[data-ev="open"] nav{border-bottom-color:rgba(11,37,69,.15)}
+html[data-ev="open"] nav button{color:rgba(11,37,69,.6)}
+html[data-ev="open"] nav button:hover,html[data-ev="open"] nav button.on{color:#0B2545}
+html[data-ev="open"] nav button.on{border-bottom-color:#0B2545}
+html[data-ev="open"] .evpick{border-color:rgba(11,37,69,.4);color:#0B2545}
+@media (prefers-color-scheme:dark){html[data-ev="open"]:not([data-theme="light"]) .rpill{color:#0B2545}}
 html[data-ev="fedex"] header h1{font-weight:600;text-transform:uppercase;letter-spacing:.08em;font-size:22px}
 /* ===== movement arrows ===== */
 .pos{display:flex;flex-direction:column;align-items:center;text-align:center;line-height:1.1}
