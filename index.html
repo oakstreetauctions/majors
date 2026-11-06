@@ -987,31 +987,37 @@ function gridHTML(evs){const cols=evs.slice().sort((a,b)=>a.ord-b.ord);
 function recRow(label,who,val,detail,o){return`<div class="rec"><div class="rl">${label}</div><div class="rw">${o?tagHTML(o):""}<span>${who}</span></div><div class="rv">${val}</div>${detail?`<div class="rd">${detail}</div>`:""}</div>`}
 function recordsHTML(evs){const B=bidders(evs);const lots=evs.flatMap(x=>x.lots);const O=n=>ALL.look[n];
   const pot=evs.reduce((t,x)=>t+x.pot,0);const all=[];for(const b of B)for(const v of b.evs)all.push({b,...v});
-  const top=(arr,f)=>arr.slice().sort((a,b)=>f(b)-f(a))[0];
-  const hiEv=top(all,v=>v.net),loEv=top(all,v=>-v.net),bigPot=top(evs,x=>x.pot),smPot=top(evs,x=>-x.pot);
-  const bestLot=top(lots,l=>l.won-l.price),bestX=top(lots.filter(l=>l.price>=1&&l.won>0),l=>l.won/l.price),dear=top(lots,l=>l.price);
-  const bust=top(lots.filter(l=>l.won===0),l=>l.price);
-  const champs=evs.filter(x=>x.champLot);const cheap=top(champs,x=>-x.champLot.price),pricey=top(champs,x=>x.champLot.price);
+  // every entry tied for the top value (compared at the precision shown)
+  const tops=(arr,f)=>{if(!arr.length)return[];const v=arr.map(f),m=Math.max(...v);return arr.filter((_,k)=>v[k]===m)};
+  const D$=x=>Math.round(x),X=x=>Math.round(x*10)/10;
+  const hiEv=tops(all,v=>D$(v.net)),loEv=tops(all,v=>-D$(v.net)),bigPot=tops(evs,x=>D$(x.pot)),smPot=tops(evs,x=>-D$(x.pot));
+  const bestLot=tops(lots,l=>D$(l.won-l.price)),bestX=tops(lots.filter(l=>l.price>=1&&l.won>0),l=>Math.round(l.won/l.price)),dear=tops(lots,l=>D$(l.price));
+  const bust=tops(lots.filter(l=>l.won===0),l=>D$(l.price));
+  const champs=evs.filter(x=>x.champLot);const cheap=tops(champs,x=>-D$(x.champLot.price)),pricey=tops(champs,x=>D$(x.champLot.price));
   const titles=B.filter(b=>b.titles).sort((a,b)=>b.titles-a.titles||b.net-a.net);
-  const roiQ=B.filter(b=>b.evs.length>=Math.min(5,evs.length)&&b.paid>0);const bestRoi=top(roiQ,b=>b.roi),mostEv=top(B,b=>b.evs.length*1e6+b.paid);
+  const roiQ=B.filter(b=>b.evs.length>=Math.min(5,evs.length)&&b.paid>0);const bestRoi=tops(roiQ,b=>Math.round(b.roi*100)),mostEv=tops(B,b=>b.evs.length);
+  // one record, with a line for each tied entry
+  const rec=(label,list,f)=>{if(!list.length)return"";const rows=list.map(f);
+    return`<div class="rec"><div class="rl">${label}${list.length>1?` <span style="text-transform:none;letter-spacing:0">· ${list.length}-way tie</span>`:""}</div>${rows.map(([who,val,det,o])=>`<div class="rw">${o?tagHTML(o):""}<span>${who}</span></div><div class="rv">${val}</div>${det?`<div class="rd">${det}</div>`:""}`).join("")}</div>`};
+  const bigP=bigPot[0],chm=tops(champs,x=>D$(x.champLot.price));
   let h=`<div class="tiles">
     <div class="tile"><div class="k">Events</div><div class="v">${evs.length}</div><div class="s">${new Set(evs.map(x=>x.yr)).size} season${new Set(evs.map(x=>x.yr)).size===1?"":"s"}</div></div>
     <div class="tile"><div class="k">Total pots</div><div class="v">${money(pot)}</div><div class="s">avg ${money(pot/evs.length)} per event</div></div>
     <div class="tile"><div class="k">Bidders</div><div class="v">${B.length}</div><div class="s">${(all.length/evs.length).toFixed(1)} per event</div></div>
-    <div class="tile"><div class="k">Biggest pot</div><div class="v">${money(bigPot.pot)}</div><div class="s">${esc(evLabel(bigPot.e))}</div></div></div>`;
+    <div class="tile"><div class="k">Biggest pot</div><div class="v">${money(bigP.pot)}</div><div class="s">${bigPot.map(x=>esc(evLabel(x.e))).join(", ")}</div></div></div>`;
   h+=`<div class="card"><div class="sec"><span>Records</span><span>${STATE.fmaj&&STATE.fmaj!=="all"||STATE.fyr&&STATE.fyr!=="all"?"filtered":"all-time"}</span></div>
-    ${recRow("Best single event",esc(hiEv.b.name),sgn(hiEv.net),esc(evLabel(hiEv.x.e))+` · paid ${money(hiEv.paid)}, won ${money(hiEv.won)}`,hiEv.b.o)}
-    ${recRow("Worst single event",esc(loEv.b.name),sgn(loEv.net),esc(evLabel(loEv.x.e))+` · paid ${money(loEv.paid)}, won ${money(loEv.won)}`,loEv.b.o)}
-    ${recRow("Biggest profit on one lot",esc(bestLot.lot),sgn(bestLot.won-bestLot.price),`${money(bestLot.price)} → ${money(bestLot.won)} · ${esc(evLabel(bestLot.ev))}`,O(bestLot.owner))}
-    ${bestX?recRow("Best return per dollar",esc(bestX.lot),Math.round(bestX.won/bestX.price)+"×",`${money(bestX.price)} → ${money(bestX.won)} · ${esc(evLabel(bestX.ev))}`,O(bestX.owner)):""}
-    ${recRow("Priciest lot",esc(dear.lot),money(dear.price),`won ${money(dear.won)} · ${esc(evLabel(dear.ev))}`,O(dear.owner))}
-    ${bust?recRow("Priciest bust",esc(bust.lot),money(bust.price),`won nothing · ${esc(evLabel(bust.ev))}`,O(bust.owner)):""}
-    ${cheap?recRow("Cheapest champion",esc(cheap.champ.name),money(cheap.champLot.price),`${esc(evLabel(cheap.e))}${cheap.champLot.players.length>1?` · ${esc(cheap.champLot.lot)}`:""}`,O(cheap.champOwner)):""}
-    ${pricey&&pricey!==cheap?recRow("Priciest champion",esc(pricey.champ.name),money(pricey.champLot.price),esc(evLabel(pricey.e)),O(pricey.champOwner)):""}
-    ${bestRoi?recRow(`Best ROI${evs.length>=5?" (5+ events)":""}`,esc(bestRoi.name),pct(bestRoi.roi),`${money(bestRoi.paid)} paid · ${money(bestRoi.won)} won over ${bestRoi.evs.length} events`,bestRoi.o):""}
-    ${mostEv?recRow("Most events",esc(mostEv.name),mostEv.evs.length,`${money(mostEv.paid)} paid all-time`,mostEv.o):""}
-    ${recRow("Biggest pot",esc(evLabel(bigPot.e)),money(bigPot.pot),"",null)}
-    ${smPot!==bigPot?recRow("Smallest pot",esc(evLabel(smPot.e)),money(smPot.pot),"",null):""}
+    ${rec("Best single event",hiEv,v=>[esc(v.b.name),sgn(v.net),esc(evLabel(v.x.e))+` · paid ${money(v.paid)}, won ${money(v.won)}`,v.b.o])}
+    ${rec("Worst single event",loEv,v=>[esc(v.b.name),sgn(v.net),esc(evLabel(v.x.e))+` · paid ${money(v.paid)}, won ${money(v.won)}`,v.b.o])}
+    ${rec("Biggest profit on one lot",bestLot,l=>[esc(l.lot),sgn(l.won-l.price),`${money(l.price)} → ${money(l.won)} · ${esc(evLabel(l.ev))}`,O(l.owner)])}
+    ${rec("Best return per dollar",bestX,l=>[esc(l.lot),Math.round(l.won/l.price)+"×",`${money(l.price)} → ${money(l.won)} · ${esc(evLabel(l.ev))}`,O(l.owner)])}
+    ${rec("Priciest lot",dear,l=>[esc(l.lot),money(l.price),`won ${money(l.won)} · ${esc(evLabel(l.ev))}`,O(l.owner)])}
+    ${rec("Priciest bust",bust,l=>[esc(l.lot),money(l.price),`won nothing · ${esc(evLabel(l.ev))}`,O(l.owner)])}
+    ${rec("Cheapest champion",cheap,x=>[esc(x.champ.name),money(x.champLot.price),`${esc(evLabel(x.e))}${x.champLot.players.length>1?` · ${esc(x.champLot.lot)}`:""}`,O(x.champOwner)])}
+    ${champs.length>1&&D$(pricey[0].champLot.price)!==D$(cheap[0].champLot.price)?rec("Priciest champion",pricey,x=>[esc(x.champ.name),money(x.champLot.price),esc(evLabel(x.e)),O(x.champOwner)]):""}
+    ${rec(`Best ROI${evs.length>=5?" (5+ events)":""}`,bestRoi,b=>[esc(b.name),pct(b.roi),`${money(b.paid)} paid · ${money(b.won)} won over ${b.evs.length} events`,b.o])}
+    ${mostEv.length===B.length?"":rec("Most events",mostEv,b=>[esc(b.name),b.evs.length,`${money(b.paid)} paid`,b.o])}
+    ${rec("Biggest pot",bigPot,x=>[esc(evLabel(x.e)),money(x.pot),"",null])}
+    ${evs.length>1&&D$(smPot[0].pot)!==D$(bigP.pot)?rec("Smallest pot",smPot,x=>[esc(evLabel(x.e)),money(x.pot),"",null]):""}
   </div>`;
   if(titles.length)h+=`<div class="card"><div class="sec"><span>Most champions owned</span><span>🏆</span></div>${titles.map(b=>recRow("",esc(b.name),"🏆".repeat(Math.min(b.titles,6))+(b.titles>6?" "+b.titles:""),evs.filter(x=>x.champOwner===b.name).map(x=>`${esc(x.champ.name)} (${esc(evAbbr(x.e))})`).join(", "),b.o)).join("")}</div>`;
   h+=`<div class="card"><div class="sec"><span>Champions</span><span>${champs.length}</span></div><table class="at"><thead><tr><th>Event</th><th>Owner</th><th>Paid</th><th>Won</th></tr></thead><tbody>`;
