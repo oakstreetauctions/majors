@@ -398,6 +398,14 @@ table.gt td{font-size:13px}
 table.gt .who span{white-space:normal}
 .gsearch{display:block;width:100%;box-sizing:border-box;border:1px solid var(--line);background:var(--card);color:var(--fg);border-radius:4px;padding:11px 12px;font:500 16px Inter,sans-serif;margin:0 0 12px}
 .gsearch:focus{outline:2px solid var(--green);outline-offset:-1px}
+.dr-grid{display:grid;grid-template-columns:44px repeat(4,minmax(0,1fr));gap:6px;padding:4px 16px 8px;align-items:center}
+.dr-mh{display:flex;align-items:center;justify-content:center;gap:4px;font:700 9.5px Inter,sans-serif;letter-spacing:.06em;color:var(--mut)}
+.dr-mh i{width:7px;height:7px;border-radius:50%}
+.dr-y{font:400 15px var(--serif);color:var(--green)}
+.dr-cell{height:34px;letter-spacing:.04em;border:1px solid var(--line);border-left:3px solid var(--mc);border-radius:4px;background:var(--card);color:var(--fg);font:600 12.5px Inter,sans-serif;cursor:pointer;padding:0}
+.dr-cell:hover{background:var(--row)}
+.dr-cell.on{background:var(--mc);border-color:var(--mc);color:#fff}
+.dr-cell.off{display:flex;align-items:center;justify-content:center;border:1px dashed var(--line);color:var(--mut);font-weight:500;cursor:default;background:none}
 </style>
 </head>
 <body>
@@ -1245,9 +1253,14 @@ function drawDrawer(){computeAll();const page=STATE.page||"event";const byId={};
     <button class="dr-link${page==="stats"?" on":""}" data-page="stats"><span class="ic"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span>Stats & Records</button>
     <button class="dr-link${page==="golfers"?" on":""}" data-page="golfers"><span class="ic"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 21V3l11 4-11 4"/><path d="M3 21h10"/></svg></span>Golfers</button>
     <div class="dr-sec" style="padding-top:20px">Events</div>`;
-  for(const y of yrs){h+=`<div class="dr-year">${y}</div>`;
-    for(const e of CFG.events.filter(e=>yrOf(e)===y)){const x=byId[e.id];const o=x&&ALL.look[x.champOwner];
-      h+=`<button class="dr-ev${page==="event"&&e.id===CUR.id?" on":""}" data-goev="${esc(e.id)}"><span class="dot" style="background:${MAJ[majOf(e)].c}"></span><span class="en">${esc(MAJ[majOf(e)].n)}</span><span class="ew">${x&&x.champ?`${esc(shortName(x.champ))}${o?tagHTML(o):""}`:hasData(e)?"Live":"No auction"}</span></button>`}}
+  const MK=["masters","pga","usopen","open"];
+  h+=`<div class="dr-grid">`;
+  for(const y of yrs){h+=`<span class="dr-y">${y}</span>`;
+    for(const k of MK){const e=CFG.events.find(e=>yrOf(e)===y&&majOf(e)===k);
+      if(!e||!hasData(e)){h+=`<span class="dr-cell off">—</span>`;continue}
+      const live=!byId[e.id];
+      h+=`<button class="dr-cell${page==="event"&&e.id===CUR.id?" on":""}" data-goev="${esc(e.id)}" aria-label="${esc(e.name)}" style="--mc:${MAJ[k].c}">${live?"LIVE":MAJ[k].a}</button>`}}
+  h+=`</div>`;
   $("#drawerCard").innerHTML=h}
 function setPageFlag(){const pg=STATE.page||"event";document.documentElement.dataset.pg=pg;
   if(pg==="event")applyTheme(CUR.name);else document.documentElement.dataset.ev=(CFG.theme&&CFG.theme!=="auto")?CFG.theme:"masters"}
