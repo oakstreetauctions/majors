@@ -410,6 +410,35 @@ table.gt .who span{white-space:normal}
 .dr-cell:hover{background:var(--row)}
 .dr-cell.on{background:var(--mc);border-color:var(--mc);color:#fff}
 .dr-cell.off{display:flex;align-items:center;justify-content:center;border:1px dashed var(--line);color:var(--mut);font-weight:500;cursor:default;background:none}
+/* ===== live leaderboard on the cover ===== */
+.lv-hero{border-radius:4px;padding:16px 16px 14px;margin-bottom:10px;box-shadow:var(--shadow)}
+.lv-hero .k{font:600 10.5px Inter,sans-serif;letter-spacing:.18em;text-transform:uppercase;opacity:.9}
+.lv-hero .k .live{display:inline-flex;align-items:center;gap:6px}.lv-hero .k .live i{width:7px;height:7px;border-radius:50%;background:currentColor;animation:pulse 1.4s infinite}
+.lv-hero .t{font:400 24px/1.15 var(--serif);margin:6px 0 4px}
+.lv-hero .s{font:500 12.5px Inter,sans-serif;opacity:.85}
+.lv-tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px}
+.lv-tabs button{border:1px solid var(--line);background:var(--card);color:var(--fg);border-radius:4px;padding:10px;font:600 13px Inter,sans-serif;cursor:pointer}
+.lv-tabs button.on{background:var(--green);border-color:var(--green);color:var(--card)}
+.lvr{display:grid;grid-template-columns:38px minmax(0,1fr) 44px 46px 40px;gap:4px;align-items:center;padding:9px 12px;border-bottom:1px solid var(--line);font:500 14px Inter,sans-serif;font-variant-numeric:tabular-nums}
+.lvr:last-child{border-bottom:0}
+.lvr>span:nth-child(n+3){text-align:right}
+.lvr.h{background:var(--th);color:var(--thfg);font:600 9.5px Inter,sans-serif;letter-spacing:.1em;text-transform:uppercase;padding:8px 12px}
+.lvr .ps{font-weight:600;color:var(--mut);font-size:13px}
+.lvr .nm{font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lvr .nm small{color:var(--mut);font-weight:500}
+.lvr .nm i{font-style:normal;font-size:10px;font-weight:600;margin-left:6px}
+.lvr .nm i.up{color:var(--pos)}.lvr .nm i.dn{color:var(--neg)}
+.lvr .red{color:var(--under)}
+.lvr .th{color:var(--mut);font-size:13px}.lvr .tt2{font-size:12px}
+.lvr.out{color:var(--mut)}
+.tt{display:grid;grid-template-columns:70px minmax(0,1fr);gap:10px;padding:10px 12px;border-bottom:1px solid var(--line)}
+.tt:last-child{border-bottom:0}
+.tt .tm b{display:block;font:700 14px Inter,sans-serif;font-variant-numeric:tabular-nums}
+.tt .tm small{font:500 11px Inter,sans-serif;color:var(--mut)}
+.tt .tp div{display:flex;justify-content:space-between;gap:8px;font:600 13.5px Inter,sans-serif;padding:1px 0}
+.tt .tp span:last-child{font-variant-numeric:tabular-nums;font-weight:500;color:var(--mut)}
+.tt .tp .red{color:var(--under)!important}
+.tt .tp small{color:var(--mut);font-weight:500}
 </style>
 </head>
 <body>
@@ -1024,7 +1053,8 @@ function renderOther(){computeAll();drawNav();drawPill();$("#err").innerHTML="";
   if(STATE.page==="golfers"){$("#pick").style.display="none";$("#pick").innerHTML="";
     $("#status").innerHTML=`<b>Golfers</b><span class="stale">every golfer ever auctioned · ${evs.length} event${evs.length===1?"":"s"}</span>`;
     $("#view").innerHTML=filterChips()+`<input id="gq" class="gsearch" type="search" placeholder="Search golfers…" value="${esc(STATE.gq||"")}" autocomplete="off"><div id="glist">${golferList()}</div>`;return}
-  if(STATE.page==="home"){$("#pick").style.display="none";$("#pick").innerHTML="";$("#status").innerHTML="";$("#view").innerHTML=homeHTML();return}
+  if(STATE.page==="home"){$("#pick").style.display="none";$("#pick").innerHTML="";$("#status").innerHTML="";
+    if(LIVE)document.documentElement.dataset.ev=LIVE.maj;$("#view").innerHTML=homeHTML();return}
   if(STATE.page==="alltime"){
     $("#status").innerHTML=`<b>All-Time</b><span class="stale">${evs.length} event${evs.length===1?"":"s"} · ${money(evs.reduce((t,x)=>t+x.pot,0))} in pots</span>`;
     const B=bidders(evs).sort((a,b)=>a.name.localeCompare(b.name));const so=STATE.asel&&B.find(b=>b.name===STATE.asel);
@@ -1216,7 +1246,10 @@ document.addEventListener("click",e=>{if(e.target.closest("[data-gall]")){STATE.
 
 /* ---- cover page ---- */
 const MAJBAND={masters:["#006747","#fff"],pga:["#00205B","#fff"],usopen:["#00365F","#fff"],open:["#FFD100","#0B2545"],fedex:["#4D148C","#fff"]};
-function homeHTML(){const evs=ALL.events,byId={};evs.forEach(x=>byId[x.e.id]=x);
+function homeHTML(){
+  if(LIVE)return liveHTML()+homeLinks();
+  const lc=liveCache();if(lc&&Date.now()>=lc.from&&Date.now()<=lc.to)return`<div class="card"><div class="empty">Loading the leaderboard…</div></div>`;
+  const evs=ALL.events,byId={};evs.forEach(x=>byId[x.e.id]=x);
   const pots=evs.reduce((t,x)=>t+x.pot,0),B=bidders(evs).sort((a,b)=>b.net-a.net);
   const yrs=evs.map(x=>x.yr),y0=Math.min(...yrs),y1=Math.max(...yrs);
   let h=`<div class="hero"><div class="kick">Golf Majors Calcutta</div><h2>The Auction Board</h2><p>${evs.length} auctions · ${money(pots)} in pots · ${y0}–${y1}</p></div>`;
@@ -1244,8 +1277,70 @@ function homeHTML(){const evs=ALL.events,byId={};evs.forEach(x=>byId[x.e.id]=x);
       else if(hasData(e))h+=`<button class="yr" data-goev="${esc(e.id)}"><span class="y">${yrOf(e)}</span><span class="c">In progress</span><span class="tag" style="background:var(--green);color:var(--card)">LIVE</span></button>`;
       else h+=`<div class="yr off"><span class="y">${yrOf(e)}</span><span class="c">No auction</span><span></span></div>`}
     h+=`</div>`}
-  h+=`</div><div class="qlinks"><button data-page="alltime"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4zM17 6h3v2a3 3 0 0 1-3 3M7 6H4v2a3 3 0 0 0 3 3"/></svg>All-Time Standings</button><button data-page="stats"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Stats & Records</button><button data-page="golfers" style="grid-column:1/-1"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 21V3l11 4-11 4"/><path d="M3 21h10"/></svg>Golfers</button></div>`;
+  h+=`</div>`+homeLinks();
   return h}
+
+
+function homeLinks(){return`<div class="qlinks"><button data-page="alltime"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4zM17 6h3v2a3 3 0 0 1-3 3M7 6H4v2a3 3 0 0 0 3 3"/></svg>All-Time Standings</button><button data-page="stats"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Stats & Records</button><button data-page="golfers" style="grid-column:1/-1"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 21V3l11 4-11 4"/><path d="M3 21h10"/></svg>Golfers</button></div>`;}
+/* ---- live tournament on the cover page (pure golf, no bidders) ----
+   During a major's week (Monday through the Monday after) the cover page becomes
+   the live leaderboard. ESPN posts tee times and pairings on Tuesday.
+   Add ?live=any to the address to preview it with whatever event is on this week. */
+const isMajorName=n=>!/senior|women|amateur|junior/i.test(n)&&/\bmasters\b|\bpga championship\b|\bu\.?\s?s\.?\s?open\b|\bopen championship\b|^the open\b/i.test(n);
+let LIVE=null,LIVE_AT=0;
+function liveWanted(){try{return new URLSearchParams(location.search).get("live")==="any"}catch(e){return false}}
+function liveCache(v){try{if(v===undefined)return JSON.parse(localStorage.getItem("osa-live")||"null");localStorage.setItem("osa-live",JSON.stringify(v))}catch(e){return null}}
+function liveWindow(ev){const a=new Date(ev.date).getTime(),b=new Date(ev.endDate||ev.date).getTime();return[a-3*864e5,b+2*864e5]}
+async function loadLive(){
+  try{const sb=await fetch("https://site.web.api.espn.com/apis/site/v2/sports/golf/pga/scoreboard?_="+Date.now(),{cache:"no-store"}).then(r=>{if(!r.ok)throw new Error(r.status);return r.json()});
+    const evs=sb.events||[],now=Date.now();
+    const ev=evs.find(e=>isMajorName(e.name||""))||(liveWanted()?evs[0]:null);
+    if(!ev){LIVE=null;liveCache(null);return}
+    const [a,b]=liveWindow(ev);if(!liveWanted()&&(now<a||now>b)){LIVE=null;liveCache(null);return}
+    const j=await fetch("https://site.web.api.espn.com/apis/site/v2/sports/golf/leaderboard?league=pga&event="+ev.id+"&_="+Date.now(),{cache:"no-store"}).then(r=>{if(!r.ok)throw new Error(r.status);return r.json()});
+    LIVE=liveModel(j,ev);LIVE_AT=Date.now();liveCache({id:ev.id,from:a,to:b})}
+  catch(e){if(LIVE)LIVE.err=true}
+  if((STATE.page||"event")==="home")renderOther()}
+function liveModel(j,sbEv){const ev=(j.events||[])[0]||sbEv,comp=((ev.competitions||[])[0])||{},x=espnToRows(j);
+  const byId={};for(const c of comp.competitors||[])byId[(c.athlete&&c.athlete.id)||c.id]=c;
+  const ps=x.rows.slice(1).map(r=>{const c=byId[r[10]]||{},st=c.status||{},t=st.teeTime?new Date(st.teeTime):null;
+    return{pos:r[0],name:r[1],score:r[2],today:r[3],thru:r[4],r:[null,...[5,6,7,8].map(k=>r[k]===""||r[k]==null?null:+r[k])],id:r[10],move:r[11],short:r[12],
+      flag:c.athlete&&c.athlete.flag&&c.athlete.flag.alt||"",am:!!c.amateur,tee:t&&!isNaN(t)?t:null,hole:+st.startHole||1,
+      state:(st.type&&st.type.state)||"",out:/^(CUT|WD|DQ)$/.test(r[0])}});
+  const sType=(comp.status&&comp.status.type)||(ev.status&&ev.status.type)||{};
+  const started=ps.some(p=>p.r[1]!=null||(p.thru&&!/:/.test(p.thru)&&p.thru!=="")||p.state==="in"||p.state==="post");
+  const crs=(ev.courses||[]).find(c=>c.host)||(ev.courses||[])[0];
+  return{id:ev.id,name:ev.name,date:ev.date,end:ev.endDate,maj:evKey(ev.name),round:(comp.status&&comp.status.period)||1,
+    detail:sType.detail||sType.description||"",state:sType.state||"",final:!!sType.completed,started,course:crs&&crs.name||"",players:ps}}
+function liveTee(d){return d.toLocaleTimeString([],{hour:"numeric",minute:"2-digit"})}
+function liveHTML(){const L=LIVE,k=MAJBAND[L.maj]?L.maj:"masters",[bg,fg]=MAJBAND[k];
+  const tab=STATE.ltab||(L.started?"lb":"tt");
+  const yr=String(new Date(L.date).getFullYear()),cfg=CFG.events.find(e=>yrOf(e)===+yr&&majOf(e)===L.maj&&hasData(e));
+  const d0=new Date(L.date);
+  const when=L.final?"Final":L.started?(L.state==="in"?`Round ${L.round} · live`:`After round ${L.round}`):`Starts ${d0.toLocaleDateString([],{weekday:"long",month:"short",day:"numeric",timeZone:"UTC"})}`;
+  let h=`<div class="lv-hero" style="background:${bg};color:${fg}"><div class="k">${L.final?"Final":L.state==="in"?`<span class="live"><i></i>Live</span>`:"This week"}</div>
+    <div class="t">${esc(L.name)}</div><div class="s">${esc(L.course)}${L.course?" · ":""}${esc(when)}</div></div>
+  <div class="lv-tabs"><button class="${tab==="lb"?"on":""}" data-ltab="lb">Leaderboard</button><button class="${tab==="tt"?"on":""}" data-ltab="tt">Tee Times</button></div>`;
+  if(tab==="lb"){const act=L.players.filter(p=>!p.out),out=L.players.filter(p=>p.out);
+    if(!L.started&&!act.some(p=>p.tee))h+=`<div class="card"><div class="empty">Tee times usually post Tuesday.<br>The field will show here once ESPN has it.</div></div>`;
+    h+=`<div class="card lvb"><div class="lvr h"><span>Pos</span><span>Player</span><span>Tot</span><span>Thru</span><span>R${L.round}</span></div>${act.map((p,i)=>liveRow(p,i===0||act[i-1].pos!==p.pos)).join("")}</div>`;
+    if(out.length)h+=`<div class="card lvb"><div class="sec"><span>Missed cut / withdrawn</span><span>${out.length}</span></div>${out.map(p=>liveRow(p,true)).join("")}</div>`}
+  else{const G={};for(const p of L.players){if(!p.tee||p.out)continue;const key=p.tee.getTime()+"|"+p.hole;(G[key]||(G[key]={t:p.tee,hole:p.hole,ps:[]})).ps.push(p)}
+    const gs=Object.values(G).sort((a,b)=>a.t-b.t||a.hole-b.hole);
+    if(!gs.length)h+=`<div class="card"><div class="empty">${L.final?"The tournament is over.":"Tee times usually post Tuesday."}</div></div>`;
+    else{let day="";h+=`<div class="card">`;
+      for(const g of gs){const dl=g.t.toLocaleDateString([],{weekday:"long",month:"short",day:"numeric"});
+        if(dl!==day){day=dl;h+=`<div class="sec"><span>${esc(dl)}</span><span>Round ${L.round}${L.started&&L.state!=="in"&&g.t>Date.now()?"":""}</span></div>`}
+        h+=`<div class="tt"><div class="tm"><b>${liveTee(g.t)}</b><small>${g.hole===10?"Hole 10":"Hole 1"}</small></div><div class="tp">${g.ps.map(p=>`<div><span>${esc(p.name)}${p.am?' <small>(a)</small>':""}</span><span class="${toPar(p.score)<0?"red":""}">${esc(p.score||"")}</span></div>`).join("")}</div></div>`}
+      h+=`</div><div class="note">Times shown in your time zone.</div>`}}
+  h+=`<div class="note">${L.err?"Couldn't reach ESPN — showing the last update. ":""}Updated ${new Date(LIVE_AT).toLocaleTimeString([],{hour:"numeric",minute:"2-digit"})} · refreshes every minute</div>`;
+  if(cfg)h+=`<button class="feat" data-goev="${esc(cfg.id)}" style="margin-top:4px"><div class="body"><div class="ev" style="font-size:18px">Calcutta: payouts & standings</div><div class="ch"><span>See who owns who and what everyone's winning</span></div><div class="go">Open →</div></div></button>`;
+  return h}
+function liveRow(p,showPos){const v=toPar(p.score),tv=toPar(p.today),mv=+p.move||0;
+  return`<div class="lvr${p.out?" out":""}"><span class="ps">${showPos?esc(p.out?p.pos:p.pos):""}</span><span class="nm">${esc(p.name)}${p.am?' <small>(a)</small>':""}${mv&&!p.out?`<i class="${mv>0?"up":"dn"}">${mv>0?"▲":"▼"}${Math.abs(mv)}</i>`:""}</span>
+    <span class="${v!=null&&v<0&&!p.out?"red":""}">${p.out?"":esc(p.score||"")}</span><span class="th${/:/.test(p.thru)?" tt2":""}">${esc(p.out?"":p.thru||"")}</span><span class="${tv!=null&&tv<0?"red":""}">${esc(p.out?"":p.today||"")}</span></div>`}
+document.addEventListener("click",e=>{const t=e.target.closest("[data-ltab]");if(!t)return;STATE.ltab=t.dataset.ltab;save();renderOther()});
+setInterval(()=>{if((STATE.page||"event")==="home"&&document.visibilityState==="visible")loadLive()},60000);
 
 /* ---- menu ---- */
 function drawDrawer(){computeAll();const page=STATE.page||"event";const byId={};ALL.events.forEach(x=>byId[x.e.id]=x);
@@ -1300,6 +1395,7 @@ document.addEventListener("change",e=>{if(e.target.id!=="sel")return;STATE.sel=e
   STATE.page=pg==="alltime"||pg==="stats"||pg==="golfers"?pg:id?"event":"home";
   setEvent(id&&CFG.events.some(e=>e.id===id)?id:(STATE.ev&&CFG.events.some(e=>e.id===STATE.ev)?STATE.ev:FIRST().id));applyTheme(CUR.name)})();
 setPageFlag();drawNav();drawPill();if(STATE.page!=="event")renderOther();
+loadLive();
 load();
 setInterval(load,CFG.refreshSeconds*1000);
 </script>
