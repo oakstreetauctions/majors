@@ -331,6 +331,7 @@ table.grid tr.tot td{font-weight:700;border-top:2px solid var(--line)}
 /* ===== event picker in the header ===== */
 .evpick{position:relative;display:inline-flex;align-items:center;gap:7px;margin-top:9px;padding:4px 12px;border:1px solid rgba(255,255,255,.28);border-radius:999px;font:600 11px Inter,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#fff}
 .evpick .car3{font-size:9px;opacity:.85}
+.evpick.plain{border:0;padding:0;margin-top:8px;opacity:.9}
 .evpick select{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;font-size:16px}
 /* ===== cover page ===== */
 html[data-pg="home"] #nav,html[data-pg="home"] .status{display:none}
@@ -1014,9 +1015,9 @@ function navFor(page){
   return[["v","lb","Leaderboard"],["v","pay","Payouts"],["v","st","Standings"],["v","lots","Auction"]]}
 function drawNav(){const page=STATE.page||"event";const cur={v:STATE.view,at:STATE.atab||"st",stb:STATE.stab||"rec",gs:STATE.gs||"won"};
   $("#nav").innerHTML=navFor(page).map(([k,v,l])=>`<button data-${k}="${v}" class="${cur[k]===v?"on":""}">${l}</button>`).join("")}
-function drawPill(){const page=STATE.page||"event";
-  const lab=page==="home"?"Choose an event":page==="golfers"?"Golfers":page==="alltime"?"All-Time Standings":page==="stats"?"Stats & Records":CUR.name;
-  $("#evpick").innerHTML=`<span>${esc(lab)}</span><span class="car3">▾</span><select id="evsel" aria-label="Pick an event">${page!=="event"?`<option value="" selected>${esc(lab)}</option>`:""}${CFG.events.map(e=>`<option value="${esc(e.id)}"${page==="event"&&e.id===CUR.id?" selected":""}>${esc(e.short||e.name)}</option>`).join("")}</select>`}
+function drawPill(){const page=STATE.page||"event";const el=$("#evpick");
+  // the menu handles navigation now; the header just names the event you're looking at
+  el.className="evpick plain";el.style.display=page==="event"?"":"none";el.innerHTML=page==="event"?`<span>${esc(CUR.name)}</span>`:""}
 
 function renderOther(){computeAll();drawNav();drawPill();$("#err").innerHTML="";$("#selbar").innerHTML="";
   const evs=ALL.events.filter(inFilter);
