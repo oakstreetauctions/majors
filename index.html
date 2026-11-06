@@ -256,6 +256,8 @@ const CFG = {
   // ===== EVENTS =====  Newest first. The first one is what the site opens to.
   // espnEvent = the number after tournamentId= in the ESPN leaderboard link.
   // short     = optional shorter name for the event dropdown list (the header shows the full name).
+  // makeCutPerGolfer = true if that year's sheet rounded each golfer's Make Cut share to the cent
+  //             (normally each bidder gets pool x their golfers / all golfers, rounded once).
   // makeCutWD = false if a golfer who withdraws after making the cut did NOT get a Make Cut share that year.
   // espnDate  = if espnEvent is blank, the site finds the event on ESPN from its final-round date (YYYYMMDD).
   // sheets    = published CSV links for that event's tabs (leave blank for past events;
@@ -269,7 +271,7 @@ const CFG = {
       sheets: { leaderboard: "", players: "", lots: "", payouts: "", bonuses: "" } },
     { id: "2026-masters", name: "2026 Masters", espnEvent: "401811941",
       sheets: { leaderboard: "", players: "", lots: "", payouts: "", bonuses: "" } },
-    { id: "2025-usopen", name: "2025 U.S. Open", espnEvent: "401703515", makeCutWD: false, espnDate: "20250615",
+    { id: "2025-usopen", name: "2025 U.S. Open", espnEvent: "401703515", makeCutWD: false, makeCutPerGolfer: true, espnDate: "20250615",
       sheets: { leaderboard: "", players: "", lots: "", payouts: "", bonuses: "" } },
     { id: "2025-pga", name: "2025 PGA Championship", short: "2025 PGA", espnEvent: "401703511",
       sheets: { leaderboard: "", players: "", lots: "", payouts: "", bonuses: "" } },
@@ -622,7 +624,8 @@ function compute(T){
     awards.forEach(a=>{a.pct=Math.round(a.pct*1000)/1000;if(a.holders.length>1)a.detail=`split ${a.holders.length} ways`})}
   // allocate
   for(const a of awards){a.amount=a.pct/100*pot;if(!a.holders.length)continue;// each golfer's share of a payout, to the cent like the master sheet
-    const each=cents(a.amount/a.holders.length);
+    // Make Cut is split by bidder (pool x golfers / all golfers, rounded once) unless that year rounded each golfer's share
+    const each=a.many&&!CUR.makeCutPerGolfer?a.amount/a.holders.length:cents(a.amount/a.holders.length);
     for(const p of a.holders){p.won+=each;p.awards.push({label:a.kind==="place"?"Finish":a.label,amt:each})}}
   const allP=[...P];for(const a of awards)for(const p of a.holders)if(p.missing&&!allP.includes(p))allP.push(p);
   for(const p of allP){const lot=lotOf[p.key];p.lot=lot||"";if(lot&&lots[lot])lots[lot].won+=p.won}
@@ -718,10 +721,10 @@ function renderPay(){
             hs=counts.flatMap(c=>c.ps)}}
         const list=`<div class="holders">${hs.map(p=>{const o=ownerOf(p);return`<div class="${dimCls(o)}">${tagHTML(o)}<span>${esc(p.name)}</span></div>`}).join("")}</div>`;
         // per bidder: golfers who made the cut / golfers owned, and what that bidder's share of the pool pays
-        const each=cents(a.amount/a.holders.length);
+        const each=CUR.makeCutPerGolfer?cents(a.amount/a.holders.length):a.amount/a.holders.length;
         const owned=o=>Object.values(D.lots).filter(l=>l.owner===(o&&o.name)).reduce((n,l)=>n+l.players.length,0);
         return counts?`<details class="many"><summary><span class="mc-tot">${hs.length} golfers <span class="car">▶</span></span><span class="mc-counts">${counts.map(c=>`<span class="mc-c">${c.o?tagHTML(c.o):'<span class="nob">–</span>'}<span class="mc-n"><b>${c.ps.length}</b>/${owned(c.o)}</span><span class="mc-amt">${money2(each*c.ps.length)}</span></span>`).join("")}</span></summary>${list}</details>`:list})()}</td>
-      <td><b>${money2(a.amount)}</b>${a.holders.length>1?`<br><small style="color:var(--mut)">${money2(cents(a.amount/a.holders.length))} each</small>`:""}</td></tr>`}
+      <td><b>${money2(a.amount)}</b>${a.holders.length>1?`<br><small style="color:var(--mut)">${money2(a.many&&!CUR.makeCutPerGolfer?a.amount/a.holders.length:cents(a.amount/a.holders.length))} each</small>`:""}</td></tr>`}
     return s+"</tbody></table></div>"};
   h+=sect("Finishing position",D.awards.filter(a=>a.kind==="place"));
   h+=sect("Bonuses",D.awards.filter(a=>a.kind==="bonus"));
