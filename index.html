@@ -389,6 +389,15 @@ html[data-pg="home"] #nav,html[data-pg="home"] .status{display:none}
 .gdrow .t1 .tag{height:17px;min-width:28px;font-size:9.5px}
 .gdrow .t2{display:block;font-size:11px;color:var(--mut);font-weight:500;margin-top:1px}
 .gd .note{padding:12px 16px 18px}
+table.gt{width:100%;table-layout:fixed}
+table.gt th:first-child{width:auto}table.gt th:not(:first-child){width:64px}table.gt th:last-child{width:58px}
+table.gt td,table.gt th{padding-left:6px!important;padding-right:6px!important}
+table.gt td:first-child,table.gt th:first-child{padding-left:12px!important}
+table.gt td:last-child,table.gt th:last-child{padding-right:12px!important}
+table.gt td{font-size:13px}
+table.gt .who span{white-space:normal}
+.gsearch{display:block;width:100%;box-sizing:border-box;border:1px solid var(--line);background:var(--card);color:var(--fg);border-radius:4px;padding:11px 12px;font:500 16px Inter,sans-serif;margin:0 0 12px}
+.gsearch:focus{outline:2px solid var(--green);outline-offset:-1px}
 </style>
 </head>
 <body>
@@ -895,7 +904,7 @@ function renderPay(){
 
 /* ====== events ====== */
 $("#nav").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
-  if(b.dataset.v)STATE.view=b.dataset.v;if(b.dataset.at)STATE.atab=b.dataset.at;if(b.dataset.stb)STATE.stab=b.dataset.stb;save();
+  if(b.dataset.v)STATE.view=b.dataset.v;if(b.dataset.at)STATE.atab=b.dataset.at;if(b.dataset.stb)STATE.stab=b.dataset.stb;if(b.dataset.gs){STATE.gs=b.dataset.gs;STATE.gall=false}save();
   if((STATE.page||"event")==="event"){if(D)render();else drawNav()}else renderOther();window.scrollTo(0,0)});
 document.addEventListener("click",e=>{const t=e.target.closest("[data-o]");if(!t||t.closest("#nav"))return;const o=t.dataset.o;STATE.sel=STATE.sel===o?null:o;save();render()});
 
@@ -990,15 +999,19 @@ function filterChips(){const yrs=[...new Set(ALL.events.map(x=>x.yr))].sort((a,b
 function navFor(page){
   if(page==="alltime")return[["at","st","Standings"],["at","grid","By Event"]];
   if(page==="stats")return[["stb","rec","Records"],["stb","ana","Analytics"]];
+  if(page==="golfers")return[["gs","won","Paid Out"],["gs","n","Most Sold"],["gs","net","Best Net"],["gs","name","A–Z"]];
   return[["v","lb","Leaderboard"],["v","pay","Payouts"],["v","st","Standings"],["v","lots","Auction"]]}
-function drawNav(){const page=STATE.page||"event";const cur={v:STATE.view,at:STATE.atab||"st",stb:STATE.stab||"rec"};
+function drawNav(){const page=STATE.page||"event";const cur={v:STATE.view,at:STATE.atab||"st",stb:STATE.stab||"rec",gs:STATE.gs||"won"};
   $("#nav").innerHTML=navFor(page).map(([k,v,l])=>`<button data-${k}="${v}" class="${cur[k]===v?"on":""}">${l}</button>`).join("")}
 function drawPill(){const page=STATE.page||"event";
-  const lab=page==="home"?"Choose an event":page==="alltime"?"All-Time Standings":page==="stats"?"Stats & Records":CUR.name;
+  const lab=page==="home"?"Choose an event":page==="golfers"?"Golfers":page==="alltime"?"All-Time Standings":page==="stats"?"Stats & Records":CUR.name;
   $("#evpick").innerHTML=`<span>${esc(lab)}</span><span class="car3">▾</span><select id="evsel" aria-label="Pick an event">${page!=="event"?`<option value="" selected>${esc(lab)}</option>`:""}${CFG.events.map(e=>`<option value="${esc(e.id)}"${page==="event"&&e.id===CUR.id?" selected":""}>${esc(e.short||e.name)}</option>`).join("")}</select>`}
 
 function renderOther(){computeAll();drawNav();drawPill();$("#err").innerHTML="";$("#selbar").innerHTML="";
   const evs=ALL.events.filter(inFilter);
+  if(STATE.page==="golfers"){$("#pick").style.display="none";$("#pick").innerHTML="";
+    $("#status").innerHTML=`<b>Golfers</b><span class="stale">every golfer ever auctioned · ${evs.length} event${evs.length===1?"":"s"}</span>`;
+    $("#view").innerHTML=filterChips()+`<input id="gq" class="gsearch" type="search" placeholder="Search golfers…" value="${esc(STATE.gq||"")}" autocomplete="off"><div id="glist">${golferList()}</div>`;return}
   if(STATE.page==="home"){$("#pick").style.display="none";$("#pick").innerHTML="";$("#status").innerHTML="";$("#view").innerHTML=homeHTML();return}
   if(STATE.page==="alltime"){
     $("#status").innerHTML=`<b>All-Time</b><span class="stale">${evs.length} event${evs.length===1?"":"s"} · ${money(evs.reduce((t,x)=>t+x.pot,0))} in pots</span>`;
@@ -1146,23 +1159,48 @@ function drillHTML(name,sel){const rows=[];
   rows.sort((a,b)=>a.x.ord-b.x.ord);
   const by={};for(const r of rows){const o=by[r.owner]||(by[r.owner]={name:r.owner,n:0,cost:0,won:0});o.n++;o.cost+=r.cost;o.won+=r.won}
   const owners=Object.values(by).sort((a,b)=>b.n-a.n||a.name.localeCompare(b.name));
-  if(!by[sel])sel=owners[0]&&owners[0].name;const me=by[sel]||{n:0,cost:0,won:0},net=me.won-me.cost,mine=rows.filter(r=>r.owner===sel);
-  const best=mine.filter(r=>/^T?\d+$/.test(r.fin)).sort((a,b)=>parseInt(a.fin.replace("T",""))-parseInt(b.fin.replace("T","")))[0];
-  const cashed=mine.filter(r=>r.won>0).length,grp=mine.filter(r=>!r.ind).length,o=ALL.look[sel];
+  const all=sel==="";if(!all&&!by[sel])sel=owners[0]&&owners[0].name;
+  const me=all?{n:rows.length,cost:rows.reduce((t,r)=>t+r.cost,0),won:rows.reduce((t,r)=>t+r.won,0)}:by[sel]||{n:0,cost:0,won:0},net=me.won-me.cost,mine=all?rows:rows.filter(r=>r.owner===sel);
+  const wins=mine.filter(r=>r.fin==="1").length,best=mine.filter(r=>/^T?\d+$/.test(r.fin)).sort((a,b)=>parseInt(a.fin.replace("T",""))-parseInt(b.fin.replace("T","")))[0];
+  const cashed=mine.filter(r=>r.won>0).length,grp=mine.filter(r=>!r.ind).length,o=!all&&ALL.look[sel];
   let h=`<div class="sc-head"><button class="x" data-close aria-label="Close">✕</button><h3>${esc(name)}</h3>
-    <div class="meta">${o?tagHTML(o):""}${esc(sel||"")} · bought him ${me.n} of ${rows.length} time${rows.length===1?"":"s"}${grp?` (${grp} in a group)`:""}</div></div><div class="gd">`;
-  if(owners.length>1)h+=`<div class="gd-chips">${owners.map(w=>`<button class="${w.name===sel?"on":""}" data-gg="${esc(name)}" data-gb="${esc(w.name)}">${tagHTML(ALL.look[w.name])}${w.n}×</button>`).join("")}</div>`;
+    <div class="meta">${all?`Auctioned ${rows.length} time${rows.length===1?"":"s"}${grp?` (${grp} in a group)`:""} · ${owners.length} owner${owners.length===1?"":"s"}`:`${o?tagHTML(o):""}${esc(sel||"")} · bought him ${me.n} of ${rows.length} time${rows.length===1?"":"s"}${grp?` (${grp} in a group)`:""}`}</div></div><div class="gd">`;
+  if(owners.length)h+=`<div class="gd-chips"><button class="${all?"on":""}" data-gg="${esc(name)}" data-gb="" style="padding-left:10px">Everyone</button>${owners.map(w=>`<button class="${w.name===sel?"on":""}" data-gg="${esc(name)}" data-gb="${esc(w.name)}">${tagHTML(ALL.look[w.name])}${w.n}×</button>`).join("")}</div>`;
   h+=`<div class="tiles">
-    <div class="tile"><div class="k">Spent on him</div><div class="v">${money2(me.cost)}</div><div class="s">${me.n?`avg ${money2(me.cost/me.n)} a time`:""}</div></div>
-    <div class="tile"><div class="k">He won them</div><div class="v">${money2(me.won)}</div><div class="s">cashed ${cashed} of ${me.n}</div></div>
+    <div class="tile"><div class="k">${all?"Bid on him":"Spent on him"}</div><div class="v">${money2(me.cost)}</div><div class="s">${me.n?`avg ${money2(me.cost/me.n)} a time`:""}</div></div>
+    <div class="tile"><div class="k">${all?"He paid out":"He won them"}</div><div class="v">${money2(me.won)}</div><div class="s">cashed ${cashed} of ${me.n}</div></div>
     <div class="tile"><div class="k">Net</div><div class="v ${negCls(net)}">${net<0?"−":net>0?"+":""}${money2(Math.abs(net))}</div><div class="s">${me.cost?pct(me.won/me.cost-1)+" ROI":""}</div></div>
-    <div class="tile"><div class="k">Best finish</div><div class="v">${best?esc(best.fin):"—"}</div><div class="s">${best?esc(evLabel(best.x.e)):"never made a cut for him"}</div></div></div>
+    <div class="tile"><div class="k">Best finish</div><div class="v">${best?esc(best.fin):"—"}</div><div class="s">${wins>1?`won ${wins} times`:best?esc(evLabel(best.x.e)):all?"never made a cut":"never made a cut for him"}</div></div></div>
   <div class="card" style="margin:0 12px 4px"><div class="gdrow h"><span>Event · owner</span><span>Fin</span><span>Paid</span><span>Won</span></div>
-  ${rows.map(r=>{const w=ALL.look[r.owner];return`<div class="gdrow${r.owner===sel?"":" dim"}" data-goev="${esc(r.x.e.id)}" data-gosel="${esc(r.owner)}"><span><span class="t1">${w?tagHTML(w):""}${esc(r.x.e.short||evLabel(r.x.e))}</span><span class="t2">${r.ind?"bought on his own":`in ${esc(r.l.lot)} · ${money(r.l.price)} for ${r.l.players.length}`}</span></span><span>${esc(r.fin)}</span><span>${money2(r.cost)}</span><span>${money2(r.won)}</span></div>`}).join("")}</div>
+  ${rows.map(r=>{const w=ALL.look[r.owner];return`<div class="gdrow${all||r.owner===sel?"":" dim"}" data-goev="${esc(r.x.e.id)}" data-gosel="${esc(r.owner)}"><span><span class="t1">${w?tagHTML(w):""}${esc(r.x.e.short||evLabel(r.x.e))}</span><span class="t2">${r.ind?"bought on his own":`in ${esc(r.l.lot)} · ${money(r.l.price)} for ${r.l.players.length}`}</span></span><span>${esc(r.fin)}</span><span>${money2(r.cost)}</span><span>${money2(r.won)}</span></div>`}).join("")}</div>
   <div class="note">${grp||rows.some(r=>!r.ind)?"In a group, “Paid” is his share of the group price (price ÷ golfers in it) and “Won” is only what he earned. ":""}Tap an event to open it.</div></div>`;
   return h}
 function openDrill(name,sel){$("#sheetCard").innerHTML=drillHTML(name,sel);$("#sheetCard").scrollTop=0;$("#sheet").classList.add("on");document.body.style.overflow="hidden"}
-document.addEventListener("click",e=>{const g=e.target.closest("[data-gg]");if(!g)return;e.stopPropagation();openDrill(g.dataset.gg,g.dataset.gb)},true);
+document.addEventListener("click",e=>{const g=e.target.closest("[data-gg]");if(!g)return;e.stopPropagation();openDrill(g.dataset.gg,g.dataset.gb===undefined?"":g.dataset.gb)},true);
+
+/* ---- golfer pages ---- */
+function golferStats(evs){const G={};
+  for(const x of evs)for(const l of x.lots){if(l.kind==="field")continue;
+    for(const nm of l.players.map(gName)){const p=x.d.byKey[norm(nm)],g=G[nm]||(G[nm]={name:nm,n:0,cost:0,won:0,last:0,by:{},wins:0,best:999});
+      g.n++;g.cost+=l.kind==="ind"?l.price:l.price/l.players.length;g.won+=p?p.won:0;g.last=Math.max(g.last,x.yr);g.by[l.owner]=(g.by[l.owner]||0)+1;
+      const f=p&&/^T?\d+$/.test(p.pos)&&p.status!=="cut"?parseInt(String(p.pos).replace("T","")):999;g.best=Math.min(g.best,f);if(x.champ&&x.champ.name===nm)g.wins++}}
+  return Object.values(G).map(g=>{const m=Math.max(...Object.values(g.by));return{...g,net:g.won-g.cost,roi:g.cost?g.won/g.cost-1:0,top:Object.keys(g.by).filter(k=>g.by[k]===m).sort(),topN:m}})}
+function golferList(){const q=(STATE.gq||"").trim().toLowerCase(),sort=STATE.gs||"won";
+  let G=golferStats(ALL.events.filter(inFilter));
+  if(q)G=G.filter(g=>g.name.toLowerCase().includes(q)||norm(g.name).includes(norm(q)));
+  const by={won:(a,b)=>b.won-a.won,n:(a,b)=>b.n-a.n||b.cost-a.cost,cost:(a,b)=>b.cost-a.cost,net:(a,b)=>b.net-a.net,name:(a,b)=>a.name.localeCompare(b.name)}[sort]||((a,b)=>b.won-a.won);
+  G.sort((a,b)=>by(a,b)||a.name.localeCompare(b.name));
+  if(!G.length)return`<div class="card"><div class="empty">No golfers match “${esc(STATE.gq)}”.</div></div>`;
+  const shown=q||STATE.gall?G:G.slice(0,60);
+  let h=`<div class="card"><table class="at gt"><thead><tr><th>Golfer</th><th>Bid</th><th>Paid out</th><th>Net</th></tr></thead><tbody>`;
+  for(const g of shown)h+=`<tr data-gg="${esc(g.name)}" data-gb=""><td><div class="who"><span>${esc(g.name)}<span class="sub2">${g.n}× · ${g.top.map(n=>ALL.look[n]?ALL.look[n].tag:n).join("/")} ${g.topN}×${g.wins?` · ${g.wins}🏆`:g.best<999?` · best ${ordN(g.best)}`:""}</span></span></div></td>
+    <td>${money(g.cost)}</td><td>${money(g.won)}</td><td class="${negCls(g.net)}" style="font-weight:700">${sgn(g.net)}</td></tr>`;
+  h+=`</tbody></table>${shown.length<G.length?`<button class="more" data-gall>Show all ${G.length} golfers</button>`:""}</div>
+  <div class="note">“Bid” counts a golfer’s share of a group price. The Field isn’t included. Tap a golfer for his full history.</div>`;
+  return h}
+const ordN=n=>n+ord(n);
+document.addEventListener("input",e=>{if(e.target.id!=="gq")return;STATE.gq=e.target.value;$("#glist").innerHTML=golferList()});
+document.addEventListener("click",e=>{if(e.target.closest("[data-gall]")){STATE.gall=true;$("#glist").innerHTML=golferList()}});
 
 /* ---- cover page ---- */
 const MAJBAND={masters:["#006747","#fff"],pga:["#00205B","#fff"],usopen:["#00365F","#fff"],open:["#FFD100","#0B2545"],fedex:["#4D148C","#fff"]};
@@ -1194,7 +1232,7 @@ function homeHTML(){const evs=ALL.events,byId={};evs.forEach(x=>byId[x.e.id]=x);
       else if(hasData(e))h+=`<button class="yr" data-goev="${esc(e.id)}"><span class="y">${yrOf(e)}</span><span class="c">In progress</span><span class="tag" style="background:var(--green);color:var(--card)">LIVE</span></button>`;
       else h+=`<div class="yr off"><span class="y">${yrOf(e)}</span><span class="c">No auction</span><span></span></div>`}
     h+=`</div>`}
-  h+=`</div><div class="qlinks"><button data-page="alltime"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4zM17 6h3v2a3 3 0 0 1-3 3M7 6H4v2a3 3 0 0 0 3 3"/></svg>All-Time Standings</button><button data-page="stats"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Stats & Records</button></div>`;
+  h+=`</div><div class="qlinks"><button data-page="alltime"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4zM17 6h3v2a3 3 0 0 1-3 3M7 6H4v2a3 3 0 0 0 3 3"/></svg>All-Time Standings</button><button data-page="stats"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Stats & Records</button><button data-page="golfers" style="grid-column:1/-1"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 21V3l11 4-11 4"/><path d="M3 21h10"/></svg>Golfers</button></div>`;
   return h}
 
 /* ---- menu ---- */
@@ -1205,6 +1243,7 @@ function drawDrawer(){computeAll();const page=STATE.page||"event";const byId={};
     <div class="dr-sec">Overall</div>
     <button class="dr-link${page==="alltime"?" on":""}" data-page="alltime"><span class="ic"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4zM17 6h3v2a3 3 0 0 1-3 3M7 6H4v2a3 3 0 0 0 3 3"/></svg></span>All-Time Standings</button>
     <button class="dr-link${page==="stats"?" on":""}" data-page="stats"><span class="ic"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span>Stats & Records</button>
+    <button class="dr-link${page==="golfers"?" on":""}" data-page="golfers"><span class="ic"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 21V3l11 4-11 4"/><path d="M3 21h10"/></svg></span>Golfers</button>
     <div class="dr-sec" style="padding-top:20px">Events</div>`;
   for(const y of yrs){h+=`<div class="dr-year">${y}</div>`;
     for(const e of CFG.events.filter(e=>yrOf(e)===y)){const x=byId[e.id];const o=x&&ALL.look[x.champOwner];
@@ -1241,7 +1280,7 @@ function switchEvent(id){if(id===CUR.id)return;setEvent(id);STATE.ev=CUR.id;save
 document.addEventListener("change",e=>{if(e.target.id==="evsel"){if(e.target.value)goEvent(e.target.value);return}});
 document.addEventListener("change",e=>{if(e.target.id!=="sel")return;STATE.sel=e.target.value||null;save();render()});
 (()=>{let id=null,pg=null;try{const q=new URLSearchParams(location.search);id=q.get("event");pg=q.get("page")}catch(e){}
-  STATE.page=pg==="alltime"||pg==="stats"?pg:id?"event":"home";
+  STATE.page=pg==="alltime"||pg==="stats"||pg==="golfers"?pg:id?"event":"home";
   setEvent(id&&CFG.events.some(e=>e.id===id)?id:(STATE.ev&&CFG.events.some(e=>e.id===STATE.ev)?STATE.ev:FIRST().id));applyTheme(CUR.name)})();
 setPageFlag();drawNav();drawPill();if(STATE.page!=="event")renderOther();
 load();
