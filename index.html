@@ -323,7 +323,7 @@ table.grid tr.tot td{font-weight:700;border-top:2px solid var(--line)}
 .evrow{display:grid;grid-template-columns:minmax(0,1fr) 62px 62px 70px;gap:6px;align-items:center;padding:9px 12px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums;font-size:13px;cursor:pointer}
 .evrow:last-child{border-bottom:0}
 .evrow.h{background:var(--th);color:var(--thfg);font:600 9.5px Inter,sans-serif;letter-spacing:.1em;text-transform:uppercase;cursor:default}
-.evrow span:not(:first-child){text-align:right}
+.evrow>span:not(:first-child){text-align:right}
 .evrow .t1{font-weight:600}
 .evrow .t2{display:block;font-size:11px;color:var(--mut);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .evrow.h .t2{display:none}
@@ -372,6 +372,23 @@ html[data-pg="home"] #nav,html[data-pg="home"] .status{display:none}
 .qlinks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:8px}
 .qlinks button{border:1px solid var(--line);background:var(--card);color:var(--fg);border-radius:4px;padding:13px 12px;font:600 13px Inter,sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:var(--shadow)}
 .qlinks svg{color:var(--green)}
+/* ===== golfer x bidder drill-down ===== */
+[data-gg]{cursor:pointer}
+[data-gg]:hover{background:var(--row)}
+.gd-chips{display:flex;gap:6px;overflow-x:auto;padding:12px 12px 4px;scrollbar-width:none}
+.gd-chips::-webkit-scrollbar{display:none}
+.gd-chips button{flex:0 0 auto;display:flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--card);color:var(--fg);border-radius:999px;padding:4px 10px 4px 4px;font:600 12px Inter,sans-serif;cursor:pointer}
+.gd-chips button.on{border-color:var(--green);box-shadow:0 0 0 1px var(--green) inset}
+.gd .tiles{padding:8px 12px 0;margin-bottom:12px}
+.gd .tile{box-shadow:none}
+.gdrow{display:grid;grid-template-columns:minmax(0,1fr) 40px 60px 60px;gap:6px;align-items:center;padding:9px 12px;border-bottom:1px solid var(--line);font-size:13px;font-variant-numeric:tabular-nums;cursor:pointer}
+.gdrow>span:not(:first-child){text-align:right}
+.gdrow.h{background:var(--th);color:var(--thfg);font:600 9.5px Inter,sans-serif;letter-spacing:.1em;text-transform:uppercase;cursor:default}
+.gdrow.dim{opacity:.5}
+.gdrow .t1{display:flex;align-items:center;gap:7px;font-weight:600;min-width:0}
+.gdrow .t1 .tag{height:17px;min-width:28px;font-size:9.5px}
+.gdrow .t2{display:block;font-size:11px;color:var(--mut);font-weight:500;margin-top:1px}
+.gd .note{padding:12px 16px 18px}
 </style>
 </head>
 <body>
@@ -1013,7 +1030,7 @@ function profileHTML(b){const evs=b.evs.slice().sort((a,c)=>a.x.ord-c.x.ord);
   </div>
   ${(()=>{const G={};for(const x of ALL.events.filter(inFilter))for(const l of x.lots){if(l.kind==="field")continue;for(const nm of l.kind==="ind"?[l.lot]:l.players.map(p=>typeof p==="string"?p:p.name)){const g=G[nm]||(G[nm]={n:0,c:0});g.n++;if(l.owner===b.name)g.c++}}
     const L=Object.entries(G).filter(([,g])=>g.c>=2).sort((a,c)=>c[1].c-a[1].c||c[1].c/c[1].n-a[1].c/a[1].n).slice(0,5);
-    return L.length?`<div class="sec" style="border-top:1px solid var(--line)"><span>Go-to golfers</span><span>times bought</span></div>${L.map(([n,g])=>`<div class="hb"><div class="top"><span>${esc(n)}</span><span>${g.c} of ${g.n} <small>· ${Math.round(g.c/g.n*100)}%</small></span></div><div class="track" style="height:6px"><div class="fill" style="left:0;width:${g.c/g.n*100}%;background:${b.o.color}"></div></div></div>`).join("")}`:""})()}
+    return L.length?`<div class="sec" style="border-top:1px solid var(--line)"><span>Go-to golfers</span><span>times bought</span></div>${L.map(([n,g])=>`<div class="hb" data-gg="${esc(n)}" data-gb="${esc(b.name)}"><div class="top"><span>${esc(n)}</span><span>${g.c} of ${g.n} <small>· ${Math.round(g.c/g.n*100)}%</small></span></div><div class="track" style="height:6px"><div class="fill" style="left:0;width:${g.c/g.n*100}%;background:${b.o.color}"></div></div></div>`).join("")}`:""})()}
   <div class="sec" style="border-top:1px solid var(--line)"><span>Net by event</span><span>oldest → newest</span></div>
   <div class="nb">${chron.map(v=>{const hgt=Math.abs(v.net)/max*50;return`<div class="col" title="${esc(evLabel(v.x.e))}: ${sgn(v.net)}"><div class="b ${v.net>=0?"p":"n"}" style="height:${Math.max(hgt,v.net?1.5:0)}%"></div></div>`}).join("")}</div>
   <div class="evrow h"><span>Event</span><span>Paid</span><span>Won</span><span>Net</span></div>
@@ -1081,7 +1098,7 @@ function loyalty(evs){const G={};
     const who=Object.keys(g.by).filter(k=>g.by[k]===m).sort();out.push({name:g.name,n:g.n,c:m,who,share:m/g.n,grp:who.length===1?g.grp[who[0]]||0:0})}
   return out.sort((a,b)=>b.c-a.c||b.share-a.share||b.n-a.n||a.name.localeCompare(b.name))}
 function loyalRow(r){const o=ALL.look[r.who[0]];
-  return`<div class="hb"><div class="top"><span style="display:flex;align-items:center;gap:8px;min-width:0">${r.who.map(w=>tagHTML(ALL.look[w])).join("")}<span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.name)}</span></span><span style="white-space:nowrap">${r.c} of ${r.n} <small>· ${Math.round(r.share*100)}%</small></span></div>
+  return`<div class="hb" data-gg="${esc(r.name)}" data-gb="${esc(r.who[0])}"><div class="top"><span style="display:flex;align-items:center;gap:8px;min-width:0">${r.who.map(w=>tagHTML(ALL.look[w])).join("")}<span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.name)}</span></span><span style="white-space:nowrap">${r.c} of ${r.n} <small>· ${Math.round(r.share*100)}%</small></span></div>
     <div class="track" style="height:6px"><div class="fill" style="left:0;width:${r.share*100}%;background:${o?o.color:"var(--green)"}"></div></div>
     <div style="font:500 11.5px Inter,sans-serif;color:var(--mut);margin-top:5px">${r.who.map(esc).join(" & ")}${r.who.length>1?" (each)":""}${r.grp?` · ${r.grp===r.c?"all":r.grp} in groups`:""}</div></div>`}
 function analyticsHTML(evs){const lots=evs.flatMap(x=>x.lots);
@@ -1117,6 +1134,35 @@ function analyticsHTML(evs){const lots=evs.flatMap(x=>x.lots);
     <div class="track" style="height:6px"><div class="fill" style="left:0;width:${b.paid/B[0].paid*100}%;background:${b.o.color}"></div></div></div>`).join("")}${B.length>12?`<div class="note" style="margin:0;padding:10px 12px">+ ${B.length-12} more bidders</div>`:""}</div>`;
   return h}
 
+
+
+/* ---- one golfer, one bidder ---- */
+const gName=p=>typeof p==="string"?p:p.name;
+function drillHTML(name,sel){const rows=[];
+  for(const x of ALL.events.filter(inFilter))for(const l of x.lots){if(l.kind==="field"||!l.players.map(gName).includes(name))continue;
+    const p=x.d.byKey[norm(name)],ind=l.kind==="ind";
+    rows.push({x,l,ind,owner:l.owner,cost:ind?l.price:l.price/l.players.length,won:p?p.won:0,
+      fin:!p?"—":p.status==="cut"?"MC":/^(wd|dq)$/.test(p.status)?p.status.toUpperCase():p.pos})}
+  rows.sort((a,b)=>a.x.ord-b.x.ord);
+  const by={};for(const r of rows){const o=by[r.owner]||(by[r.owner]={name:r.owner,n:0,cost:0,won:0});o.n++;o.cost+=r.cost;o.won+=r.won}
+  const owners=Object.values(by).sort((a,b)=>b.n-a.n||a.name.localeCompare(b.name));
+  if(!by[sel])sel=owners[0]&&owners[0].name;const me=by[sel]||{n:0,cost:0,won:0},net=me.won-me.cost,mine=rows.filter(r=>r.owner===sel);
+  const best=mine.filter(r=>/^T?\d+$/.test(r.fin)).sort((a,b)=>parseInt(a.fin.replace("T",""))-parseInt(b.fin.replace("T","")))[0];
+  const cashed=mine.filter(r=>r.won>0).length,grp=mine.filter(r=>!r.ind).length,o=ALL.look[sel];
+  let h=`<div class="sc-head"><button class="x" data-close aria-label="Close">✕</button><h3>${esc(name)}</h3>
+    <div class="meta">${o?tagHTML(o):""}${esc(sel||"")} · bought him ${me.n} of ${rows.length} time${rows.length===1?"":"s"}${grp?` (${grp} in a group)`:""}</div></div><div class="gd">`;
+  if(owners.length>1)h+=`<div class="gd-chips">${owners.map(w=>`<button class="${w.name===sel?"on":""}" data-gg="${esc(name)}" data-gb="${esc(w.name)}">${tagHTML(ALL.look[w.name])}${w.n}×</button>`).join("")}</div>`;
+  h+=`<div class="tiles">
+    <div class="tile"><div class="k">Spent on him</div><div class="v">${money2(me.cost)}</div><div class="s">${me.n?`avg ${money2(me.cost/me.n)} a time`:""}</div></div>
+    <div class="tile"><div class="k">He won them</div><div class="v">${money2(me.won)}</div><div class="s">cashed ${cashed} of ${me.n}</div></div>
+    <div class="tile"><div class="k">Net</div><div class="v ${negCls(net)}">${net<0?"−":net>0?"+":""}${money2(Math.abs(net))}</div><div class="s">${me.cost?pct(me.won/me.cost-1)+" ROI":""}</div></div>
+    <div class="tile"><div class="k">Best finish</div><div class="v">${best?esc(best.fin):"—"}</div><div class="s">${best?esc(evLabel(best.x.e)):"never made a cut for him"}</div></div></div>
+  <div class="card" style="margin:0 12px 4px"><div class="gdrow h"><span>Event · owner</span><span>Fin</span><span>Paid</span><span>Won</span></div>
+  ${rows.map(r=>{const w=ALL.look[r.owner];return`<div class="gdrow${r.owner===sel?"":" dim"}" data-goev="${esc(r.x.e.id)}" data-gosel="${esc(r.owner)}"><span><span class="t1">${w?tagHTML(w):""}${esc(r.x.e.short||evLabel(r.x.e))}</span><span class="t2">${r.ind?"bought on his own":`in ${esc(r.l.lot)} · ${money(r.l.price)} for ${r.l.players.length}`}</span></span><span>${esc(r.fin)}</span><span>${money2(r.cost)}</span><span>${money2(r.won)}</span></div>`}).join("")}</div>
+  <div class="note">${grp||rows.some(r=>!r.ind)?"In a group, “Paid” is his share of the group price (price ÷ golfers in it) and “Won” is only what he earned. ":""}Tap an event to open it.</div></div>`;
+  return h}
+function openDrill(name,sel){$("#sheetCard").innerHTML=drillHTML(name,sel);$("#sheetCard").scrollTop=0;$("#sheet").classList.add("on");document.body.style.overflow="hidden"}
+document.addEventListener("click",e=>{const g=e.target.closest("[data-gg]");if(!g)return;e.stopPropagation();openDrill(g.dataset.gg,g.dataset.gb)},true);
 
 /* ---- cover page ---- */
 const MAJBAND={masters:["#006747","#fff"],pga:["#00205B","#fff"],usopen:["#00365F","#fff"],open:["#FFD100","#0B2545"],fedex:["#4D148C","#fff"]};
@@ -1172,7 +1218,7 @@ function goPage(page){STATE.page=page;save();closeDrawer();setPageFlag();
   try{history.replaceState(null,"",page==="event"?"?event="+CUR.id:page==="home"?location.pathname:"?page="+page)}catch(e){}
   if(page==="event"){$("#pick").style.display="";drawNav();drawPill();if(D)render();else $("#view").innerHTML=`<div class="card"><div class="empty">Loading ${esc(CUR.name)}…</div></div>`}
   else renderOther();window.scrollTo(0,0)}
-function goEvent(id,sel){STATE.page="event";$("#pick").style.display="";closeDrawer();if(sel!==undefined)STATE.sel=sel||null;save();setPageFlag();
+function goEvent(id,sel){closeCard();STATE.page="event";$("#pick").style.display="";closeDrawer();if(sel!==undefined)STATE.sel=sel||null;save();setPageFlag();
   if(id===CUR.id){try{history.replaceState(null,"","?event="+CUR.id)}catch(e){}drawNav();drawPill();if(D)render();window.scrollTo(0,0);return}
   drawNav();switchEvent(id);window.scrollTo(0,0)}
 document.addEventListener("click",e=>{
