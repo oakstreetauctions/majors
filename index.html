@@ -209,6 +209,10 @@ details.many summary::-webkit-details-marker{display:none}
 details.many summary .car{font-size:9px;display:inline-block;transition:transform .15s}
 details.many[open] summary .car{transform:rotate(90deg)}
 details.many .holders{margin-top:6px}
+details.many .mc-tot{display:block}
+details.many .mc-counts{display:flex;flex-wrap:wrap;gap:5px 8px;margin-top:6px}
+details.many .mc-c{display:inline-flex;align-items:center;gap:4px;color:var(--fg);font-weight:600}
+details.many[open] .mc-counts{display:none}
 
 /* ===== event picker in the header ===== */
 .evpick{position:relative;display:inline-flex;align-items:center;gap:7px;margin-top:9px;padding:4px 12px;border:1px solid rgba(255,255,255,.28);border-radius:999px;font:600 11px Inter,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#fff}
@@ -646,9 +650,22 @@ function renderPay(){
   let h=`<div class="card"><div class="pot"><span>Pot</span><span>${money(D.pot)}</span></div></div>`;
   const sect=(title,list)=>{list=list.filter(a=>!STATE.sel||a.holders.some(p=>mine(ownerOf(p))));if(!list.length)return"";let s=`<div class="card"><div class="sec"><span>${title}</span></div><table class="pay"><thead><tr><th>Award</th><th style="text-align:left">Who</th><th>Pays</th></tr></thead><tbody>`;
     for(const a of list){s+=`<tr><td><b>${esc(a.label)}</b><br><small style="color:var(--mut)">${a.pct}%${a.detail?" · "+esc(a.detail):""}</small><br><span class="badge${a.status==="Final"?" final":""}">${esc(a.status)}</span></td>
-      <td>${(()=>{const hs=a.holders.filter(p=>mine(ownerOf(p)));const list=`<div class="holders">${hs.map(p=>{const o=ownerOf(p);return`<div class="${dimCls(o)}">${tagHTML(o)}<span>${esc(p.name)}</span></div>`}).join("")}</div>`;
+      <td>${(()=>{let hs=a.holders.filter(p=>mine(ownerOf(p)));
         if(!hs.length)return'<span style="color:var(--mut)">—</span>';
-        return a.many&&!STATE.sel?`<details class="many"><summary>${hs.length} golfers <span class="car">▶</span></summary>${list}</details>`:list})()}</td>
+        let counts=null;
+        if(a.many){
+          // Make Cut: order golfers by rank (individual lots by OWGR, then groups A, B, ..., then the Field)
+          const rk=p=>{const l=D.lots[p.lot],n=D.owgrOf[p.key];if(l&&l.players.length===1)return[0,n||999,""];
+            return[1,/field/i.test(p.lot||"")?1e6:0,String(p.lot||"")]};
+          const byRank=(x,y)=>{const a1=rk(x),b1=rk(y);return a1[0]-b1[0]||a1[1]-b1[1]||a1[2].localeCompare(b1[2])||x.name.localeCompare(y.name)};
+          hs=hs.slice().sort(byRank);
+          if(!STATE.sel){
+            // everyone: group by bidder, most golfers first
+            const by={};for(const p of hs){const o=ownerOf(p);const k=o?o.name:"";(by[k]=by[k]||{o,ps:[]}).ps.push(p)}
+            counts=Object.values(by).sort((x,y)=>y.ps.length-x.ps.length||(x.o?x.o.name:"~").localeCompare(y.o?y.o.name:"~"));
+            hs=counts.flatMap(c=>c.ps)}}
+        const list=`<div class="holders">${hs.map(p=>{const o=ownerOf(p);return`<div class="${dimCls(o)}">${tagHTML(o)}<span>${esc(p.name)}</span></div>`}).join("")}</div>`;
+        return counts?`<details class="many"><summary><span class="mc-tot">${hs.length} golfers <span class="car">▶</span></span><span class="mc-counts">${counts.map(c=>`<span class="mc-c">${c.o?tagHTML(c.o):'<span class="nob">–</span>'}<b>${c.ps.length}</b></span>`).join("")}</span></summary>${list}</details>`:list})()}</td>
       <td><b>${money(a.amount)}</b>${a.holders.length>1?`<br><small style="color:var(--mut)">${money(a.amount/a.holders.length)} each</small>`:""}</td></tr>`}
     return s+"</tbody></table></div>"};
   h+=sect("Finishing position",D.awards.filter(a=>a.kind==="place"));
