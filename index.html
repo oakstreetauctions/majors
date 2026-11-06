@@ -210,8 +210,11 @@ details.many summary .car{font-size:9px;display:inline-block;transition:transfor
 details.many[open] summary .car{transform:rotate(90deg)}
 details.many .holders{margin-top:6px}
 details.many .mc-tot{display:block}
-details.many .mc-counts{display:flex;flex-wrap:wrap;gap:5px 8px;margin-top:6px}
-details.many .mc-c{display:inline-flex;align-items:center;gap:4px;color:var(--fg);font-weight:600}
+details.many .mc-counts{display:flex;flex-direction:column;gap:5px;margin-top:6px}
+details.many .mc-c{display:grid;grid-template-columns:auto 52px auto;align-items:center;gap:8px;color:var(--fg);font-weight:500;font-variant-numeric:tabular-nums}
+details.many .mc-n{color:var(--mut)}
+details.many .mc-n b{color:var(--fg)}
+details.many .mc-amt{font-weight:700}
 details.many[open] .mc-counts{display:none}
 
 /* ===== event picker in the header ===== */
@@ -665,7 +668,10 @@ function renderPay(){
             counts=Object.values(by).sort((x,y)=>y.ps.length-x.ps.length||(x.o?x.o.name:"~").localeCompare(y.o?y.o.name:"~"));
             hs=counts.flatMap(c=>c.ps)}}
         const list=`<div class="holders">${hs.map(p=>{const o=ownerOf(p);return`<div class="${dimCls(o)}">${tagHTML(o)}<span>${esc(p.name)}</span></div>`}).join("")}</div>`;
-        return counts?`<details class="many"><summary><span class="mc-tot">${hs.length} golfers <span class="car">▶</span></span><span class="mc-counts">${counts.map(c=>`<span class="mc-c">${c.o?tagHTML(c.o):'<span class="nob">–</span>'}<b>${c.ps.length}</b></span>`).join("")}</span></summary>${list}</details>`:list})()}</td>
+        // per bidder: golfers who made the cut / golfers owned, and what that bidder's share of the pool pays
+        const each=a.amount/a.holders.length;
+        const owned=o=>Object.values(D.lots).filter(l=>l.owner===(o&&o.name)).reduce((n,l)=>n+l.players.length,0);
+        return counts?`<details class="many"><summary><span class="mc-tot">${hs.length} golfers <span class="car">▶</span></span><span class="mc-counts">${counts.map(c=>`<span class="mc-c">${c.o?tagHTML(c.o):'<span class="nob">–</span>'}<span class="mc-n"><b>${c.ps.length}</b>/${owned(c.o)}</span><span class="mc-amt">${money(each*c.ps.length)}</span></span>`).join("")}</span></summary>${list}</details>`:list})()}</td>
       <td><b>${money(a.amount)}</b>${a.holders.length>1?`<br><small style="color:var(--mut)">${money(a.amount/a.holders.length)} each</small>`:""}</td></tr>`}
     return s+"</tbody></table></div>"};
   h+=sect("Finishing position",D.awards.filter(a=>a.kind==="place"));
