@@ -226,6 +226,108 @@ details.many .mc-n b{color:var(--fg)}
 details.many .mc-amt{font-weight:700}
 details.many[open] .mc-counts{display:none}
 
+/* ===== menu (hamburger) ===== */
+header{position:relative;padding-left:48px!important;padding-right:48px!important}
+@media (max-width:460px){html header h1{font-size:clamp(17px,5.4vw,23px)!important;letter-spacing:.04em!important;white-space:nowrap}}
+.burger{position:absolute;left:10px;top:calc(env(safe-area-inset-top,0px) + 14px);width:40px;height:40px;border:0;background:none;color:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;border-radius:6px}
+.burger:hover{background:rgba(255,255,255,.1)}
+.burger svg{width:22px;height:22px}
+html[data-ev="open"] .burger:hover{background:rgba(11,37,69,.08)}
+.drawer{position:fixed;inset:0;z-index:60;display:none}
+.drawer.on{display:block}
+.drawer-bg{position:absolute;inset:0;background:rgba(10,20,14,.45);animation:fade .15s}
+.drawer-card{position:absolute;left:0;top:0;bottom:0;width:min(330px,88vw);background:var(--bg);overflow:auto;box-shadow:6px 0 30px rgba(0,0,0,.25);animation:slide .2s ease-out;padding-bottom:calc(24px + env(safe-area-inset-bottom,0px))}
+@keyframes slide{from{transform:translateX(-100%)}to{transform:none}}
+.dr-head{background:var(--hdr);color:var(--hdrfg);padding:calc(env(safe-area-inset-top,0px) + 18px) 16px 16px;display:flex;align-items:center;justify-content:space-between}
+.dr-head b{font:400 19px var(--serif);letter-spacing:.05em}
+.dr-head button{border:0;background:none;color:inherit;font-size:18px;cursor:pointer;width:36px;height:36px}
+.dr-sec{font:600 10px Inter,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:var(--mut);padding:16px 16px 6px}
+.dr-link{display:flex;align-items:center;gap:12px;width:100%;border:0;background:none;color:var(--fg);text-align:left;padding:11px 16px;font:600 14px Inter,sans-serif;cursor:pointer;border-left:3px solid transparent}
+.dr-link:hover{background:var(--row)}
+.dr-link.on{border-left-color:var(--green);background:var(--row)}
+.dr-link .ic{width:20px;display:flex;justify-content:center;color:var(--green)}
+.dr-year{font:400 15px var(--serif);color:var(--green);padding:14px 16px 4px;border-top:1px solid var(--line);margin-top:8px}
+.dr-ev{display:grid;grid-template-columns:10px minmax(0,1fr) auto;align-items:center;gap:10px;width:100%;border:0;background:none;color:var(--fg);text-align:left;padding:9px 16px;cursor:pointer;border-left:3px solid transparent}
+.dr-ev:hover{background:var(--row)}
+.dr-ev.on{border-left-color:var(--green);background:var(--row)}
+.dr-ev .dot{width:10px;height:10px;border-radius:50%}
+.dr-ev .en{font:600 13.5px Inter,sans-serif}
+.dr-ev .ew{font:500 11.5px Inter,sans-serif;color:var(--mut);display:flex;align-items:center;gap:6px;white-space:nowrap}
+.dr-ev .ew .tag{min-width:28px;height:18px;font-size:9.5px}
+
+/* ===== all-time & stats ===== */
+.chips{display:flex;gap:6px;overflow-x:auto;padding:0 0 10px;margin:0 0 4px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:0 0 auto;border:1px solid var(--line);background:var(--card);color:var(--fg);border-radius:999px;padding:6px 12px;font:600 12px Inter,sans-serif;cursor:pointer;white-space:nowrap}
+.chip.on{background:var(--green);border-color:var(--green);color:var(--card)}
+.tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:16px}
+@media (min-width:560px){.tiles{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:4px;padding:10px 12px;box-shadow:var(--shadow);min-width:0}
+.tile .k{font:600 9.5px Inter,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--mut)}
+.tile .v{font:700 20px Inter,sans-serif;font-variant-numeric:tabular-nums;margin-top:3px;letter-spacing:-.01em}
+.tile .s{font:500 11.5px Inter,sans-serif;color:var(--mut);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+table.at{width:100%}
+table.at td,table.at th{white-space:nowrap}
+table.at td:first-child{white-space:normal;width:100%}
+table.at .sub2{display:block;font:500 11px Inter,sans-serif;color:var(--mut);white-space:nowrap}
+@media (max-width:420px){table.at th,table.at td{padding-left:6px;padding-right:6px}table.at td:first-child{padding-left:10px}table.at td{font-size:13px}}
+table.at .rkn{color:var(--mut);font:600 12px Inter,sans-serif;width:22px;display:inline-block}
+.gridwrap{overflow-x:auto}
+table.grid{border-collapse:separate;border-spacing:0;font-variant-numeric:tabular-nums}
+table.grid th,table.grid td{padding:7px 8px;text-align:right;font-size:12.5px;border-bottom:1px solid var(--line);white-space:nowrap}
+table.grid th{font-size:9.5px!important;letter-spacing:.06em!important}
+table.grid th.ev{cursor:pointer}
+table.grid .sticky{position:sticky;left:0;background:var(--card);text-align:left;z-index:1;box-shadow:1px 0 0 var(--line)}
+table.grid th.sticky{background:var(--th)}
+table.grid td.na{color:var(--line)}
+table.grid td.p{color:var(--pos);font-weight:600}
+table.grid td.n{color:var(--neg)}
+table.grid tr.tot td{font-weight:700;border-top:2px solid var(--line)}
+.rec{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 10px;padding:11px 12px;border-bottom:1px solid var(--line)}
+.rec:last-child{border-bottom:0}
+.rec .rl{font:600 10px Inter,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);grid-column:1/-1}
+.rec .rw{display:flex;align-items:center;gap:8px;min-width:0;font:600 14px Inter,sans-serif}
+.rec .rw span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rec .rv{font:700 15px Inter,sans-serif;font-variant-numeric:tabular-nums;text-align:right}
+.rec .rd{font:500 11.5px Inter,sans-serif;color:var(--mut);grid-column:1/-1}
+.hb{padding:10px 12px;border-bottom:1px solid var(--line)}
+.hb:last-child{border-bottom:0}
+.hb .top{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font:600 13px Inter,sans-serif;margin-bottom:6px}
+.hb .top small{font:500 11.5px Inter,sans-serif;color:var(--mut)}
+.hb .track{position:relative;height:10px;background:var(--row);border-radius:2px}
+.hb .track .mid{position:absolute;top:-3px;bottom:-3px;width:1px;background:var(--mut);opacity:.5}
+.hb .fill{position:absolute;top:0;bottom:0;border-radius:2px}
+.hb .fill.p{background:var(--pos)}
+.hb .fill.n{background:var(--neg)}
+.vb{display:flex;align-items:flex-end;gap:2px;height:140px;padding:14px 12px 0}
+.vb .col{flex:1 1 0;min-width:0;display:flex;flex-direction:column;justify-content:flex-end;align-items:stretch;height:100%;cursor:default;position:relative}
+.vb .col .b{background:var(--green);border-radius:3px 3px 0 0;min-height:2px}
+.vb .col:hover .b{opacity:.75}
+.vb .col .lbl{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);font:700 10px Inter,sans-serif;color:var(--fg);white-space:nowrap;margin-bottom:2px;display:none}
+.vb .col.peak .lbl,.vb .col:hover .lbl{display:block}
+.vbx{display:flex;gap:2px;padding:4px 12px 10px}
+.vbx span{flex:1 1 0;min-width:0;text-align:center;font:600 9px Inter,sans-serif;color:var(--mut);overflow:hidden}
+.vbk{display:flex;flex-wrap:wrap;gap:4px 12px;padding:0 12px 12px;font:500 11px Inter,sans-serif;color:var(--mut)}
+.nb{display:flex;align-items:center;gap:2px;height:96px;padding:10px 12px;position:relative}
+.nb::before{content:"";position:absolute;left:12px;right:12px;top:50%;height:1px;background:var(--line)}
+.nb .col{flex:1 1 0;min-width:0;height:100%;position:relative;cursor:default}
+.nb .col .b{position:absolute;left:15%;right:15%;border-radius:2px}
+.nb .col .b.p{background:var(--pos);bottom:50%}
+.nb .col .b.n{background:var(--neg);top:50%}
+.prof{background:var(--card);border:1px solid var(--line);border-radius:4px;box-shadow:var(--shadow);margin-bottom:16px;overflow:hidden}
+.prof .ph2{display:flex;align-items:center;gap:10px;padding:12px;border-bottom:1px solid var(--line)}
+.prof .ph2 b{font:600 16px Inter,sans-serif;flex:1;min-width:0}
+.prof .ph2 button{border:1px solid var(--line);background:var(--bg);color:var(--fg);border-radius:4px;padding:5px 10px;font:600 11px Inter,sans-serif;cursor:pointer}
+.prof .tiles{padding:12px 12px 0;margin-bottom:12px}
+.prof .tile{box-shadow:none;background:var(--bg)}
+.evrow{display:grid;grid-template-columns:minmax(0,1fr) 62px 62px 70px;gap:6px;align-items:center;padding:9px 12px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums;font-size:13px;cursor:pointer}
+.evrow:last-child{border-bottom:0}
+.evrow.h{background:var(--th);color:var(--thfg);font:600 9.5px Inter,sans-serif;letter-spacing:.1em;text-transform:uppercase;cursor:default}
+.evrow span:not(:first-child){text-align:right}
+.evrow .t1{font-weight:600}
+.evrow .t2{display:block;font-size:11px;color:var(--mut);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.evrow.h .t2{display:none}
+
 /* ===== event picker in the header ===== */
 .evpick{position:relative;display:inline-flex;align-items:center;gap:7px;margin-top:9px;padding:4px 12px;border:1px solid rgba(255,255,255,.28);border-radius:999px;font:600 11px Inter,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#fff}
 .evpick .car3{font-size:9px;opacity:.85}
@@ -233,13 +335,14 @@ details.many[open] .mc-counts{display:none}
 </style>
 </head>
 <body>
-<header><h1>Oak Street Auctions</h1><div class="rule"></div><div class="evpick" id="evpick"></div></header>
+<header><button class="burger" id="burger" aria-label="Open menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button><h1>Oak Street Auctions</h1><div class="rule"></div><div class="evpick" id="evpick"></div></header>
 <nav id="nav">
   <button data-v="lb" class="on">Leaderboard</button>
   <button data-v="pay">Payouts</button>
   <button data-v="st">Standings</button>
   <button data-v="lots">Auction</button>
 </nav>
+<div class="drawer" id="drawer"><div class="drawer-bg" data-dclose></div><div class="drawer-card" id="drawerCard" role="dialog" aria-label="Menu"></div></div>
 <div class="sheet" id="sheet"><div class="sheet-bg" data-close></div><div class="sheet-card" id="sheetCard"></div></div>
 <div class="wrap">
   <div id="err"></div>
@@ -641,14 +744,15 @@ function parClass(v){return v<0?"under":v>0?"over":""}
 /* ====== render ====== */
 const ownerOf=p=>{const l=D.lots[p.lot];return l&&l.owner?D.owners[l.owner]:null};
 function render(){
-  document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("on",b.dataset.v===STATE.view));
+  if((STATE.page||"event")!=="event"){renderOther();return}
+  drawNav();
   const st=D.final?"Final":D.curRound?`Round ${D.curRound} · live, projected payouts`:"Waiting on first round";
   const tm=d=>d.toLocaleTimeString([],{hour:"numeric",minute:"2-digit"});
   const sub=SOURCE==="sample"?STALE:UPDATED?(STALE?`Showing the update from ${tm(UPDATED)}`:`Updated ${tm(UPDATED)}`):STALE;
   $("#status").innerHTML=`<b>${st}</b>`+(sub?`<span class="stale">${sub}</span>`:"");
   const os=Object.values(D.owners);
   const sorted=os.slice().sort((a,b)=>a.name.localeCompare(b.name));const cur=STATE.sel&&D.owners[STATE.sel];
-  $("#evpick").innerHTML=`<span>${esc(CUR.name)}</span><span class="car3">▾</span><select id="evsel" aria-label="Pick an event">${CFG.events.map(e=>`<option value="${esc(e.id)}"${e.id===CUR.id?" selected":""}>${esc(e.short||e.name)}</option>`).join("")}</select>`;
+  drawPill();
   $("#pick").innerHTML=`<span class="lbl">Bidder</span>${cur?`<span class="sw" style="background:${cur.color};border-color:${cur.color}"></span>`:""}<span class="val">${cur?esc(cur.name):"Everyone"}</span><span class="car2">▾</span>
     <select id="sel" aria-label="Pick a bidder"><option value="">Everyone</option>${sorted.map(o=>`<option value="${esc(o.name)}"${STATE.sel===o.name?" selected":""}>${esc(o.name)}</option>`).join("")}</select>`;
   if(STATE.sel&&!D.owners[STATE.sel])STATE.sel=null;
@@ -733,7 +837,9 @@ function renderPay(){
   $("#view").innerHTML=h}
 
 /* ====== events ====== */
-$("#nav").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;STATE.view=b.dataset.v;save();render();window.scrollTo(0,0)});
+$("#nav").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
+  if(b.dataset.v)STATE.view=b.dataset.v;if(b.dataset.at)STATE.atab=b.dataset.at;if(b.dataset.stb)STATE.stab=b.dataset.stb;save();
+  if((STATE.page||"event")==="event"){if(D)render();else drawNav()}else renderOther();window.scrollTo(0,0)});
 document.addEventListener("click",e=>{const t=e.target.closest("[data-o]");if(!t||t.closest("#nav"))return;const o=t.dataset.o;STATE.sel=STATE.sel===o?null:o;save();render()});
 
 /* ====== themes ====== */
@@ -787,16 +893,207 @@ document.addEventListener("click",e=>{
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeCard()});
 
 
+/* ====== all-time standings, stats & the menu ====== */
+const MAJ={masters:{n:"Masters",a:"MAS",c:"#006747"},pga:{n:"PGA Championship",a:"PGA",c:"#2F5DB8"},
+  usopen:{n:"U.S. Open",a:"USO",c:"#BF0D3E"},open:{n:"The Open",a:"OPEN",c:"#C9A227"},fedex:{n:"FedEx",a:"FDX",c:"#4D148C"}};
+const majOf=e=>evKey(e.name),yrOf=e=>+String(e.id).slice(0,4);
+const evLabel=e=>`${yrOf(e)} ${MAJ[majOf(e)].n}`;
+const evAbbr=e=>`${MAJ[majOf(e)].a} ’${String(yrOf(e)).slice(2)}`;
+const pct=v=>(v>0?"+":"")+Math.round(v*100)+"%";
+const sgn=v=>{const r=Math.round(v);return r===0?"$0":(r>0?"+":"−")+"$"+Math.abs(r).toLocaleString()};
+const negCls=v=>{const r=Math.round(v);return r>0?"posv":r<0?"negv":""};
+let ALL=null;
+function computeAll(){if(ALL)return ALL;const keep=CUR,events=[];
+  for(const e of CFG.events){const x=EVENT_DATA[e.id];if(!hasData(e)||!x||!x.leaderboard)continue;
+    CUR=e;const T={};for(const k of Object.keys(CFG.sheets))T[k]=table(x[k]||EMPTY_TAB[k]||"");
+    let d;try{d=compute(T)}catch(err){continue}if(!d||!d.final)continue;
+    const champAw=d.awards.find(a=>a.kind==="place");const champ=champAw&&champAw.holders[0];
+    const lotOwner=p=>{const l=p&&d.lots[p.lot];return l&&l.owner||""};
+    const lots=Object.values(d.lots).filter(l=>l.owner).map(l=>{const n=d.owgrOf[norm(l.lot)];
+      return{ev:e,lot:l.lot,owner:l.owner,price:l.price,won:l.won,size:l.players.length,rank:l.players.length===1?(n||null):null,
+        kind:l.players.length===1?"ind":/field/i.test(l.lot)?"field":"group",players:l.players}});
+    events.push({ord:CFG.events.indexOf(e),e,d,maj:majOf(e),yr:yrOf(e),pot:d.pot,champ,champOwner:lotOwner(champ),champLot:champ?d.lots[champ.lot]:null,lots})}
+  CUR=keep;
+  // a bidder's identity (tag + color) from the settings, falling back to how they appeared at an event
+  const look={};for(const x of events)for(const o of Object.values(x.d.owners))if(!look[o.name])look[o.name]=o;
+  for(const b of CFG.bidders||[]){const o=look[b[0]];if(o){o.color=b[1];o.text=b[2]||o.text;o.light=lum(b[1])>.82}}
+  ALL={events,look};return ALL}
+function inFilter(x){return(STATE.fmaj==="all"||!STATE.fmaj||x.maj===STATE.fmaj)&&(STATE.fyr==="all"||!STATE.fyr||x.yr===+STATE.fyr)}
+function bidders(evs){const B={};
+  for(const x of evs)for(const o of Object.values(x.d.owners)){const b=B[o.name]||(B[o.name]={name:o.name,o:ALL.look[o.name]||o,paid:0,won:0,evs:[],titles:0});
+    b.paid+=o.paid;b.won+=o.won;b.evs.push({x,paid:o.paid,won:o.won,net:o.won-o.paid});if(x.champOwner===o.name)b.titles++}
+  for(const b of Object.values(B)){b.net=b.won-b.paid;b.roi=b.paid?b.won/b.paid-1:0;b.ups=b.evs.filter(v=>Math.round(v.net)>0).length;
+    b.best=b.evs.reduce((m,v)=>!m||v.net>m.net?v:m,null);b.worst=b.evs.reduce((m,v)=>!m||v.net<m.net?v:m,null)}
+  return Object.values(B)}
+function filterChips(){const yrs=[...new Set(ALL.events.map(x=>x.yr))].sort((a,b)=>b-a);
+  const majs=["masters","pga","usopen","open"].filter(k=>ALL.events.some(x=>x.maj===k));
+  const c=(attr,v,lab,on)=>`<button class="chip${on?" on":""}" ${attr}="${v}">${lab}</button>`;
+  return`<div class="chips">${c("data-fmaj","all","All majors",!STATE.fmaj||STATE.fmaj==="all")}${majs.map(k=>c("data-fmaj",k,MAJ[k].n,STATE.fmaj===k)).join("")}</div>
+  <div class="chips">${c("data-fyr","all","All years",!STATE.fyr||STATE.fyr==="all")}${yrs.map(y=>c("data-fyr",y,y,String(STATE.fyr)===String(y))).join("")}</div>`}
+function navFor(page){
+  if(page==="alltime")return[["at","st","Standings"],["at","grid","By Event"]];
+  if(page==="stats")return[["stb","rec","Records"],["stb","ana","Analytics"]];
+  return[["v","lb","Leaderboard"],["v","pay","Payouts"],["v","st","Standings"],["v","lots","Auction"]]}
+function drawNav(){const page=STATE.page||"event";const cur={v:STATE.view,at:STATE.atab||"st",stb:STATE.stab||"rec"};
+  $("#nav").innerHTML=navFor(page).map(([k,v,l])=>`<button data-${k}="${v}" class="${cur[k]===v?"on":""}">${l}</button>`).join("")}
+function drawPill(){const page=STATE.page||"event";
+  const lab=page==="alltime"?"All-Time Standings":page==="stats"?"Stats & Records":CUR.name;
+  $("#evpick").innerHTML=`<span>${esc(lab)}</span><span class="car3">▾</span><select id="evsel" aria-label="Pick an event">${page!=="event"?`<option value="" selected>${esc(lab)}</option>`:""}${CFG.events.map(e=>`<option value="${esc(e.id)}"${page==="event"&&e.id===CUR.id?" selected":""}>${esc(e.short||e.name)}</option>`).join("")}</select>`}
+
+function renderOther(){computeAll();drawNav();drawPill();$("#err").innerHTML="";$("#selbar").innerHTML="";
+  const evs=ALL.events.filter(inFilter);
+  if(STATE.page==="alltime"){
+    $("#status").innerHTML=`<b>All-Time</b><span class="stale">${evs.length} event${evs.length===1?"":"s"} · ${money(evs.reduce((t,x)=>t+x.pot,0))} in pots</span>`;
+    const B=bidders(evs).sort((a,b)=>a.name.localeCompare(b.name));const so=STATE.asel&&B.find(b=>b.name===STATE.asel);
+    if(STATE.asel&&!so)STATE.asel=null;
+    $("#pick").style.display="";
+    $("#pick").innerHTML=`<span class="lbl">Bidder</span>${so?`<span class="sw" style="background:${so.o.color};border-color:${so.o.color}"></span>`:""}<span class="val">${so?esc(so.name):"Everyone"}</span><span class="car2">▾</span>
+      <select id="asel" aria-label="Pick a bidder"><option value="">Everyone</option>${B.map(b=>`<option value="${esc(b.name)}"${STATE.asel===b.name?" selected":""}>${esc(b.name)}</option>`).join("")}</select>`;
+    $("#view").innerHTML=filterChips()+(evs.length?(so?profileHTML(so):"")+((STATE.atab||"st")==="grid"?gridHTML(evs):standingsHTML(evs)):`<div class="card"><div class="empty">No events match these filters.</div></div>`)}
+  else{$("#pick").style.display="none";$("#pick").innerHTML="";
+    $("#status").innerHTML=`<b>Stats & Records</b><span class="stale">${evs.length} event${evs.length===1?"":"s"}</span>`;
+    $("#view").innerHTML=filterChips()+(evs.length?((STATE.stab||"rec")==="ana"?analyticsHTML(evs):recordsHTML(evs)):`<div class="card"><div class="empty">No events match these filters.</div></div>`)}}
+
+function standingsHTML(evs){const B=bidders(evs).sort((a,b)=>b.net-a.net);
+  let h=`<div class="card"><table class="at"><thead><tr><th>Bidder</th><th>Paid</th><th>Won</th><th>Net</th></tr></thead><tbody>`;
+  B.forEach((b,i)=>{h+=`<tr class="${STATE.asel===b.name?"me":""}" data-ab="${esc(b.name)}" style="cursor:pointer"><td><div class="who">${tagHTML(b.o)}<span>${esc(b.name)}<span class="sub2">${i+1}. ${b.evs.length} ev · ${pct(b.roi)}${b.titles?` · ${b.titles}🏆`:""}</span></span></div></td>
+    <td>${money(b.paid)}</td><td>${money(b.won)}</td><td class="${negCls(b.net)}" style="font-weight:700">${sgn(b.net)}</td></tr>`});
+  return h+`</tbody></table></div><div class="note">Final events only, rounded to the dollar. Under each name: rank, events played, return on money bid, and 🏆 champions owned. Tap a bidder for their history.</div>`}
+
+function profileHTML(b){const evs=b.evs.slice().sort((a,c)=>a.x.ord-c.x.ord);
+  const max=Math.max(1,...evs.map(v=>Math.abs(v.net)));const chron=evs.slice().reverse();
+  const bestLot=ALL.events.filter(inFilter).flatMap(x=>x.lots).filter(l=>l.owner===b.name).sort((a,c)=>(c.won-c.price)-(a.won-a.price))[0];
+  return`<div class="prof"><div class="ph2">${tagHTML(b.o)}<b>${esc(b.name)}</b><button data-ab="">Show all</button></div>
+  <div class="tiles">
+    <div class="tile"><div class="k">Net</div><div class="v ${negCls(b.net)}">${sgn(b.net)}</div><div class="s">${money(b.paid)} paid · ${money(b.won)} won</div></div>
+    <div class="tile"><div class="k">ROI</div><div class="v">${pct(b.roi)}</div><div class="s">per dollar bid</div></div>
+    <div class="tile"><div class="k">Winning events</div><div class="v">${b.ups} of ${b.evs.length}</div><div class="s">${b.titles} champion${b.titles===1?"":"s"} owned</div></div>
+    <div class="tile"><div class="k">Best buy</div><div class="v" style="font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${bestLot&&bestLot.won>bestLot.price?esc(bestLot.lot):"—"}</div><div class="s">${bestLot&&bestLot.won>bestLot.price?`${money(bestLot.price)} → ${money(bestLot.won)} · ${evAbbr(bestLot.ev)}`:"no profitable lot yet"}</div></div>
+  </div>
+  <div class="sec" style="border-top:1px solid var(--line)"><span>Net by event</span><span>oldest → newest</span></div>
+  <div class="nb">${chron.map(v=>{const hgt=Math.abs(v.net)/max*50;return`<div class="col" title="${esc(evLabel(v.x.e))}: ${sgn(v.net)}"><div class="b ${v.net>=0?"p":"n"}" style="height:${Math.max(hgt,v.net?1.5:0)}%"></div></div>`}).join("")}</div>
+  <div class="evrow h"><span>Event</span><span>Paid</span><span>Won</span><span>Net</span></div>
+  ${evs.map(v=>`<div class="evrow" data-goev="${esc(v.x.e.id)}" data-gosel="${esc(b.name)}"><span><span class="t1">${esc(evLabel(v.x.e))}</span><span class="t2">${v.x.champ?`Won by ${esc(v.x.champ.name)}${v.x.champOwner===b.name?" — yours 🏆":""}`:""}</span></span><span>${money(v.paid)}</span><span>${money(v.won)}</span><span class="${negCls(v.net)}" style="font-weight:700">${sgn(v.net)}</span></div>`).join("")}
+  </div>`}
+
+function gridHTML(evs){const cols=evs.slice().sort((a,b)=>a.ord-b.ord);
+  const B=bidders(evs).sort((a,b)=>b.net-a.net);
+  let h=`<div class="card"><div class="gridwrap"><table class="grid"><thead><tr><th class="sticky">Bidder</th><th>Total</th>${cols.map(x=>`<th class="ev" data-goev="${esc(x.e.id)}" title="${esc(evLabel(x.e))}">${esc(evAbbr(x.e))}</th>`).join("")}</tr></thead><tbody>`;
+  for(const b of B){const by={};b.evs.forEach(v=>by[v.x.e.id]=v);
+    h+=`<tr class="${STATE.asel===b.name?"me":""}" data-ab="${esc(b.name)}" style="cursor:pointer"><td class="sticky"><div class="who">${tagHTML(b.o)}</div></td><td class="${Math.round(b.net)>0?"p":Math.round(b.net)<0?"n":""}" style="font-weight:700">${sgn(b.net)}</td>${cols.map(x=>{const v=by[x.e.id];if(!v)return`<td class="na">·</td>`;const r=Math.round(v.net);return`<td class="${r>0?"p":r<0?"n":""}">${sgn(v.net)}${x.champOwner===b.name?" 🏆":""}</td>`}).join("")}</tr>`}
+  h+=`<tr class="tot"><td class="sticky">Pot</td><td>${money(cols.reduce((t,x)=>t+x.pot,0))}</td>${cols.map(x=>`<td>${money(x.pot)}</td>`).join("")}</tr>`;
+  return h+`</tbody></table></div></div><div class="note">Net per event, newest first. Scroll sideways for older events. Tap an event to open it, or a bidder for their history.</div>`}
+
+function recRow(label,who,val,detail,o){return`<div class="rec"><div class="rl">${label}</div><div class="rw">${o?tagHTML(o):""}<span>${who}</span></div><div class="rv">${val}</div>${detail?`<div class="rd">${detail}</div>`:""}</div>`}
+function recordsHTML(evs){const B=bidders(evs);const lots=evs.flatMap(x=>x.lots);const O=n=>ALL.look[n];
+  const pot=evs.reduce((t,x)=>t+x.pot,0);const all=[];for(const b of B)for(const v of b.evs)all.push({b,...v});
+  const top=(arr,f)=>arr.slice().sort((a,b)=>f(b)-f(a))[0];
+  const hiEv=top(all,v=>v.net),loEv=top(all,v=>-v.net),bigPot=top(evs,x=>x.pot),smPot=top(evs,x=>-x.pot);
+  const bestLot=top(lots,l=>l.won-l.price),bestX=top(lots.filter(l=>l.price>=1&&l.won>0),l=>l.won/l.price),dear=top(lots,l=>l.price);
+  const bust=top(lots.filter(l=>l.won===0),l=>l.price);
+  const champs=evs.filter(x=>x.champLot);const cheap=top(champs,x=>-x.champLot.price),pricey=top(champs,x=>x.champLot.price);
+  const titles=B.filter(b=>b.titles).sort((a,b)=>b.titles-a.titles||b.net-a.net);
+  const roiQ=B.filter(b=>b.evs.length>=Math.min(5,evs.length)&&b.paid>0);const bestRoi=top(roiQ,b=>b.roi),mostEv=top(B,b=>b.evs.length*1e6+b.paid);
+  let h=`<div class="tiles">
+    <div class="tile"><div class="k">Events</div><div class="v">${evs.length}</div><div class="s">${new Set(evs.map(x=>x.yr)).size} season${new Set(evs.map(x=>x.yr)).size===1?"":"s"}</div></div>
+    <div class="tile"><div class="k">Total pots</div><div class="v">${money(pot)}</div><div class="s">avg ${money(pot/evs.length)} per event</div></div>
+    <div class="tile"><div class="k">Bidders</div><div class="v">${B.length}</div><div class="s">${(all.length/evs.length).toFixed(1)} per event</div></div>
+    <div class="tile"><div class="k">Biggest pot</div><div class="v">${money(bigPot.pot)}</div><div class="s">${esc(evLabel(bigPot.e))}</div></div></div>`;
+  h+=`<div class="card"><div class="sec"><span>Records</span><span>${STATE.fmaj&&STATE.fmaj!=="all"||STATE.fyr&&STATE.fyr!=="all"?"filtered":"all-time"}</span></div>
+    ${recRow("Best single event",esc(hiEv.b.name),sgn(hiEv.net),esc(evLabel(hiEv.x.e))+` · paid ${money(hiEv.paid)}, won ${money(hiEv.won)}`,hiEv.b.o)}
+    ${recRow("Worst single event",esc(loEv.b.name),sgn(loEv.net),esc(evLabel(loEv.x.e))+` · paid ${money(loEv.paid)}, won ${money(loEv.won)}`,loEv.b.o)}
+    ${recRow("Biggest profit on one lot",esc(bestLot.lot),sgn(bestLot.won-bestLot.price),`${money(bestLot.price)} → ${money(bestLot.won)} · ${esc(evLabel(bestLot.ev))}`,O(bestLot.owner))}
+    ${bestX?recRow("Best return per dollar",esc(bestX.lot),Math.round(bestX.won/bestX.price)+"×",`${money(bestX.price)} → ${money(bestX.won)} · ${esc(evLabel(bestX.ev))}`,O(bestX.owner)):""}
+    ${recRow("Priciest lot",esc(dear.lot),money(dear.price),`won ${money(dear.won)} · ${esc(evLabel(dear.ev))}`,O(dear.owner))}
+    ${bust?recRow("Priciest bust",esc(bust.lot),money(bust.price),`won nothing · ${esc(evLabel(bust.ev))}`,O(bust.owner)):""}
+    ${cheap?recRow("Cheapest champion",esc(cheap.champ.name),money(cheap.champLot.price),`${esc(evLabel(cheap.e))}${cheap.champLot.players.length>1?` · ${esc(cheap.champLot.lot)}`:""}`,O(cheap.champOwner)):""}
+    ${pricey&&pricey!==cheap?recRow("Priciest champion",esc(pricey.champ.name),money(pricey.champLot.price),esc(evLabel(pricey.e)),O(pricey.champOwner)):""}
+    ${bestRoi?recRow(`Best ROI${evs.length>=5?" (5+ events)":""}`,esc(bestRoi.name),pct(bestRoi.roi),`${money(bestRoi.paid)} paid · ${money(bestRoi.won)} won over ${bestRoi.evs.length} events`,bestRoi.o):""}
+    ${mostEv?recRow("Most events",esc(mostEv.name),mostEv.evs.length,`${money(mostEv.paid)} paid all-time`,mostEv.o):""}
+    ${recRow("Biggest pot",esc(evLabel(bigPot.e)),money(bigPot.pot),"",null)}
+    ${smPot!==bigPot?recRow("Smallest pot",esc(evLabel(smPot.e)),money(smPot.pot),"",null):""}
+  </div>`;
+  if(titles.length)h+=`<div class="card"><div class="sec"><span>Most champions owned</span><span>🏆</span></div>${titles.map(b=>recRow("",esc(b.name),"🏆".repeat(Math.min(b.titles,6))+(b.titles>6?" "+b.titles:""),evs.filter(x=>x.champOwner===b.name).map(x=>`${esc(x.champ.name)} (${esc(evAbbr(x.e))})`).join(", "),b.o)).join("")}</div>`;
+  h+=`<div class="card"><div class="sec"><span>Champions</span><span>${champs.length}</span></div><table class="at"><thead><tr><th>Event</th><th>Owner</th><th>Paid</th><th>Won</th></tr></thead><tbody>`;
+  for(const x of champs.slice().sort((a,b)=>a.ord-b.ord)){const o=O(x.champOwner);
+    h+=`<tr data-goev="${esc(x.e.id)}" style="cursor:pointer"><td><b style="font-weight:600">${esc(x.champ.name)}</b><span style="display:block;font:500 11px Inter,sans-serif;color:var(--mut)">${esc(evLabel(x.e))}${x.champLot.players.length>1?" · "+esc(x.champLot.lot):""}</span></td><td>${o?tagHTML(o):"–"}</td><td>${money(x.champLot.price)}</td><td>${money(x.champLot.won)}</td></tr>`}
+  return h+`</tbody></table></div><div class="note">"Won" is everything the champion's lot paid out that week. Tap a row to open the event.</div>`}
+
+function analyticsHTML(evs){const lots=evs.flatMap(x=>x.lots);
+  const tiers=[["OWGR 1–5",l=>l.kind==="ind"&&l.rank&&l.rank<=5],["OWGR 6–10",l=>l.kind==="ind"&&l.rank>5&&l.rank<=10],["OWGR 11–25",l=>l.kind==="ind"&&l.rank>10&&l.rank<=25],
+    ["OWGR 26–50",l=>l.kind==="ind"&&l.rank>25],["Groups (5 golfers)",l=>l.kind==="group"],["The Field",l=>l.kind==="field"]];
+  const rows=tiers.map(([n,f])=>{const ls=lots.filter(f);const paid=ls.reduce((t,l)=>t+l.price,0),won=ls.reduce((t,l)=>t+l.won,0);
+    return{n,ls,paid,won,roi:paid?won/paid-1:0,cash:ls.filter(l=>l.won>0).length}}).filter(r=>r.ls.length);
+  const mx=Math.max(.5,...rows.map(r=>Math.abs(r.roi)));
+  let h=`<div class="card"><div class="sec"><span>Return by price tier</span><span>ROI</span></div>${rows.map(r=>{const w=Math.min(Math.abs(r.roi)/mx,1)*50;
+    return`<div class="hb" title="${esc(r.n)}: ${money(r.paid)} paid, ${money(r.won)} won"><div class="top"><span>${esc(r.n)} <small>· ${r.cash} of ${r.ls.length} lots cashed</small></span><span class="${r.roi>0?"posv":r.roi<0?"negv":""}">${pct(r.roi)}</span></div>
+      <div class="track"><div class="mid" style="left:50%"></div><div class="fill ${r.roi>=0?"p":"n"}" style="${r.roi>=0?`left:50%;width:${w}%`:`right:50%;width:${w}%`}"></div></div>
+      <div class="top" style="margin:6px 0 0"><small>${money(r.paid)} paid</small><small>${money(r.won)} won</small></div></div>`}).join("")}</div>
+  <div class="note" style="margin-top:-8px;margin-bottom:16px">Every dollar bid comes back as winnings, so the tiers balance out to zero overall. Positive tiers have paid back more than they cost.</div>`;
+  // average price paid by OWGR rank band
+  const ind=lots.filter(l=>l.kind==="ind"&&l.rank);const bands=[[1,1],[2,3],[4,5],[6,10],[11,15],[16,25],[26,35],[36,50]];
+  const av=bands.map(([a,b])=>{const ls=ind.filter(l=>l.rank>=a&&l.rank<=b);return{lab:a===b?`#${a}`:`${a}–${b}`,n:ls.length,price:ls.length?ls.reduce((t,l)=>t+l.price,0)/ls.length:0,won:ls.length?ls.reduce((t,l)=>t+l.won,0)/ls.length:0}}).filter(x=>x.n);
+  const am=Math.max(1,...av.map(x=>Math.max(x.price,x.won)));
+  h+=`<div class="card"><div class="sec"><span>Average lot by world ranking</span><span>per lot</span></div>${av.map(x=>`<div class="hb"><div class="top"><span>${x.lab} <small>· ${x.n} lots</small></span><span><small>paid</small> ${money(x.price)} · <small>won</small> ${money(x.won)}</span></div>
+    <div class="track" style="height:6px;margin-bottom:4px"><div class="fill" style="left:0;width:${x.price/am*100}%;background:var(--mut);opacity:.55"></div></div>
+    <div class="track" style="height:6px"><div class="fill ${x.won>=x.price?"p":"n"}" style="left:0;width:${x.won/am*100}%"></div></div></div>`).join("")}
+    <div class="vbk" style="padding-top:8px"><span>▬ grey: average price</span><span>▬ green/red: average winnings</span></div></div>`;
+  // pot by event
+  const ch=evs.slice().sort((a,b)=>b.ord-a.ord);const pm=Math.max(...ch.map(x=>x.pot));const pk=ch.reduce((m,x)=>!m||x.pot>m.pot?x:m,null);
+  h+=`<div class="card"><div class="sec"><span>Pot by event</span><span>oldest → newest</span></div>
+    <div class="vb">${ch.map(x=>`<div class="col${x===pk?" peak":""}" title="${esc(evLabel(x.e))}: ${money(x.pot)}"><span class="lbl">${money(x.pot)}</span><div class="b" style="height:${x.pot/pm*100}%;background:${MAJ[x.maj].c}"></div></div>`).join("")}</div>
+    <div class="vbx">${ch.map(x=>`<span>${String(x.yr).slice(2)}</span>`).join("")}</div>
+    <div class="vbk">${["masters","pga","usopen","open"].filter(k=>ch.some(x=>x.maj===k)).map(k=>`<span><i style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${MAJ[k].c};margin-right:4px"></i>${MAJ[k].n}</span>`).join("")}</div></div>`;
+  // spend share
+  const B=bidders(evs).sort((a,b)=>b.paid-a.paid);const tot=B.reduce((t,b)=>t+b.paid,0);
+  h+=`<div class="card"><div class="sec"><span>Share of money bid</span><span>${money(tot)}</span></div>${B.slice(0,12).map(b=>`<div class="hb"><div class="top"><span style="display:flex;align-items:center;gap:8px">${tagHTML(b.o)}${esc(b.name)}</span><span>${money(b.paid)} <small>· ${Math.round(b.paid/tot*100)}%</small></span></div>
+    <div class="track" style="height:6px"><div class="fill" style="left:0;width:${b.paid/B[0].paid*100}%;background:${b.o.color}"></div></div></div>`).join("")}${B.length>12?`<div class="note" style="margin:0;padding:10px 12px">+ ${B.length-12} more bidders</div>`:""}</div>`;
+  return h}
+
+/* ---- menu ---- */
+function drawDrawer(){computeAll();const page=STATE.page||"event";const byId={};ALL.events.forEach(x=>byId[x.e.id]=x);
+  const yrs=[...new Set(CFG.events.map(yrOf))].sort((a,b)=>b-a);
+  let h=`<div class="dr-head"><b>Oak Street Auctions</b><button data-dclose aria-label="Close menu">✕</button></div>
+    <div class="dr-sec">Overall</div>
+    <button class="dr-link${page==="alltime"?" on":""}" data-page="alltime"><span class="ic"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4zM17 6h3v2a3 3 0 0 1-3 3M7 6H4v2a3 3 0 0 0 3 3"/></svg></span>All-Time Standings</button>
+    <button class="dr-link${page==="stats"?" on":""}" data-page="stats"><span class="ic"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span>Stats & Records</button>
+    <div class="dr-sec" style="padding-top:20px">Events</div>`;
+  for(const y of yrs){h+=`<div class="dr-year">${y}</div>`;
+    for(const e of CFG.events.filter(e=>yrOf(e)===y)){const x=byId[e.id];const o=x&&ALL.look[x.champOwner];
+      h+=`<button class="dr-ev${page==="event"&&e.id===CUR.id?" on":""}" data-goev="${esc(e.id)}"><span class="dot" style="background:${MAJ[majOf(e)].c}"></span><span class="en">${esc(MAJ[majOf(e)].n)}</span><span class="ew">${x&&x.champ?`${esc(shortName(x.champ))}${o?tagHTML(o):""}`:hasData(e)?"Live":"No auction"}</span></button>`}}
+  $("#drawerCard").innerHTML=h}
+function openDrawer(){drawDrawer();$("#drawer").classList.add("on");document.body.style.overflow="hidden"}
+function closeDrawer(){$("#drawer").classList.remove("on");document.body.style.overflow=""}
+function goPage(page){STATE.page=page;save();closeDrawer();
+  try{history.replaceState(null,"",page==="event"?"?event="+CUR.id:"?page="+page)}catch(e){}
+  if(page==="event"){$("#pick").style.display="";drawNav();drawPill();if(D)render();else $("#view").innerHTML=`<div class="card"><div class="empty">Loading ${esc(CUR.name)}…</div></div>`}
+  else renderOther();window.scrollTo(0,0)}
+function goEvent(id,sel){STATE.page="event";$("#pick").style.display="";closeDrawer();if(sel!==undefined)STATE.sel=sel||null;save();
+  if(id===CUR.id){try{history.replaceState(null,"","?event="+CUR.id)}catch(e){}drawNav();drawPill();if(D)render();window.scrollTo(0,0);return}
+  drawNav();switchEvent(id);window.scrollTo(0,0)}
+document.addEventListener("click",e=>{
+  if(e.target.closest("#burger")){openDrawer();return}
+  if(e.target.closest("[data-dclose]")){closeDrawer();return}
+  const pg=e.target.closest("[data-page]");if(pg){goPage(pg.dataset.page);return}
+  const ge=e.target.closest("[data-goev]");if(ge){goEvent(ge.dataset.goev,ge.dataset.gosel);return}
+  const fm=e.target.closest("[data-fmaj]");if(fm){STATE.fmaj=fm.dataset.fmaj;save();renderOther();return}
+  const fy=e.target.closest("[data-fyr]");if(fy){STATE.fyr=fy.dataset.fyr;save();renderOther();return}
+  const ab=e.target.closest("[data-ab]");if(ab&&(STATE.page==="alltime")){const n=ab.dataset.ab||null;STATE.asel=STATE.asel===n?null:n;save();renderOther();if(STATE.asel)window.scrollTo({top:0,behavior:"smooth"});return}});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeDrawer()});
+document.addEventListener("change",e=>{if(e.target.id==="asel"){STATE.asel=e.target.value||null;save();renderOther()}});
+
 /* refresh right away when the app is reopened from the background */
 let lastLoad=0;document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&Date.now()-lastLoad>15000)load()});
 window.addEventListener("pageshow",e=>{if(e.persisted)load()});
 function switchEvent(id){if(id===CUR.id)return;setEvent(id);STATE.ev=CUR.id;save();
   for(const k in GOOD)delete GOOD[k];for(const k in CARDS)delete CARDS[k];UPDATED=null;SOURCE="";STALE="";EVENT={name:"",id:""};CARD=null;closeCard();
   try{history.replaceState(null,"","?event="+CUR.id)}catch(e){}applyTheme(CUR.name);D=null;$("#view").innerHTML=`<div class="card"><div class="empty">Loading ${esc(CUR.name)}…</div></div>`;load()}
-document.addEventListener("change",e=>{if(e.target.id==="evsel"){switchEvent(e.target.value);return}});
+document.addEventListener("change",e=>{if(e.target.id==="evsel"){if(e.target.value)goEvent(e.target.value);return}});
 document.addEventListener("change",e=>{if(e.target.id!=="sel")return;STATE.sel=e.target.value||null;save();render()});
-(()=>{let id=null;try{id=new URLSearchParams(location.search).get("event")}catch(e){}
+(()=>{let id=null,pg=null;try{const q=new URLSearchParams(location.search);id=q.get("event");pg=q.get("page")}catch(e){}
+  STATE.page=pg==="alltime"||pg==="stats"?pg:"event";
   setEvent(id&&CFG.events.some(e=>e.id===id)?id:(STATE.ev&&CFG.events.some(e=>e.id===STATE.ev)?STATE.ev:FIRST().id));applyTheme(CUR.name)})();
+drawNav();drawPill();if(STATE.page!=="event")renderOther();
 load();
 setInterval(load,CFG.refreshSeconds*1000);
 </script>
