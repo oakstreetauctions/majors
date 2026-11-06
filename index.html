@@ -1287,7 +1287,7 @@ function homeLinks(){return`<div class="qlinks"><button data-page="alltime"><svg
    the live leaderboard. ESPN posts tee times and pairings on Tuesday.
    Add ?live=any to the address to preview it with whatever event is on this week. */
 const isMajorName=n=>!/senior|women|amateur|junior/i.test(n)&&/\bmasters\b|\bpga championship\b|\bu\.?\s?s\.?\s?open\b|\bopen championship\b|^the open\b/i.test(n);
-let LIVE=null,LIVE_AT=0;
+let LIVE=null,LIVE_AT=0,LANDING=false;
 function liveWanted(){try{return new URLSearchParams(location.search).get("live")==="any"}catch(e){return false}}
 function liveCache(v){try{if(v===undefined)return JSON.parse(localStorage.getItem("osa-live")||"null");localStorage.setItem("osa-live",JSON.stringify(v))}catch(e){return null}}
 function liveWindow(ev){const a=new Date(ev.date).getTime(),b=new Date(ev.endDate||ev.date).getTime();return[a-3*864e5,b+2*864e5]}
@@ -1298,7 +1298,11 @@ async function loadLive(){
     if(!ev){LIVE=null;liveCache(null);return}
     const [a,b]=liveWindow(ev);if(!liveWanted()&&(now<a||now>b)){LIVE=null;liveCache(null);return}
     const j=await fetch("https://site.web.api.espn.com/apis/site/v2/sports/golf/leaderboard?league=pga&event="+ev.id+"&_="+Date.now(),{cache:"no-store"}).then(r=>{if(!r.ok)throw new Error(r.status);return r.json()});
-    LIVE=liveModel(j,ev);LIVE_AT=Date.now();liveCache({id:ev.id,from:a,to:b})}
+    LIVE=liveModel(j,ev);LIVE_AT=Date.now();
+    const yr=new Date(ev.date).getUTCFullYear(),cfg=CFG.events.find(e=>yrOf(e)===yr&&majOf(e)===LIVE.maj&&hasData(e));
+    liveCache({id:ev.id,from:a,to:b,start:new Date(ev.date).getTime(),cfg:cfg?cfg.id:""});
+    // once the tournament starts and the auction is loaded, a fresh visit opens the Calcutta page
+    if(LANDING&&cfg&&now>=new Date(ev.date).getTime()&&!liveWanted()&&(STATE.page||"event")==="home"){LANDING=false;goEvent(cfg.id);return}}
   catch(e){if(LIVE)LIVE.err=true}
   if((STATE.page||"event")==="home")renderOther()}
 function liveModel(j,sbEv){const ev=(j.events||[])[0]||sbEv,comp=((ev.competitions||[])[0])||{},x=espnToRows(j);
@@ -1364,7 +1368,7 @@ function setPageFlag(){const pg=STATE.page||"event";document.documentElement.dat
   if(pg==="event")applyTheme(CUR.name);else document.documentElement.dataset.ev=(CFG.theme&&CFG.theme!=="auto")?CFG.theme:"masters"}
 function openDrawer(){drawDrawer();$("#drawer").classList.add("on");document.body.style.overflow="hidden"}
 function closeDrawer(){$("#drawer").classList.remove("on");document.body.style.overflow=""}
-function goPage(page){STATE.page=page;save();closeDrawer();setPageFlag();
+function goPage(page){LANDING=false;STATE.page=page;save();closeDrawer();setPageFlag();
   try{history.replaceState(null,"",page==="event"?"?event="+CUR.id:page==="home"?location.pathname:"?page="+page)}catch(e){}
   if(page==="event"){$("#pick").style.display="";drawNav();drawPill();if(D)render();else $("#view").innerHTML=`<div class="card"><div class="empty">Loading ${esc(CUR.name)}…</div></div>`}
   else renderOther();window.scrollTo(0,0)}
@@ -1393,6 +1397,8 @@ document.addEventListener("change",e=>{if(e.target.id==="evsel"){if(e.target.val
 document.addEventListener("change",e=>{if(e.target.id!=="sel")return;STATE.sel=e.target.value||null;save();render()});
 (()=>{let id=null,pg=null;try{const q=new URLSearchParams(location.search);id=q.get("event");pg=q.get("page")}catch(e){}
   STATE.page=pg==="alltime"||pg==="stats"||pg==="golfers"?pg:id?"event":"home";
+  if(STATE.page==="home"&&!pg&&!id){LANDING=true;const lc=liveCache(),t=Date.now();
+    if(lc&&lc.cfg&&t>=lc.start&&t<=lc.to&&CFG.events.some(e=>e.id===lc.cfg&&hasData(e))){STATE.page="event";id=lc.cfg;LANDING=false;try{history.replaceState(null,"","?event="+id)}catch(e){}}}
   setEvent(id&&CFG.events.some(e=>e.id===id)?id:(STATE.ev&&CFG.events.some(e=>e.id===STATE.ev)?STATE.ev:FIRST().id));applyTheme(CUR.name)})();
 setPageFlag();drawNav();drawPill();if(STATE.page!=="event")renderOther();
 loadLive();
