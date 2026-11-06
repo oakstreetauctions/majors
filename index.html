@@ -1011,6 +1011,9 @@ function profileHTML(b){const evs=b.evs.slice().sort((a,c)=>a.x.ord-c.x.ord);
     <div class="tile"><div class="k">Winning events</div><div class="v">${b.ups} of ${b.evs.length}</div><div class="s">${b.titles} champion${b.titles===1?"":"s"} owned</div></div>
     <div class="tile"><div class="k">Best buy</div><div class="v" style="font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${bestLot&&bestLot.won>bestLot.price?esc(bestLot.lot):"—"}</div><div class="s">${bestLot&&bestLot.won>bestLot.price?`${money(bestLot.price)} → ${money(bestLot.won)} · ${evAbbr(bestLot.ev)}`:"no profitable lot yet"}</div></div>
   </div>
+  ${(()=>{const G={};for(const x of ALL.events.filter(inFilter))for(const l of x.lots){if(l.kind!=="ind")continue;const g=G[l.lot]||(G[l.lot]={n:0,c:0});g.n++;if(l.owner===b.name)g.c++}
+    const L=Object.entries(G).filter(([,g])=>g.c>=2).sort((a,c)=>c[1].c-a[1].c||c[1].c/c[1].n-a[1].c/a[1].n).slice(0,5);
+    return L.length?`<div class="sec" style="border-top:1px solid var(--line)"><span>Go-to golfers</span><span>times bought</span></div>${L.map(([n,g])=>`<div class="hb"><div class="top"><span>${esc(n)}</span><span>${g.c} of ${g.n} <small>· ${Math.round(g.c/g.n*100)}%</small></span></div><div class="track" style="height:6px"><div class="fill" style="left:0;width:${g.c/g.n*100}%;background:${b.o.color}"></div></div></div>`).join("")}`:""})()}
   <div class="sec" style="border-top:1px solid var(--line)"><span>Net by event</span><span>oldest → newest</span></div>
   <div class="nb">${chron.map(v=>{const hgt=Math.abs(v.net)/max*50;return`<div class="col" title="${esc(evLabel(v.x.e))}: ${sgn(v.net)}"><div class="b ${v.net>=0?"p":"n"}" style="height:${Math.max(hgt,v.net?1.5:0)}%"></div></div>`}).join("")}</div>
   <div class="evrow h"><span>Event</span><span>Paid</span><span>Won</span><span>Net</span></div>
@@ -1056,6 +1059,8 @@ function recordsHTML(evs){const B=bidders(evs);const lots=evs.flatMap(x=>x.lots)
     ${rec("Cheapest champion",cheap,x=>[esc(x.champ.name),money(x.champLot.price),`${esc(evLabel(x.e))}${x.champLot.players.length>1?` · ${esc(x.champLot.lot)}`:""}`,O(x.champOwner)])}
     ${champs.length>1&&D$(pricey[0].champLot.price)!==D$(cheap[0].champLot.price)?rec("Priciest champion",pricey,x=>[esc(x.champ.name),money(x.champLot.price),esc(evLabel(x.e)),O(x.champOwner)]):""}
     ${rec(`Best ROI${evs.length>=5?" (5+ events)":""}`,bestRoi,b=>[esc(b.name),pct(b.roi),`${money(b.paid)} paid · ${money(b.won)} won over ${b.evs.length} events`,b.o])}
+    ${(()=>{const L=loyalty(evs).filter(r=>r.c>=2);if(!L.length)return"";const t=tops(tops(L,r=>r.c),r=>Math.round(r.share*100));
+      return rec("Most loyal buyer",t,r=>[`${r.who.map(esc).join(" & ")} <small style="font-weight:500;color:var(--mut)">· ${esc(r.name)}</small>`,`${r.c} of ${r.n}`,`bought ${esc(r.name)} ${r.c} of the ${r.n} times he was auctioned`,ALL.look[r.who[0]]])})()}
     ${mostEv.length===B.length?"":rec("Most events",mostEv,b=>[esc(b.name),b.evs.length,`${money(b.paid)} paid`,b.o])}
     ${rec("Biggest pot",bigPot,x=>[esc(evLabel(x.e)),money(x.pot),"",null])}
     ${evs.length>1&&D$(smPot[0].pot)!==D$(bigP.pot)?rec("Smallest pot",smPot,x=>[esc(evLabel(x.e)),money(x.pot),"",null]):""}
@@ -1066,13 +1071,27 @@ function recordsHTML(evs){const B=bidders(evs);const lots=evs.flatMap(x=>x.lots)
     h+=`<tr data-goev="${esc(x.e.id)}" style="cursor:pointer"><td><b style="font-weight:600">${esc(x.champ.name)}</b><span style="display:block;font:500 11px Inter,sans-serif;color:var(--mut)">${esc(evLabel(x.e))}${x.champLot.players.length>1?" · "+esc(x.champLot.lot):""}</span></td><td>${o?tagHTML(o):"–"}</td><td>${money(x.champLot.price)}</td><td>${money(x.champLot.won)}</td></tr>`}
   return h+`</tbody></table></div><div class="note">"Won" is everything the champion's lot paid out that week. Tap a row to open the event.</div>`}
 
+
+/* who keeps buying the same golfer: individual lots only */
+function loyalty(evs){const G={};
+  for(const x of evs)for(const l of x.lots){if(l.kind!=="ind")continue;const g=G[l.lot]||(G[l.lot]={name:l.lot,n:0,by:{},last:0});
+    g.n++;g.by[l.owner]=(g.by[l.owner]||0)+1;g.last=Math.max(g.last,x.yr)}
+  const out=[];for(const g of Object.values(G)){const m=Math.max(...Object.values(g.by));
+    const who=Object.keys(g.by).filter(k=>g.by[k]===m).sort();out.push({name:g.name,n:g.n,c:m,who,share:m/g.n})}
+  return out.sort((a,b)=>b.c-a.c||b.share-a.share||b.n-a.n||a.name.localeCompare(b.name))}
+function loyalRow(r){const o=ALL.look[r.who[0]];
+  return`<div class="hb"><div class="top"><span style="display:flex;align-items:center;gap:8px;min-width:0">${r.who.map(w=>tagHTML(ALL.look[w])).join("")}<span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.name)}</span></span><span style="white-space:nowrap">${r.c} of ${r.n} <small>· ${Math.round(r.share*100)}%</small></span></div>
+    <div class="track" style="height:6px"><div class="fill" style="left:0;width:${r.share*100}%;background:${o?o.color:"var(--green)"}"></div></div>
+    <div style="font:500 11.5px Inter,sans-serif;color:var(--mut);margin-top:5px">${r.who.map(esc).join(" & ")} bought him ${r.c} of the ${r.n} time${r.n===1?"":"s"} he was auctioned${r.who.length>1?" each":""}</div></div>`}
 function analyticsHTML(evs){const lots=evs.flatMap(x=>x.lots);
   const tiers=[["OWGR 1–5",l=>l.kind==="ind"&&l.rank&&l.rank<=5],["OWGR 6–10",l=>l.kind==="ind"&&l.rank>5&&l.rank<=10],["OWGR 11–25",l=>l.kind==="ind"&&l.rank>10&&l.rank<=25],
     ["OWGR 26–50",l=>l.kind==="ind"&&l.rank>25],["Groups (5 golfers)",l=>l.kind==="group"],["The Field",l=>l.kind==="field"]];
   const rows=tiers.map(([n,f])=>{const ls=lots.filter(f);const paid=ls.reduce((t,l)=>t+l.price,0),won=ls.reduce((t,l)=>t+l.won,0);
     return{n,ls,paid,won,roi:paid?won/paid-1:0,cash:ls.filter(l=>l.won>0).length}}).filter(r=>r.ls.length);
   const mx=Math.max(.5,...rows.map(r=>Math.abs(r.roi)));
-  let h=`<div class="card"><div class="sec"><span>Return by price tier</span><span>ROI</span></div>${rows.map(r=>{const w=Math.min(Math.abs(r.roi)/mx,1)*50;
+  const LY=loyalty(evs).filter(r=>r.c>=2);
+  let h=LY.length?`<div class="card"><div class="sec"><span>Go-to golfers</span><span>times bought</span></div>${LY.slice(0,12).map(loyalRow).join("")}<div class="note" style="margin:0;padding:10px 12px">Individual lots only — groups and the Field don’t count.</div></div>`:"";
+  h+=`<div class="card"><div class="sec"><span>Return by price tier</span><span>ROI</span></div>${rows.map(r=>{const w=Math.min(Math.abs(r.roi)/mx,1)*50;
     return`<div class="hb" title="${esc(r.n)}: ${money(r.paid)} paid, ${money(r.won)} won"><div class="top"><span>${esc(r.n)} <small>· ${r.cash} of ${r.ls.length} lots cashed</small></span><span class="${r.roi>0?"posv":r.roi<0?"negv":""}">${pct(r.roi)}</span></div>
       <div class="track"><div class="mid" style="left:50%"></div><div class="fill ${r.roi>=0?"p":"n"}" style="${r.roi>=0?`left:50%;width:${w}%`:`right:50%;width:${w}%`}"></div></div>
       <div class="top" style="margin:6px 0 0"><small>${money(r.paid)} paid</small><small>${money(r.won)} won</small></div></div>`}).join("")}</div>
