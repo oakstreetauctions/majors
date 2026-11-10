@@ -439,6 +439,11 @@ table.gt .who span{white-space:normal}
 .tt .tp span:last-child{font-variant-numeric:tabular-nums;font-weight:500;color:var(--mut)}
 .tt .tp .red{color:var(--under)!important}
 .tt .tp small{color:var(--mut);font-weight:500}
+.dr-evs[hidden]{display:none}
+.dr-div{display:flex;align-items:center;gap:10px;padding:12px 16px 2px;font:600 9.5px Inter,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:var(--mut)}
+.dr-div::after{content:"";flex:1;height:1px;background:var(--line)}
+.home-div{border:0!important;padding:8px 2px 10px!important;display:flex;align-items:center;gap:10px}
+.home-div::after{content:"";flex:1;height:1px;background:var(--line)}
 </style>
 </head>
 <body>
@@ -1002,8 +1007,13 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape")closeCard()});
 
 /* ====== all-time standings, stats & the menu ====== */
 const MAJ={masters:{n:"Masters",a:"MAS",c:"#006747"},pga:{n:"PGA Championship",a:"PGA",c:"#2F5DB8"},
-  usopen:{n:"U.S. Open",a:"USO",c:"#BF0D3E"},open:{n:"The Open",a:"OPEN",c:"#C9A227"},fedex:{n:"FedEx",a:"FDX",c:"#4D148C"}};
-const majOf=e=>evKey(e.name),yrOf=e=>+String(e.id).slice(0,4);
+  usopen:{n:"U.S. Open",a:"USO",c:"#BF0D3E"},open:{n:"The Open",a:"OPEN",c:"#C9A227"},fedex:{n:"FedEx",a:"FDX",c:"#4D148C"},
+  stj:{n:"St. Jude",a:"STJ",c:"#FF6200"},bmw:{n:"BMW Championship",a:"BMW",c:"#1C69D4"},tc:{n:"Tour Championship",a:"TC",c:"#7B3FC4"}};
+// majors key by tournament; playoff events get their own keys (St. Jude, BMW, Tour Championship)
+const MJ=["masters","pga","usopen","open"],PO=["stj","bmw","tc"];
+const majOf=e=>{const k=evKey(e.name);if(k!=="fedex")return k;const n=String(e.name).toLowerCase();
+  return /st\.? ?jude|northern trust/.test(n)?"stj":/bmw/.test(n)?"bmw":/tour championship/.test(n)?"tc":"tc"},yrOf=e=>+String(e.id).slice(0,4);
+const serOf=k=>PO.includes(k)?"po":"mj";
 const evLabel=e=>`${yrOf(e)} ${MAJ[majOf(e)].n}`;
 const evAbbr=e=>`${MAJ[majOf(e)].a} ’${String(yrOf(e)).slice(2)}`;
 const pct=v=>(v>0?"+":"")+Math.round(v*100)+"%";
@@ -1025,17 +1035,23 @@ function computeAll(){if(ALL)return ALL;const keep=CUR,events=[];
   const look={};for(const x of events)for(const o of Object.values(x.d.owners))if(!look[o.name])look[o.name]=o;
   for(const b of CFG.bidders||[]){const o=look[b[0]];if(o){o.color=b[1];o.text=b[2]||o.text;o.light=lum(b[1])>.82}}
   ALL={events,look};return ALL}
-function inFilter(x){return(STATE.fmaj==="all"||!STATE.fmaj||x.maj===STATE.fmaj)&&(STATE.fyr==="all"||!STATE.fyr||x.yr===+STATE.fyr)}
+function inFilter(x){return(!STATE.fser||STATE.fser==="all"||serOf(x.maj)===STATE.fser)&&(STATE.fmaj==="all"||!STATE.fmaj||x.maj===STATE.fmaj)&&(STATE.fyr==="all"||!STATE.fyr||x.yr===+STATE.fyr)}
 function bidders(evs){const B={};
   for(const x of evs)for(const o of Object.values(x.d.owners)){const b=B[o.name]||(B[o.name]={name:o.name,o:ALL.look[o.name]||o,paid:0,won:0,evs:[],titles:0});
     b.paid+=o.paid;b.won+=o.won;b.evs.push({x,paid:o.paid,won:o.won,net:o.won-o.paid});if(x.champOwner===o.name)b.titles++}
   for(const b of Object.values(B)){b.net=b.won-b.paid;b.roi=b.paid?b.won/b.paid-1:0;b.ups=b.evs.filter(v=>Math.round(v.net)>0).length;
     b.best=b.evs.reduce((m,v)=>!m||v.net>m.net?v:m,null);b.worst=b.evs.reduce((m,v)=>!m||v.net<m.net?v:m,null)}
   return Object.values(B)}
-function filterChips(){const yrs=[...new Set(ALL.events.map(x=>x.yr))].sort((a,b)=>b-a);
-  const majs=["masters","pga","usopen","open"].filter(k=>ALL.events.some(x=>x.maj===k));
+function filterChips(){
   const c=(attr,v,lab,on)=>`<button class="chip${on?" on":""}" ${attr}="${v}">${lab}</button>`;
-  return`<div class="chips">${c("data-fmaj","all","All majors",!STATE.fmaj||STATE.fmaj==="all")}${majs.map(k=>c("data-fmaj",k,MAJ[k].n,STATE.fmaj===k)).join("")}</div>
+  const hasPO=ALL.events.some(x=>serOf(x.maj)==="po"),hasMJ=ALL.events.some(x=>serOf(x.maj)==="mj");
+  const ser=hasPO&&hasMJ?(STATE.fser||"all"):hasPO?"po":"mj";
+  const pool=ALL.events.filter(x=>ser==="all"||serOf(x.maj)===ser);
+  const yrs=[...new Set(pool.map(x=>x.yr))].sort((a,b)=>b-a);
+  const subs=(ser==="po"?PO:ser==="mj"?MJ:[]).filter(k=>ALL.events.some(x=>x.maj===k));
+  const fm=!STATE.fmaj||STATE.fmaj==="all";
+  return`${hasPO&&hasMJ?`<div class="chips">${c("data-fser","all","All events",ser==="all")}${c("data-fser","mj","Majors",ser==="mj")}${c("data-fser","po","Playoffs",ser==="po")}</div>`:""}
+  ${subs.length>1?`<div class="chips">${c("data-fmaj","all",ser==="po"?"All playoff events":"All majors",fm)}${subs.map(k=>c("data-fmaj",k,MAJ[k].n,STATE.fmaj===k)).join("")}</div>`:""}
   <div class="chips">${c("data-fyr","all","All years",!STATE.fyr||STATE.fyr==="all")}${yrs.map(y=>c("data-fyr",y,y,String(STATE.fyr)===String(y))).join("")}</div>`}
 function navFor(page){
   if(page==="alltime")return[["at","st","Standings"],["at","grid","By Event"]];
@@ -1182,7 +1198,7 @@ function analyticsHTML(evs){const lots=evs.flatMap(x=>x.lots);
   h+=`<div class="card"><div class="sec"><span>Pot by event</span><span>oldest → newest</span></div>
     <div class="vb">${ch.map(x=>`<div class="col${x===pk?" peak":""}" title="${esc(evLabel(x.e))}: ${money(x.pot)}"><span class="lbl">${money(x.pot)}</span><div class="b" style="height:${x.pot/pm*100}%;background:${MAJ[x.maj].c}"></div></div>`).join("")}</div>
     <div class="vbx">${ch.map(x=>`<span>${String(x.yr).slice(2)}</span>`).join("")}</div>
-    <div class="vbk">${["masters","pga","usopen","open"].filter(k=>ch.some(x=>x.maj===k)).map(k=>`<span><i style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${MAJ[k].c};margin-right:4px"></i>${MAJ[k].n}</span>`).join("")}</div></div>`;
+    <div class="vbk">${[...MJ,...PO].filter(k=>ch.some(x=>x.maj===k)).map(k=>`<span><i style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${MAJ[k].c};margin-right:4px"></i>${MAJ[k].n}</span>`).join("")}</div></div>`;
   // spend share
   const B=bidders(evs).sort((a,b)=>b.paid-a.paid);const tot=B.reduce((t,b)=>t+b.paid,0);
   h+=`<div class="card"><div class="sec"><span>Share of money bid</span><span>${money(tot)}</span></div>${B.map(b=>`<div class="hb"><div class="top"><span style="display:flex;align-items:center;gap:8px">${tagHTML(b.o)}${esc(b.name)}</span><span>${money(b.paid)} <small>· ${Math.round(b.paid/tot*100)}%</small></span></div>
@@ -1245,7 +1261,7 @@ document.addEventListener("input",e=>{if(e.target.id!=="gq")return;STATE.gq=e.ta
 document.addEventListener("click",e=>{if(e.target.closest("[data-gall]")){STATE.gall=true;$("#glist").innerHTML=golferList()}});
 
 /* ---- cover page ---- */
-const MAJBAND={masters:["#006747","#fff"],pga:["#00205B","#fff"],usopen:["#00365F","#fff"],open:["#FFD100","#0B2545"],fedex:["#4D148C","#fff"]};
+const MAJBAND={masters:["#006747","#fff"],pga:["#00205B","#fff"],usopen:["#00365F","#fff"],open:["#FFD100","#0B2545"],fedex:["#4D148C","#fff"],stj:["#4D148C","#fff"],bmw:["#4D148C","#fff"],tc:["#4D148C","#fff"]};
 function homeHTML(){
   if(LIVE)return liveHTML()+homeLinks();
   const lc=liveCache();if(lc&&Date.now()>=lc.from&&Date.now()<=lc.to)return`<div class="card"><div class="empty">Loading the leaderboard…</div></div>`;
@@ -1269,7 +1285,9 @@ function homeHTML(){
   h+=`<button class="more" data-page="alltime">Full standings →</button></div>`;
   // champions by major
   h+=`<div class="sec" style="border:0;padding:4px 2px 10px"><span>Champions</span><span style="font:500 11px Inter,sans-serif;color:var(--mut)">tap a year</span></div><div class="majgrid">`;
-  for(const k of ["masters","pga","usopen","open"]){const list=CFG.events.filter(e=>majOf(e)===k).sort((a,b)=>yrOf(b)-yrOf(a));if(!list.length)continue;
+  for(const k of [...MJ,"|",...PO]){
+    if(k==="|"){if(CFG.events.some(e=>PO.includes(majOf(e))))h+=`</div><div class="sec home-div"><span>FedEx Cup Playoffs</span></div><div class="majgrid">`;continue}
+    const list=CFG.events.filter(e=>majOf(e)===k).sort((a,b)=>yrOf(b)-yrOf(a));if(!list.length)continue;
     const [bg,fg]=MAJBAND[k],n=list.filter(e=>byId[e.id]).length;
     h+=`<div class="card majc"><div class="mh" style="background:${bg};color:${fg}"><span>${esc(MAJ[k].n)}</span><small>${n} auction${n===1?"":"s"}</small></div>`;
     for(const e of list){const x=byId[e.id],o=x&&ALL.look[x.champOwner];
@@ -1355,14 +1373,17 @@ function drawDrawer(){computeAll();const page=STATE.page||"event";const byId={};
     <button class="dr-link${page==="stats"?" on":""}" data-page="stats"><span class="ic"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span>Stats & Records</button>
     <button class="dr-link${page==="golfers"?" on":""}" data-page="golfers"><span class="ic"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 21V3l11 4-11 4"/><path d="M3 21h10"/></svg></span>Golfers</button>
     <button class="dr-link${page==="event"?" on":""}" data-devt aria-expanded="${STATE.devt?"true":"false"}"><span class="ic"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></span>Events<span class="dr-car${STATE.devt?" open":""}">▾</span></button>`;
-  const MK=["masters","pga","usopen","open"];
-  h+=`<div class="dr-grid"${STATE.devt?"":" hidden"}>`;
-  for(const y of yrs){h+=`<span class="dr-y">${y}</span>`;
-    for(const k of MK){const e=CFG.events.find(e=>yrOf(e)===y&&majOf(e)===k);
-      if(!e||!hasData(e)){h+=`<span class="dr-cell off">—</span>`;continue}
-      const live=!byId[e.id];
-      h+=`<button class="dr-cell${page==="event"&&e.id===CUR.id?" on":""}" data-goev="${esc(e.id)}" aria-label="${esc(e.name)}" style="--mc:${MAJ[k].c}">${live?"LIVE":MAJ[k].a}</button>`}}
-  h+=`</div>`;
+  const grid=(MK,label)=>{const ys=[...new Set(CFG.events.filter(e=>MK.includes(majOf(e))).map(yrOf))].sort((a,b)=>b-a);if(!ys.length)return"";
+    let g=label?`<div class="dr-div"><span>${label}</span></div>`:"";
+    g+=`<div class="dr-grid" style="grid-template-columns:44px repeat(${MK.length},minmax(0,1fr))">`;
+    for(const y of ys){g+=`<span class="dr-y">${y}</span>`;
+      for(const k of MK){const e=CFG.events.find(e=>yrOf(e)===y&&majOf(e)===k);
+        if(!e||!hasData(e)){g+=`<span class="dr-cell off">—</span>`;continue}
+        const live=!byId[e.id];
+        g+=`<button class="dr-cell${page==="event"&&e.id===CUR.id?" on":""}" data-goev="${esc(e.id)}" aria-label="${esc(e.name)}" style="--mc:${MAJ[k].c}">${live?"LIVE":MAJ[k].a}</button>`}}
+    return g+`</div>`};
+  const hasPO=CFG.events.some(e=>PO.includes(majOf(e)));
+  h+=`<div class="dr-evs"${STATE.devt?"":" hidden"}>${grid(MJ,hasPO?"Majors":"")}${grid(PO,"FedEx Cup Playoffs")}</div>`;
   $("#drawerCard").innerHTML=h}
 function setPageFlag(){const pg=STATE.page||"event";document.documentElement.dataset.pg=pg;
   if(pg==="event")applyTheme(CUR.name);else document.documentElement.dataset.ev=(CFG.theme&&CFG.theme!=="auto")?CFG.theme:"masters"}
@@ -1381,6 +1402,7 @@ document.addEventListener("click",e=>{
   if(e.target.closest("[data-devt]")){STATE.devt=!STATE.devt;save();drawDrawer();return}
   const pg=e.target.closest("[data-page]");if(pg){if(pg.dataset.asel!==undefined)STATE.asel=pg.dataset.asel||null;else if(pg.dataset.page==="alltime"&&STATE.page==="home")STATE.asel=null;goPage(pg.dataset.page);return}
   const ge=e.target.closest("[data-goev]");if(ge){goEvent(ge.dataset.goev,ge.dataset.gosel);return}
+  const fs=e.target.closest("[data-fser]");if(fs){STATE.fser=fs.dataset.fser;STATE.fmaj="all";save();renderOther();return}
   const fm=e.target.closest("[data-fmaj]");if(fm){STATE.fmaj=fm.dataset.fmaj;save();renderOther();return}
   const fy=e.target.closest("[data-fyr]");if(fy){STATE.fyr=fy.dataset.fyr;save();renderOther();return}
   const ab=e.target.closest("[data-ab]");if(ab&&(STATE.page==="alltime")){const n=ab.dataset.ab||null;STATE.asel=STATE.asel===n?null:n;save();renderOther();if(STATE.asel)window.scrollTo({top:0,behavior:"smooth"});return}});
