@@ -767,7 +767,8 @@ function compute(T){
 
   // bonuses
   const BN=T.bonuses,bh=BN.h,bc={award:col(bh,/award|item|type/),player:col(bh,/player|golfer|name/)};
-  const hio=[],eag=[],hh=[];for(const r of BN.rows){const a=(r[bc.award]||"");const p=(r[bc.player]||"").trim();if(!p)continue;
+  const hio=[],eag=[],hh=[],named={};for(const r of BN.rows){const a=(r[bc.award]||"");const p=(r[bc.player]||"").trim();if(!p)continue;
+    (named[a.trim().toLowerCase()]||(named[a.trim().toLowerCase()]=[])).push(p);
     if(/high|hole score/i.test(a))hh.push(p);else if(/hole|ace|hio/i.test(a))hio.push(p);else if(/eagle/i.test(a))eag.push(p)}
 
   const active=P.filter(p=>p.status==="active"&&p.toPar!==null);
@@ -803,7 +804,9 @@ function compute(T){
   // extras
   for(const it of extras){const s=it.item;let a={label:s,pct:it.pct,holders:[],status:"Pending",kind:"bonus"};
     const rm=s.match(/(?:rd|round)\s*(\d)/i);
-    if(/low/i.test(s)&&rm){const k=+rm[1];const done=roundDone(k);
+    // a payout whose name matches a Bonuses row goes to that player (e.g. "St. Jude Winner")
+    if(named[s.trim().toLowerCase()]){a.holders=named[s.trim().toLowerCase()].map(find);a.status="Final"}
+    else if(/low/i.test(s)&&rm){const k=+rm[1];const done=roundDone(k);
       const pool=P.filter(p=>p.r[k]!==null&&(done||k<curRound||!/^\d+$/.test(p.thru)));
       if(pool.length){const lo=Math.min(...pool.map(p=>p.r[k]));a.holders=pool.filter(p=>p.r[k]===lo);a.detail=`Shot ${lo}`;a.status=done?"Final":"Leading"}}
     else if(/high.*hole|hole score/i.test(s)){
@@ -853,7 +856,7 @@ function compute(T){
   // some years add up each bidder's exact winnings and round once at the end
   if(CUR.roundByBidder)for(const o of Object.values(owners))o.won=cents(o.won);
 
-  const missing=allP.filter(p=>p.missing).map(p=>p.name).concat(Object.keys(lotOf).filter(k=>!byKey[k]).map(k=>PL.rows.find(r=>norm(r[pc.name])===k)[pc.name]));
+  const missing=CUR.notInField?[]:allP.filter(p=>p.missing).map(p=>p.name).concat(Object.keys(lotOf).filter(k=>!byKey[k]).map(k=>PL.rows.find(r=>norm(r[pc.name])===k)[pc.name]));
   return{P,byKey,owgrOf,lots,owners,pot,awards,final,curRound,cutMade,par:coursePar,placeTotal,paidPlace,missing:[...new Set(missing)],extras};
 }
 function ord(n){return n%100>=11&&n%100<=13?"th":({1:"st",2:"nd",3:"rd"}[n%10]||"th")}
@@ -1015,11 +1018,11 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape")closeCard()});
 /* ====== all-time standings, stats & the menu ====== */
 const MAJ={masters:{n:"Masters",a:"MAS",c:"#006747"},pga:{n:"PGA Championship",a:"PGA",c:"#2F5DB8"},
   usopen:{n:"U.S. Open",a:"USO",c:"#BF0D3E"},open:{n:"The Open",a:"OPEN",c:"#C9A227"},fedex:{n:"FedEx",a:"FDX",c:"#4D148C"},
-  stj:{n:"St. Jude",a:"STJ",c:"#FF6200"},bmw:{n:"BMW Championship",a:"BMW",c:"#1C69D4"},tc:{n:"Tour Championship",a:"TC",c:"#7B3FC4"}};
+  stj:{n:"St. Jude",a:"STJ",c:"#FF6200"},bmw:{n:"BMW Championship",a:"BMW",c:"#1C69D4"},tc:{n:"Tour Championship",a:"TC",c:"#7B3FC4"},fcp:{n:"FedEx Cup Playoffs",a:"PLAYOFFS",c:"#FF6200"}};
 // majors key by tournament; playoff events get their own keys (St. Jude, BMW, Tour Championship)
-const MJ=["masters","pga","usopen","open"],PO=["stj","bmw","tc"];
+const MJ=["masters","pga","usopen","open"],PO=["stj","bmw","tc","fcp"];
 const majOf=e=>{const k=evKey(e.name);if(k!=="fedex")return k;const n=String(e.name).toLowerCase();
-  return /st\.? ?jude|northern trust/.test(n)?"stj":/bmw/.test(n)?"bmw":/tour championship/.test(n)?"tc":"tc"},yrOf=e=>+String(e.id).slice(0,4);
+  return /fedex ?cup playoffs|playoffs$/.test(n)?"fcp":/st\.? ?jude|northern trust/.test(n)?"stj":/bmw/.test(n)?"bmw":/tour championship/.test(n)?"tc":"tc"},yrOf=e=>+String(e.id).slice(0,4);
 const serOf=k=>PO.includes(k)?"po":"mj";
 const evLabel=e=>`${yrOf(e)} ${MAJ[majOf(e)].n}`;
 const evAbbr=e=>`${MAJ[majOf(e)].a} ’${String(yrOf(e)).slice(2)}`;
@@ -1268,7 +1271,7 @@ document.addEventListener("input",e=>{if(e.target.id!=="gq")return;STATE.gq=e.ta
 document.addEventListener("click",e=>{if(e.target.closest("[data-gall]")){STATE.gall=true;$("#glist").innerHTML=golferList()}});
 
 /* ---- cover page ---- */
-const MAJBAND={masters:["#006747","#fff"],pga:["#00205B","#fff"],usopen:["#00365F","#fff"],open:["#FFD100","#0B2545"],fedex:["#4D148C","#fff"],stj:["#4D148C","#fff"],bmw:["#4D148C","#fff"],tc:["#4D148C","#fff"]};
+const MAJBAND={masters:["#006747","#fff"],pga:["#00205B","#fff"],usopen:["#00365F","#fff"],open:["#FFD100","#0B2545"],fedex:["#4D148C","#fff"],stj:["#4D148C","#fff"],bmw:["#4D148C","#fff"],tc:["#4D148C","#fff"],fcp:["#4D148C","#fff"]};
 function homeHTML(){
   if(LIVE)return liveHTML()+homeLinks();
   const lc=liveCache();if(lc&&Date.now()>=lc.from&&Date.now()<=lc.to)return`<div class="card"><div class="empty">Loading the leaderboard…</div></div>`;
@@ -1390,7 +1393,7 @@ function drawDrawer(){computeAll();const page=STATE.page||"event";const byId={};
         g+=`<button class="dr-cell${page==="event"&&e.id===CUR.id?" on":""}" data-goev="${esc(e.id)}" aria-label="${esc(e.name)}" style="--mc:${MAJ[k].c}">${live?"LIVE":MAJ[k].a}</button>`}}
     return g+`</div>`};
   const hasPO=CFG.events.some(e=>PO.includes(majOf(e)));
-  h+=`<div class="dr-evs"${STATE.devt?"":" hidden"}>${grid(MJ,hasPO?"Majors":"")}${grid(PO,"FedEx Cup Playoffs")}</div>`;
+  h+=`<div class="dr-evs"${STATE.devt?"":" hidden"}>${grid(MJ,hasPO?"Majors":"")}${grid(PO.filter(k=>CFG.events.some(e=>majOf(e)===k&&hasData(e))),"FedEx Cup Playoffs")}</div>`;
   $("#drawerCard").innerHTML=h}
 function setPageFlag(){const pg=STATE.page||"event";document.documentElement.dataset.pg=pg;
   if(pg==="event")applyTheme(CUR.name);else document.documentElement.dataset.ev=(CFG.theme&&CFG.theme!=="auto")?CFG.theme:"masters"}
