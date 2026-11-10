@@ -472,6 +472,7 @@ const CFG = {
   // espnEvent = the number after tournamentId= in the ESPN leaderboard link.
   // short     = optional shorter name for the event dropdown list (the header shows the full name).
   // makeCutPerGolfer = true if that year's sheet rounded each golfer's Make Cut share to the cent
+  // roundByBidder = true if that event's sheet added up each bidder's exact winnings and rounded once (2022 BMW)
   //             (normally each bidder gets pool x their golfers / all golfers, rounded once).
   // makeCutWD = false if a golfer who withdraws after making the cut did NOT get a Make Cut share that year.
   // espnDate  = if espnEvent is blank, the site finds the event on ESPN from its final-round date (YYYYMMDD).
@@ -517,7 +518,7 @@ const CFG = {
     { id: "2022-masters", name: "2022 Masters", espnEvent: "401353232",
       sheets: { leaderboard: "", players: "", lots: "", payouts: "", bonuses: "" } },
     // FedEx Cup Playoffs. 2022 was one leg only (BMW), paid 1st-15th.
-    { id: "2022-bmw", name: "2022 BMW Championship", short: "2022 BMW", espnEvent: "", espnDate: "20220821",
+    { id: "2022-bmw", name: "2022 BMW Championship", short: "2022 BMW", espnEvent: "", espnDate: "20220821", roundByBidder: true,
       sheets: { leaderboard: "", players: "", lots: "", payouts: "", bonuses: "" } }
   ],
   // Sheet tabs: leaderboard (optional backup for ESPN), players (Player | Lot | OWGR),
@@ -842,12 +843,15 @@ function compute(T){
     awards.forEach(a=>{a.pct=Math.round(a.pct*1000)/1000;if(a.holders.length>1)a.detail=`split ${a.holders.length} ways`})}
   // allocate
   for(const a of awards){a.amount=a.pct/100*pot;if(!a.holders.length)continue;// each golfer's share of a payout, to the cent like the master sheet
-    // Make Cut is split by bidder (pool x golfers / all golfers, rounded once) unless that year rounded each golfer's share
-    const each=a.many&&!CUR.makeCutPerGolfer?a.amount/a.holders.length:cents(a.amount/a.holders.length);
+    // Make Cut is split by bidder (pool x golfers / all golfers, rounded once) unless that year rounded each golfer's share;
+    // roundByBidder: that event's sheet summed each bidder's exact winnings and rounded once
+    const each=(a.many&&!CUR.makeCutPerGolfer)||CUR.roundByBidder?a.amount/a.holders.length:cents(a.amount/a.holders.length);
     for(const p of a.holders){p.won+=each;p.awards.push({label:a.kind==="place"?"Finish":a.label,amt:each})}}
   const allP=[...P];for(const a of awards)for(const p of a.holders)if(p.missing&&!allP.includes(p))allP.push(p);
   for(const p of allP){const lot=lotOf[p.key];p.lot=lot||"";if(lot&&lots[lot])lots[lot].won+=p.won}
   for(const l of Object.values(lots))if(l.owner)owners[l.owner].won+=l.won;
+  // some years add up each bidder's exact winnings and round once at the end
+  if(CUR.roundByBidder)for(const o of Object.values(owners))o.won=cents(o.won);
 
   const missing=allP.filter(p=>p.missing).map(p=>p.name).concat(Object.keys(lotOf).filter(k=>!byKey[k]).map(k=>PL.rows.find(r=>norm(r[pc.name])===k)[pc.name]));
   return{P,byKey,owgrOf,lots,owners,pot,awards,final,curRound,cutMade,par:coursePar,placeTotal,paidPlace,missing:[...new Set(missing)],extras};
