@@ -6,7 +6,13 @@
 <meta name="theme-color" content="#006747">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" href="apple-touch-icon.png">
-<title>Oak Street Auctions</title>
+<title>Oak Street Auctions · Golf</title>
+<meta name="description" content="Golf majors and FedEx Cup Playoffs Calcutta: live leaderboard, payouts, standings and records.">
+<meta property="og:title" content="Oak Street Auctions · Golf">
+<meta property="og:description" content="Golf majors and FedEx Cup Playoffs Calcutta: live leaderboard, payouts, standings and records.">
+<meta property="og:url" content="https://oakstreetauctions.github.io/majors/">
+<meta property="og:image" content="https://oakstreetauctions.github.io/apple-touch-icon.png">
+<meta property="og:type" content="website">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&family=Cinzel:wght@500;700&family=Libre+Franklin:ital,wght@0,500;0,700;1,500&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Montserrat:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -466,6 +472,18 @@ html[data-ev="open"] header h1 span{color:#0B2545;font-style:italic}
 
 /* share results button */
 .shr{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin:0 0 4px;padding:12px;border:1px solid var(--line);border-radius:4px;background:var(--card);color:var(--fg);font:600 14px Inter,sans-serif;cursor:pointer}.shr svg{color:var(--green)}
+
+/* one look for every letter: no "ff"/"fi" ligatures (some display fonts draw them in a different style) */
+body{font-variant-ligatures:no-common-ligatures}
+
+/* all-time / golfer tables: the name column takes what's left so the numbers never run off the card */
+table.at{table-layout:fixed}table.at th:first-child{width:auto}
+table.at th:nth-child(2),table.at th:nth-child(3){width:68px}table.at th:nth-child(4){width:78px}
+table.gt th:nth-child(2){width:62px}table.gt th:nth-child(3){width:74px}table.gt th:nth-child(4){width:76px}
+table.at td:first-child{overflow:hidden}
+table.at .who{min-width:0}table.at .who>span{min-width:0;overflow:hidden;text-overflow:ellipsis}
+table.at .sub2{white-space:normal;line-height:1.35}
+@media(max-width:460px){table.at th,table.at td{padding-left:4px;padding-right:4px}table.at td:last-child,table.at th:last-child{padding-right:10px}table.at td{font-size:12.5px}}
 </style>
 </head>
 <body>
@@ -744,7 +762,7 @@ async function load(){lastLoad=Date.now();
   const T={};keys.forEach((k,i)=>T[k]=table(txt[i]));
   try{D=compute(T)}catch(e){if(!D){$("#err").innerHTML=`<div class="err">Something in the sheet couldn't be read.</div>`;return}}
   if(!bad.includes("leaderboard")&&SOURCE!=="sample")UPDATED=new Date();
-  STALE=SOURCE==="sample"?"Can't reach ESPN, so this is saved sample data":bad.length?"Showing the last good update":"";
+  STALE=SOURCE==="sample"?(CUR&&hasData(CUR)?"Showing the saved final results":"Can't reach ESPN right now; showing saved data"):bad.length?"Showing the last good update":"";
   $("#err").innerHTML="";render();
 }
 
