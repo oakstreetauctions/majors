@@ -773,7 +773,11 @@ function compute(T){
     const L2=words.join("").replace(/[^A-Z]/g,""),F=first.replace(/[^A-Za-z]/g,"").toUpperCase();
     let t=(F[0]||"")+(L2[0]||"")+suf;if(!t)t=o.slice(0,2).toUpperCase();
     let j=1;while(used[t]&&j<L2.length){t=(F[0]||"")+L2[0]+L2[j]+suf;j++}let n=2;const base=t;while(used[t])t=base+(n++);used[t]=1;return t};
-  ROSTER.forEach(b=>TAG[b.key]=mkTag(b.name));
+  // when two bidders share the same two letters, BOTH get three (Wyndham RWY, Woodward RWO); a few are set by hand
+  const TAGFIX={"FLATH. B":"DAD"},base2=o=>{const{last,first}=parse(o);const w=last.toUpperCase().split(/\s+/);if(w.length>1&&ROMAN[w[w.length-1].replace(/\W/g,"")])return null;return(first.replace(/[^A-Za-z]/g,"").toUpperCase()[0]||"")+(w.join("").replace(/[^A-Z]/g,"")[0]||"")};
+  const cnt2={};ROSTER.forEach(b=>{if(TAGFIX[nk(b.name)])return;const k=base2(b.name);if(k)cnt2[k]=(cnt2[k]||0)+1});
+  ROSTER.forEach(b=>{if(TAGFIX[nk(b.name)]){TAG[b.key]=TAGFIX[nk(b.name)];used[TAG[b.key]]=1}});
+  ROSTER.forEach(b=>{if(TAG[b.key])return;const k=base2(b.name);if(k&&cnt2[k]>1)used[k]=1;TAG[b.key]=mkTag(b.name)});
   // colors: present bidders in seniority order (unknown names last); a repeated color goes to the senior bidder
   const present=names.slice().sort((a,b)=>((RB[nk(a)]||{rank:999}).rank-(RB[nk(b)]||{rank:999}).rank)||a.localeCompare(b));
   const taken=new Set();const spare=(CFG.spareColors||[]).map(c=>c.toUpperCase()).concat(PALETTE.map(c=>c.toUpperCase()));
