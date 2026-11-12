@@ -766,18 +766,8 @@ function compute(T){
   const nk=x=>String(x).toUpperCase().replace(/\s+/g," ").trim();
   const ROSTER=(CFG.bidders||[]).map((b,i)=>({name:b[0],key:nk(b[0]),color:b[1].toUpperCase(),text:b[2],rank:i}));
   const RB={};ROSTER.forEach(b=>RB[b.key]=b);
-  // tags: worked out over the whole roster in seniority order so they never change between events
-  const ROMAN={II:"2",III:"3",IV:"4",V:"5",JR:"J",SR:"S"};const TAG={};
-  const mkTag=o=>{const{last,first}=parse(o);const words=last.toUpperCase().split(/\s+/);
-    const suf=words.length>1&&ROMAN[words[words.length-1].replace(/\W/g,"")]?ROMAN[words.pop().replace(/\W/g,"")]:"";
-    const L2=words.join("").replace(/[^A-Z]/g,""),F=first.replace(/[^A-Za-z]/g,"").toUpperCase();
-    let t=(F[0]||"")+(L2[0]||"")+suf;if(!t)t=o.slice(0,2).toUpperCase();
-    let j=1;while(used[t]&&j<L2.length){t=(F[0]||"")+L2[0]+L2[j]+suf;j++}let n=2;const base=t;while(used[t])t=base+(n++);used[t]=1;return t};
-  // when two bidders share the same two letters, BOTH get three (Wyndham RWY, Woodward RWO); a few are set by hand
-  const TAGFIX={"FLATH. B":"DAD"},base2=o=>{const{last,first}=parse(o);const w=last.toUpperCase().split(/\s+/);if(w.length>1&&ROMAN[w[w.length-1].replace(/\W/g,"")])return null;return(first.replace(/[^A-Za-z]/g,"").toUpperCase()[0]||"")+(w.join("").replace(/[^A-Z]/g,"")[0]||"")};
-  const cnt2={};ROSTER.forEach(b=>{if(TAGFIX[nk(b.name)])return;const k=base2(b.name);if(k)cnt2[k]=(cnt2[k]||0)+1});
-  ROSTER.forEach(b=>{if(TAGFIX[nk(b.name)]){TAG[b.key]=TAGFIX[nk(b.name)];used[TAG[b.key]]=1}});
-  ROSTER.forEach(b=>{if(TAG[b.key])return;const k=base2(b.name);if(k&&cnt2[k]>1)used[k]=1;TAG[b.key]=mkTag(b.name)});
+  // tags: two letters unless two bidders at this auction share them; then both get three (Wyndham RWY, Woodward RWO)
+  const TAG=tagSet(names);const mkTag=o=>tagSet([o])[o];
   // colors: present bidders in seniority order (unknown names last); a repeated color goes to the senior bidder
   const present=names.slice().sort((a,b)=>((RB[nk(a)]||{rank:999}).rank-(RB[nk(b)]||{rank:999}).rank)||a.localeCompare(b));
   const taken=new Set();const spare=(CFG.spareColors||[]).map(c=>c.toUpperCase()).concat(PALETTE.map(c=>c.toUpperCase()));
@@ -787,7 +777,7 @@ function compute(T){
     else{color=nextSpare();text=lum(color)>.6?"#000":"#fff";
       SWAPS.push({name:o,color,why:b?`${b.color} belongs to ${present.find(x=>RB[nk(x)]&&RB[nk(x)].color===b.color&&x!==o)}`:"not on the color list yet"})}
     taken.add(color);
-    owners[o]={name:o,tag:TAG[nk(o)]||mkTag(o),color,text,light:lum(color)>.82,paid:0,won:0,lots:[]}});
+    owners[o]={name:o,tag:TAG[o]||mkTag(o),color,text,light:lum(color)>.82,paid:0,won:0,lots:[]}});
   SWAPS_NOW=SWAPS;
   for(const l of Object.values(lots))if(l.owner){owners[l.owner].paid+=l.price;owners[l.owner].lots.push(l)}
 
@@ -1061,6 +1051,26 @@ const evAbbr=e=>`${MAJ[majOf(e)].a} ’${String(yrOf(e)).slice(2)}`;
 const pct=v=>(v>0?"+":"")+Math.round(v*100)+"%";
 const sgn=v=>{const r=Math.round(v);return r===0?"$0":(r>0?"+":"−")+"$"+Math.abs(r).toLocaleString()};
 const negCls=v=>{const r=Math.round(v);return r>0?"posv":r<0?"negv":""};
+/* Bidder tags for one set of bidders (an auction, or everyone on an all-time page): first + last initial;
+   when two of them share those two letters, BOTH get three (RWY / RWO). Suffixes add a number (BB2).
+   Brandon Flath is DAD at an auction Brandon Flater is also in; on all-time pages Flath stays BF and Flater is BFL. */
+function tagSet(list,multi){const ROMAN={II:"2",III:"3",IV:"4",V:"5",JR:"J",SR:"S"},nk=x=>String(x).toUpperCase().replace(/\s+/g," ").trim();
+  const parse=o=>{const m=o.match(/^([^.,]+)[.,]\s*(.+)$/);return m?{last:m[1].trim(),first:m[2].trim()}:{last:o,first:""}};
+  const info=o=>{const{last,first}=parse(o);const w=last.toUpperCase().split(/\s+/);const suf=w.length>1&&ROMAN[w[w.length-1].replace(/\W/g,"")]?ROMAN[w.pop().replace(/\W/g,"")]:"";
+    return{F:first.replace(/[^A-Za-z]/g,"").toUpperCase(),L:w.join("").replace(/[^A-Z]/g,""),suf}};
+  const rank=n=>{const i=(CFG.bidders||[]).findIndex(b=>nk(b[0])===nk(n));return i<0?999:i};
+  const names=[...new Set(list)].sort((a,b)=>rank(a)-rank(b)||a.localeCompare(b)),keys=new Set(names.map(nk)),T={},used={},cnt={};
+  const dad=n=>!multi&&nk(n)==="FLATH. B"&&keys.has("FLATER. B");
+  names.forEach(n=>{const x=info(n);if(x.suf||x.F.length>1||(nk(n)==="FLATH. B"&&keys.has("FLATER. B")))return;const k=x.F[0]+x.L[0];cnt[k]=(cnt[k]||0)+1});
+  names.forEach(n=>{if(dad(n)){T[n]="DAD";used.DAD=1;return}
+    const x=info(n);let t;
+    if(x.F.length>1)t=x.F+x.L[0];
+    else if(x.suf)t=x.F[0]+x.L[0]+x.suf;
+    else if(cnt[x.F[0]+x.L[0]]>1){t=x.F[0]+x.L[0]+(x.L[1]||"");for(let j=2;used[t]&&j<x.L.length;j++)t=x.F[0]+x.L[0]+x.L[j]}
+    else t=x.F[0]+x.L[0];
+    if(used[t]&&!x.suf&&x.F.length===1&&x.L.length>1)t=x.F[0]+x.L[0]+x.L[1];
+    if(!t)t=n.slice(0,2).toUpperCase();let k=2;const b=t;while(used[t])t=b+(k++);used[t]=1;T[n]=t});
+  return T}
 let ALL=null;
 function computeAll(){if(ALL)return ALL;const keep=CUR,events=[];
   for(const e of CFG.events){const x=EVENT_DATA[e.id];if(!hasData(e)||!x||!x.leaderboard)continue;
@@ -1074,7 +1084,9 @@ function computeAll(){if(ALL)return ALL;const keep=CUR,events=[];
     events.push({ord:CFG.events.indexOf(e),e,d,maj:majOf(e),yr:yrOf(e),pot:d.pot,champ,champOwner:lotOwner(champ),champLot:champ?d.lots[champ.lot]:null,lots})}
   CUR=keep;
   // a bidder's identity (tag + color) from the settings, falling back to how they appeared at an event
-  const look={};for(const x of events)for(const o of Object.values(x.d.owners))if(!look[o.name])look[o.name]=o;
+  const look={};for(const x of events)for(const o of Object.values(x.d.owners))if(!look[o.name])look[o.name]=Object.assign({},o);
+  // all-time pages show everyone together, so tags are worked out over the whole group
+  const AT=tagSet(Object.keys(look),true);for(const n in look)look[n].tag=AT[n];
   for(const b of CFG.bidders||[]){const o=look[b[0]];if(o){o.color=b[1];o.text=b[2]||o.text;o.light=lum(b[1])>.82}}
   ALL={events,look};return ALL}
 function inFilter(x){return(!STATE.fser||STATE.fser==="all"||serOf(x.maj)===STATE.fser)&&(STATE.fmaj==="all"||!STATE.fmaj||x.maj===STATE.fmaj)&&(STATE.fyr==="all"||!STATE.fyr||x.yr===+STATE.fyr)}
