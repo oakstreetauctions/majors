@@ -242,7 +242,7 @@ html[data-ev="open"] .burger:hover{background:rgba(11,37,69,.08)}
 .dr-head b{font:400 19px var(--serif);letter-spacing:.05em}
 .dr-head button{border:0;background:none;color:inherit;font-size:18px;cursor:pointer;width:36px;height:36px}
 .dr-sec{font:600 10px Inter,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:var(--mut);padding:16px 16px 6px}
-.dr-link{display:flex;align-items:center;gap:12px;width:100%;border:0;background:none;color:var(--fg);text-align:left;padding:11px 16px;font:600 14px Inter,sans-serif;cursor:pointer;border-left:3px solid transparent}
+.dr-link{text-decoration:none;display:flex;align-items:center;gap:12px;width:100%;border:0;background:none;color:var(--fg);text-align:left;padding:11px 16px;font:600 14px Inter,sans-serif;cursor:pointer;border-left:3px solid transparent}
 .dr-link:hover{background:var(--row)}
 .dr-link.on{border-left-color:var(--green);background:var(--row)}
 .dr-link .ic{width:20px;display:flex;justify-content:center;color:var(--green)}
@@ -1418,6 +1418,10 @@ function drawDrawer(){computeAll();const page=STATE.page||"event";const byId={};
     return g+`</div>`};
   const hasPO=CFG.events.some(e=>PO.includes(majOf(e)));
   h+=`<div class="dr-evs"${STATE.devt?"":" hidden"}>${grid(MJ,hasPO?"Majors":"")}${grid(PO.filter(k=>CFG.events.some(e=>majOf(e)===k&&hasData(e))),"FedEx Cup Playoffs")}</div>`;
+  // the other Oak Street sites
+  h+=`<div class="dr-div" style="padding-top:20px"><span>Oak Street Auctions</span></div>
+    <a class="dr-link" href="/"><span class="ic"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>All auctions</a>
+    <a class="dr-link" href="/march-madness/"><span class="ic"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3v18M5.6 5.6c3.5 3.5 3.5 9.3 0 12.8M18.4 5.6c-3.5 3.5-3.5 9.3 0 12.8"/></svg></span>March Madness</a>`;
   $("#drawerCard").innerHTML=h}
 function setPageFlag(){const pg=STATE.page||"event";document.documentElement.dataset.pg=pg;
   if(pg==="event")applyTheme(CUR.name);else document.documentElement.dataset.ev=(CFG.theme&&CFG.theme!=="auto")?CFG.theme:"masters"}
