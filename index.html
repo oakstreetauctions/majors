@@ -472,6 +472,7 @@ const CFG = {
   // espnEvent = the number after tournamentId= in the ESPN leaderboard link.
   // short     = optional shorter name for the event dropdown list (the header shows the full name).
   // makeCutPerGolfer = true if that year's sheet rounded each golfer's Make Cut share to the cent
+  // savedBoard = true to keep the saved positions/scores over ESPN's (Tour Championship starting strokes)
   // roundHalfUp = true if that event's sheet rounded each golfer's share with half a cent going up (2024 playoffs)
   // roundByBidder = true if that event's sheet added up each bidder's exact winnings and rounded once (2022 playoffs)
   //             (normally each bidder gets pool x their golfers / all golfers, rounded once).
@@ -488,7 +489,7 @@ const CFG = {
       sheets: { leaderboard: "", players: "", lots: "", payouts: "", bonuses: "" } },
     { id: "2026-masters", name: "2026 Masters", espnEvent: "401811941",
       sheets: { leaderboard: "", players: "", lots: "", payouts: "", bonuses: "" } },
-    { id: "2025-playoffs", name: "2025 FedEx Cup Playoffs", short: "2025 Playoffs", espnEvent: "", espnDate: "20250824", notInField: true, roundHalfUp: true,
+    { id: "2025-playoffs", name: "2025 FedEx Cup Playoffs", short: "2025 Playoffs", espnEvent: "401703531", savedBoard: true, espnDate: "20250824", notInField: true, roundHalfUp: true,
       sheets: { leaderboard: "", players: "", lots: "", payouts: "", bonuses: "" } },
     { id: "2025-usopen", name: "2025 U.S. Open", espnEvent: "401703515", makeCutWD: false, makeCutPerGolfer: true, espnDate: "20250615",
       sheets: { leaderboard: "", players: "", lots: "", payouts: "", bonuses: "" } },
@@ -496,7 +497,7 @@ const CFG = {
       sheets: { leaderboard: "", players: "", lots: "", payouts: "", bonuses: "" } },
     { id: "2025-masters", name: "2025 Masters", espnEvent: "401703504",
       sheets: { leaderboard: "", players: "", lots: "", payouts: "", bonuses: "" } },
-    { id: "2024-playoffs", name: "2024 FedEx Cup Playoffs", short: "2024 Playoffs", espnEvent: "", espnDate: "20240901", notInField: true, roundHalfUp: true,
+    { id: "2024-playoffs", name: "2024 FedEx Cup Playoffs", short: "2024 Playoffs", espnEvent: "401580366", savedBoard: true, espnDate: "20240901", notInField: true, roundHalfUp: true,
       sheets: { leaderboard: "", players: "", lots: "", payouts: "", bonuses: "" } },
     { id: "2024-open", name: "2024 Open Championship", short: "2024 The Open", espnEvent: "401580360", espnDate: "20240721",
       sheets: { leaderboard: "", players: "", lots: "", payouts: "", bonuses: "" } },
@@ -508,7 +509,7 @@ const CFG = {
       sheets: { leaderboard: "", players: "", lots: "", payouts: "", bonuses: "" } },
     // FedEx Cup Playoffs 2023-2025: one auction for the whole playoffs. St. Jude and BMW winners get 10% each;
     // the other 80% pays Tour Championship places 1-30. Golfers who didn't reach East Lake just show $0.
-    { id: "2023-playoffs", name: "2023 FedEx Cup Playoffs", short: "2023 Playoffs", espnEvent: "", espnDate: "20230827", notInField: true, roundHalfUp: true,
+    { id: "2023-playoffs", name: "2023 FedEx Cup Playoffs", short: "2023 Playoffs", espnEvent: "401465545", savedBoard: true, espnDate: "20230827", notInField: true, roundHalfUp: true,
       sheets: { leaderboard: "", players: "", lots: "", payouts: "", bonuses: "" } },
     { id: "2023-open", name: "2023 Open Championship", short: "2023 The Open", espnEvent: "401465539", espnDate: "20230723",
       sheets: { leaderboard: "", players: "", lots: "", payouts: "", bonuses: "" } },
@@ -519,7 +520,7 @@ const CFG = {
     { id: "2023-masters", name: "2023 Masters", espnEvent: "401465508",
       sheets: { leaderboard: "", players: "", lots: "", payouts: "", bonuses: "" } },
     // FedEx Cup Playoffs 2022: the auction only covered the BMW Championship, paid BMW places 1st-15th.
-    { id: "2022-playoffs", name: "2022 FedEx Cup Playoffs", short: "2022 Playoffs", espnEvent: "", espnDate: "20220821", roundByBidder: true,
+    { id: "2022-playoffs", name: "2022 FedEx Cup Playoffs", short: "2022 Playoffs", espnEvent: "401353275", savedBoard: true, espnDate: "20220821", roundByBidder: true,
       sheets: { leaderboard: "", players: "", lots: "", payouts: "", bonuses: "" } },
     { id: "2022-open", name: "2022 Open Championship", short: "2022 The Open", espnEvent: "401353217", espnDate: "20220717",
       sheets: { leaderboard: "", players: "", lots: "", payouts: "", bonuses: "" } },
@@ -665,9 +666,19 @@ let SOURCE="",EVENT={name:"",id:""},UPDATED=null;
 async function getSheet(k){const u=CFG.sheets[k];if(!u)return DEMO[k]||"";
   const r=await fetch(u+(u.includes("?")?"&":"?")+"t="+Date.now(),{cache:"no-store"});
   if(!r.ok)throw new Error(k+" tab ("+r.status+")");return r.text()}
+/* savedBoard: keep the saved positions and to-par scores (ESPN's Tour Championship feed leaves out the
+   starting strokes), but take everything else (rounds, scorecard ids) from ESPN. */
+function mergeSaved(live,saved){const L=table(live),S=table(saved);
+  const ln=col(L.h,/player|name|golfer/),lp=col(L.h,/^pos/),ls=col(L.h,/score|to ?par/);
+  const sn=col(S.h,/player|name|golfer/),sp=col(S.h,/^pos/),ss=col(S.h,/score|to ?par/);
+  const by={};for(const r of S.rows)by[norm(r[sn]||"")]=r;
+  const rows=L.rows.map(r=>{const m=by[norm(r[ln]||"")];if(!m)return r;const o=r.slice();o[lp]=m[sp];o[ls]=m[ss];return o});
+  const q=v=>{v=v==null?"":String(v);return/[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};
+  return[L.h,...rows].map(r=>r.map(q).join(",")).join("\n")}
 async function getTab(k){
   if(k==="leaderboard"&&CFG.espnEvent!=="off"){
-    try{const x=await getESPN();if((STATE.page||"event")==="event")applyTheme(x.event);if(!x.rows&&x.csv.split("\n").length<20)throw new Error("ESPN feed empty");SOURCE="";return x.csv}
+    try{const x=await getESPN();if((STATE.page||"event")==="event")applyTheme(x.event);if(!x.rows&&x.csv.split("\n").length<20)throw new Error("ESPN feed empty");SOURCE="";
+      return CUR.savedBoard&&DEMO.leaderboard?mergeSaved(x.csv,DEMO.leaderboard):x.csv}
     catch(e){if(CFG.sheets.leaderboard){SOURCE="sheet";return getSheet(k)}
       if(!GOOD.leaderboard&&DEMO.leaderboard){SOURCE="sample";return DEMO.leaderboard}throw e}}
   return getSheet(k)}
