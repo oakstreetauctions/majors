@@ -444,6 +444,13 @@ table.gt .who span{white-space:normal}
 .dr-div::after{content:"";flex:1;height:1px;background:var(--line)}
 .home-div{border:0!important;padding:8px 2px 10px!important;display:flex;align-items:center;gap:10px}
 .home-div::after{content:"";flex:1;height:1px;background:var(--line)}
+
+/* next auction card on the cover page (dates come from /schedule.json on the main site) */
+.nxa{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:14px;align-items:center;background:var(--card);border:1px solid var(--line);border-top:3px solid var(--gold);border-radius:4px;padding:14px;margin:0 0 16px;box-shadow:var(--shadow)}
+.nxa .cal{width:56px;text-align:center;border:1px solid var(--line);border-radius:4px;overflow:hidden}.nxa .cal b{display:block;background:var(--green);color:#fff;font:600 9.5px Inter,sans-serif;letter-spacing:.14em;padding:3px 0}
+.nxa .cal strong{display:block;font:400 24px/1.2 var(--serif);padding-top:2px}.nxa .cal small{display:block;font:600 9px Inter,sans-serif;color:var(--mut);letter-spacing:.1em;text-transform:uppercase;padding-bottom:4px}
+.nxa .m small{font:600 10px Inter,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--mut)}.nxa .m b{display:block;font:400 19px/1.2 var(--serif);color:var(--green);margin:2px 0}.nxa .m span{font:12px Inter,sans-serif;color:var(--mut)}
+.nxa .cd{text-align:right}.nxa .cd strong{display:block;font:400 30px/1 var(--serif)}.nxa .cd small{font:600 9.5px Inter,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)}
 </style>
 </head>
 <body>
@@ -1291,6 +1298,9 @@ function golferList(){const q=(STATE.gq||"").trim().toLowerCase(),sort=STATE.gs|
   <div class="note">“Bid” counts a golfer’s share of a group price. The Field isn’t included. Tap a golfer for his full history.</div>`;
   return h}
 const ordN=n=>n+ord(n);
+let SCHED=null;fetch("/schedule.json",{cache:"no-store"}).then(r=>r.json()).then(j=>{SCHED=j;if((STATE.page||"event")==="home"&&!LIVE)render()}).catch(()=>{});
+function nextAuc(){if(!SCHED)return"";const t=new Date();t.setHours(0,0,0,0);const a=(SCHED.auctions||[]).filter(x=>x.sport==="golf").map(x=>Object.assign({},x,{dt:new Date(x.date+"T12:00:00")})).find(x=>x.dt>=t);if(!a)return"";
+  const d=Math.round((a.dt-t)/864e5);return`<div class="nxa"><div class="cal"><b>${a.dt.toLocaleDateString(undefined,{month:"short"}).toUpperCase()}</b><strong>${a.dt.getDate()}</strong><small>${a.dt.toLocaleDateString(undefined,{weekday:"short"})}</small></div><div class="m"><small>Next auction${a.tbd?" · tentative":""}</small><b>${a.dt.getFullYear()} ${esc(a.name)}</b><span>${esc(a.detail||"")}</span></div><div class="cd"><strong>${d===0?"Tonight":d}</strong><small>${d===0?"":d===1?"day":"days"}</small></div></div>`}
 document.addEventListener("input",e=>{if(e.target.id!=="gq")return;STATE.gq=e.target.value;$("#glist").innerHTML=golferList()});
 document.addEventListener("click",e=>{if(e.target.closest("[data-gall]")){STATE.gall=true;$("#glist").innerHTML=golferList()}});
 
@@ -1302,7 +1312,7 @@ function homeHTML(){
   const evs=ALL.events,byId={};evs.forEach(x=>byId[x.e.id]=x);
   const pots=evs.reduce((t,x)=>t+x.pot,0),B=bidders(evs).sort((a,b)=>b.net-a.net);
   const yrs=evs.map(x=>x.yr),y0=Math.min(...yrs),y1=Math.max(...yrs);
-  let h=`<div class="hero"><div class="kick">Golf Majors Calcutta</div><h2>The Auction Board</h2><p>${evs.length} auctions · ${money(pots)} in pots · ${y0}–${y1}</p></div>`;
+  let h=`<div class="hero"><div class="kick">Golf Majors Calcutta</div><h2>The Auction Board</h2><p>${evs.length} auctions · ${money(pots)} in pots · ${y0}–${y1}</p></div>`+nextAuc();
   // the newest event: live if it's still going, otherwise its champion
   const latest=CFG.events.find(hasData);
   if(latest){const x=byId[latest.id],k=majOf(latest),[bg,fg]=MAJBAND[k]||MAJBAND.masters;
