@@ -228,7 +228,6 @@ details.many[open] .mc-counts{display:none}
 
 /* ===== menu (hamburger) ===== */
 header{position:relative;padding-left:48px!important;padding-right:48px!important}
-@media (max-width:460px){html header h1{font-size:clamp(17px,5.4vw,23px)!important;letter-spacing:.04em!important;white-space:nowrap}}
 .burger{position:absolute;left:10px;top:calc(env(safe-area-inset-top,0px) + 14px);width:40px;height:40px;border:0;background:none;color:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;border-radius:6px}
 .burger:hover{background:rgba(255,255,255,.1)}
 .burger svg{width:22px;height:22px}
@@ -455,10 +454,19 @@ table.gt .who span{white-space:normal}
 /* home button (top right): back to the Oak Street Auctions main page */
 .osh{position:absolute;z-index:3;right:10px;top:calc(env(safe-area-inset-top,0px) + 14px);width:40px;height:40px;display:flex;align-items:center;justify-content:center;border-radius:50%;color:inherit;text-decoration:none;background:inherit}
 .osh:hover{background:rgba(255,255,255,.12)}.osh svg{width:22px;height:22px}
+
+/* ===== header: same layout as the March Madness and NFL sites (accent edge, stripes, two-line title); colors follow each major ===== */
+header{overflow:hidden;border-bottom:1px solid rgba(0,0,0,.18)}
+header:before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--gold)}
+header:after{content:"";position:absolute;right:0;top:0;bottom:0;width:70px;background:repeating-linear-gradient(115deg,transparent 0 9px,var(--gold) 9px 11px,transparent 11px 17px,var(--hdrfg) 17px 18px,transparent 18px 26px);opacity:.5;pointer-events:none}
+header h1{position:relative;z-index:1;font-size:32px!important;line-height:1.05!important}
+header h1 span{display:block;color:var(--gold)}@media(min-width:600px){header h1 span{display:inline}}
+header .rule,header .evpick{position:relative;z-index:1}
+html[data-ev="open"] header h1 span{color:#0B2545;font-style:italic}
 </style>
 </head>
 <body>
-<header><a class="osh" href="/" aria-label="Oak Street Auctions home" title="Oak Street Auctions home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg></a><button class="burger" id="burger" aria-label="Open menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button><h1 data-page="home" style="cursor:pointer">Oak Street Auctions</h1><div class="rule"></div><div class="evpick" id="evpick"></div></header>
+<header><a class="osh" href="/" aria-label="Oak Street Auctions home" title="Oak Street Auctions home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg></a><button class="burger" id="burger" aria-label="Open menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button><h1 data-page="home" style="cursor:pointer">Oak Street <span>Auctions</span></h1><div class="rule"></div><div class="evpick" id="evpick"></div></header>
 <nav id="nav">
   <button data-v="lb" class="on">Leaderboard</button>
   <button data-v="pay">Payouts</button>
@@ -1122,8 +1130,12 @@ function navFor(page){
 function drawNav(){const page=STATE.page||"event";const cur={v:STATE.view,at:STATE.atab||"st",stb:STATE.stab||"rec",gs:STATE.gs||"won"};
   $("#nav").innerHTML=navFor(page).map(([k,v,l])=>`<button data-${k}="${v}" class="${cur[k]===v?"on":""}">${l}</button>`).join("")}
 function drawPill(){const page=STATE.page||"event";const el=$("#evpick");
-  // the menu handles navigation now; the header just names the event you're looking at
-  el.className="evpick plain";el.style.display=page==="event"?"":"none";el.innerHTML=page==="event"?`<span>${esc(CUR.name)}</span>`:""}
+  // same as March Madness and NFL: a pill with a dropdown of every auction on the home and event pages, a plain label elsewhere
+  const lab={alltime:"All-Time Standings",stats:"Stats & Records",golfers:"Golfers"}[page];el.style.display="";
+  if(lab){el.className="evpick plain";el.innerHTML=`<span>${lab}</span>`;return}
+  const yrs=[...new Set(CFG.events.map(e=>e.id.slice(0,4)))].sort().reverse();
+  const opts=yrs.map(y=>`<optgroup label="${y}">${CFG.events.filter(e=>e.id.slice(0,4)===y).map(e=>`<option value="${e.id}"${page==="event"&&e.id===CUR.id?" selected":""}>${esc(e.name)}</option>`).join("")}</optgroup>`).join("");
+  el.className="evpick";el.innerHTML=`<span>${page==="event"?esc(CUR.name):"Pick an auction"}</span><span class="car3">▾</span><select id="evsel" aria-label="Pick an auction">${page==="event"?"":'<option value="" selected disabled>Pick an auction</option>'}${opts}</select>`}
 
 function renderOther(){computeAll();drawNav();drawPill();$("#err").innerHTML="";$("#selbar").innerHTML="";
   const evs=ALL.events.filter(inFilter);
