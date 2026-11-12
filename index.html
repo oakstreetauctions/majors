@@ -1053,14 +1053,14 @@ const sgn=v=>{const r=Math.round(v);return r===0?"$0":(r>0?"+":"−")+"$"+Math.a
 const negCls=v=>{const r=Math.round(v);return r>0?"posv":r<0?"negv":""};
 /* Bidder tags for one set of bidders (an auction, or everyone on an all-time page): first + last initial;
    when two of them share those two letters, BOTH get three (RWY / RWO). Suffixes add a number (BB2).
-   Brandon Flath is DAD at an auction Brandon Flater is also in; on all-time pages Flath stays BF and Flater is BFL. */
+   Brandon Flath is DAD wherever Brandon Flater is also on the page (an auction or an all-time page), so Flater can stay BF. */
 function tagSet(list,multi){const ROMAN={II:"2",III:"3",IV:"4",V:"5",JR:"J",SR:"S"},nk=x=>String(x).toUpperCase().replace(/\s+/g," ").trim();
   const parse=o=>{const m=o.match(/^([^.,]+)[.,]\s*(.+)$/);return m?{last:m[1].trim(),first:m[2].trim()}:{last:o,first:""}};
   const info=o=>{const{last,first}=parse(o);const w=last.toUpperCase().split(/\s+/);const suf=w.length>1&&ROMAN[w[w.length-1].replace(/\W/g,"")]?ROMAN[w.pop().replace(/\W/g,"")]:"";
     return{F:first.replace(/[^A-Za-z]/g,"").toUpperCase(),L:w.join("").replace(/[^A-Z]/g,""),suf}};
   const rank=n=>{const i=(CFG.bidders||[]).findIndex(b=>nk(b[0])===nk(n));return i<0?999:i};
   const names=[...new Set(list)].sort((a,b)=>rank(a)-rank(b)||a.localeCompare(b)),keys=new Set(names.map(nk)),T={},used={},cnt={};
-  const dad=n=>!multi&&nk(n)==="FLATH. B"&&keys.has("FLATER. B");
+  const dad=n=>nk(n)==="FLATH. B"&&keys.has("FLATER. B");
   names.forEach(n=>{const x=info(n);if(x.suf||x.F.length>1||(nk(n)==="FLATH. B"&&keys.has("FLATER. B")))return;const k=x.F[0]+x.L[0];cnt[k]=(cnt[k]||0)+1});
   names.forEach(n=>{if(dad(n)){T[n]="DAD";used.DAD=1;return}
     const x=info(n);let t;
