@@ -704,7 +704,9 @@ async function getTab(k){
 let SWAPS_NOW=[];
 let D=null,STATE={view:"lb",sel:null};
 try{const s=localStorage.getItem("osa-golf");if(s)Object.assign(STATE,JSON.parse(s))}catch(e){}
-function save(){try{localStorage.setItem("osa-golf",JSON.stringify(STATE))}catch(e){}}
+/* ?embed=1: loaded quietly by the main page to read totals; never saves this visitor's view */
+const EMBED=/[?&]embed=1/.test(location.search);
+function save(){if(EMBED)return;try{localStorage.setItem("osa-golf",JSON.stringify(STATE))}catch(e){}}
 
 /* A tab that comes back mid-reload (Loading..., #N/A, half empty) is ignored and the
    last good copy is used instead, so the board never blanks out between refreshes. */
