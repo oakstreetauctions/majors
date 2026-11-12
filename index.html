@@ -463,6 +463,9 @@ header h1{position:relative;z-index:1;font-size:32px!important;line-height:1.05!
 header h1 span{display:block;color:var(--gold)}@media(min-width:600px){header h1 span{display:inline}}
 header .rule,header .evpick{position:relative;z-index:1}
 html[data-ev="open"] header h1 span{color:#0B2545;font-style:italic}
+
+/* share results button */
+.shr{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin:0 0 4px;padding:12px;border:1px solid var(--line);border-radius:4px;background:var(--card);color:var(--fg);font:600 14px Inter,sans-serif;cursor:pointer}.shr svg{color:var(--green)}
 </style>
 </head>
 <body>
@@ -947,8 +950,18 @@ function renderST(){
   const os=Object.values(D.owners).map(o=>({...o,net:Math.round(o.won)-o.paid})).sort((a,b)=>b.net-a.net||b.won-a.won);
   let h=`<div class="card"><table><thead><tr><th>Bidder</th><th>Paid</th><th>Won</th><th>Net</th></tr></thead><tbody>`;
   os.forEach((o,i)=>{h+=`<tr class="${STATE.sel===o.name?"me":""}" data-o="${esc(o.name)}" style="cursor:pointer"><td><div class="who">${tagHTML(o)}${esc(o.name)}</div></td><td>${money(o.paid)}</td><td>${money(o.won)}</td><td class="${o.net>0?"posv":o.net<0?"negv":""}" style="font-weight:700">${money(o.net)}</td></tr>`});
-  h+=`</tbody></table></div><div class="note">Projected until the tournament is final. Tap a bidder to see only their golfers.</div>`;
-  $("#view").innerHTML=h}
+  h+=`</tbody></table></div><button class="shr" id="shr"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 8l5-5 5 5"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg>Share results</button><div class="note">Projected until the tournament is final. Tap a bidder to see only their golfers.</div>`;
+  $("#view").innerHTML=h;$("#shr").onclick=shareRes}
+/* ===== Share results: phone-sized image of this event's standings (drawn by /share.js on the main site) ===== */
+function shareRes(){if(!window.OSAShare)return;const cs=getComputedStyle(document.documentElement),v=k=>cs.getPropertyValue(k).trim();
+  const os=Object.values(D.owners).map(o=>({...o,net:Math.round(o.won)-o.paid})).sort((a,b)=>b.net-a.net||b.won-a.won);
+  const aw=(D.awards||[]).find(a=>a.kind==="place"),lead=aw&&aw.holders[0],lot=lead&&D.lots[lead.lot],own=lot&&lot.owner?D.owners[lot.owner]:null,fin=!!D.final;
+  const ev=document.documentElement.dataset.ev||"masters",up=/pga|usopen|fedex/.test(ev);
+  OSAShare.open({theme:{bg:v("--hdr"),accent:v("--gold"),fg:v("--hdrfg")||"#fff",statusFg:v("--hdr"),font:v("--serif")||"Georgia, serif",titleWeight:up?700:400,titleSize:up?60:70,upper:up,chipFont:"Inter, system-ui, sans-serif",page:"#f6f4ec"},
+    title:CUR.name,sub:`${fin?"Final results":"Projected standings"} · ${money(D.pot)} pot`,status:fin?"Final":"Live",live:!fin,
+    champ:lead?{label:fin?"Champion":"Leader",text:lead.name,owners:own?[{t:own.tag,c:own.color,fg:own.text,name:own.name}]:[]}:null,
+    rows:os.map(o=>({t:o.tag,c:o.color,fg:o.text,name:o.name,net:o.net,paid:o.paid,won:o.won,trophy:fin&&own&&own.name===o.name})),
+    url:"oakstreetauctions.github.io/majors",filename:CUR.id+"-results"})}
 function lotBlock(title,list,ranked){list=list.filter(l=>mine(l.owner?D.owners[l.owner]:null));if(!list.length)return"";
   let h=`<div class="card"><div class="sec"><span>${title}</span><span>${list.length}</span></div><div class="lot h${ranked?" rkd":""}">${ranked?"<span>RK</span><span>Player</span>":"<span>Lot</span>"}<span class="n">Paid</span><span class="n">Won</span><span class="n">Net</span></div>`;
   for(const l of list){const o=l.owner?D.owners[l.owner]:null;const net=Math.round(l.won)-l.price;
@@ -1510,4 +1523,5 @@ loadLive();
 load();
 setInterval(load,CFG.refreshSeconds*1000);
 </script>
+<script src="/share.js" defer></script>
 </body></html>
