@@ -1028,7 +1028,7 @@ function renderPay(){
 /* ====== events ====== */
 $("#nav").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
   if(b.dataset.v)STATE.view=b.dataset.v;if(b.dataset.at)STATE.atab=b.dataset.at;if(b.dataset.stb)STATE.stab=b.dataset.stb;if(b.dataset.gs){STATE.gs=b.dataset.gs;STATE.gall=false}save();
-  if((STATE.page||"event")==="event"){if(D)render();else drawNav()}else renderOther();window.scrollTo(0,0)});
+  if((STATE.page||"event")==="event"){if(D)render();else drawNav()}else renderOther();syncURL();window.scrollTo(0,0)});
 document.addEventListener("click",e=>{const t=e.target.closest("[data-o]");if(!t||t.closest("#nav"))return;const o=t.dataset.o;STATE.sel=STATE.sel===o?null:o;save();render()});
 
 /* ====== themes ====== */
@@ -1504,11 +1504,11 @@ function setPageFlag(){const pg=STATE.page||"event";document.documentElement.dat
 function openDrawer(){drawDrawer();$("#drawer").classList.add("on");document.body.style.overflow="hidden"}
 function closeDrawer(){$("#drawer").classList.remove("on");document.body.style.overflow=""}
 function goPage(page){LANDING=false;STATE.page=page;save();closeDrawer();setPageFlag();
-  try{history.replaceState(null,"",page==="event"?"?event="+CUR.id:page==="home"?location.pathname:"?page="+page)}catch(e){}
+  syncURL();
   if(page==="event"){$("#pick").style.display="";drawNav();drawPill();if(D)render();else $("#view").innerHTML=`<div class="card"><div class="empty">Loading ${esc(CUR.name)}…</div></div>`}
   else renderOther();window.scrollTo(0,0)}
 function goEvent(id,sel){closeCard();STATE.page="event";$("#pick").style.display="";closeDrawer();if(sel!==undefined)STATE.sel=sel||null;save();setPageFlag();
-  if(id===CUR.id){try{history.replaceState(null,"","?event="+CUR.id)}catch(e){}drawNav();drawPill();if(D)render();window.scrollTo(0,0);return}
+  if(id===CUR.id){syncURL();drawNav();drawPill();if(D)render();window.scrollTo(0,0);return}
   drawNav();switchEvent(id);window.scrollTo(0,0)}
 document.addEventListener("click",e=>{
   if(e.target.closest("#burger")){openDrawer();return}
@@ -1519,20 +1519,33 @@ document.addEventListener("click",e=>{
   const fs=e.target.closest("[data-fser]");if(fs){STATE.fser=fs.dataset.fser;STATE.fmaj="all";save();renderOther();return}
   const fm=e.target.closest("[data-fmaj]");if(fm){STATE.fmaj=fm.dataset.fmaj;save();renderOther();return}
   const fy=e.target.closest("[data-fyr]");if(fy){STATE.fyr=fy.dataset.fyr;save();renderOther();return}
-  const ab=e.target.closest("[data-ab]");if(ab&&(STATE.page==="alltime")){const n=ab.dataset.ab||null;STATE.asel=STATE.asel===n?null:n;save();renderOther();if(STATE.asel)window.scrollTo({top:0,behavior:"smooth"});return}});
+  const ab=e.target.closest("[data-ab]");if(ab&&(STATE.page==="alltime")){const n=ab.dataset.ab||null;STATE.asel=STATE.asel===n?null:n;save();renderOther();syncURL();if(STATE.asel)window.scrollTo({top:0,behavior:"smooth"});return}});
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeDrawer()});
-document.addEventListener("change",e=>{if(e.target.id==="asel"){STATE.asel=e.target.value||null;save();renderOther()}});
+document.addEventListener("change",e=>{if(e.target.id==="asel"){STATE.asel=e.target.value||null;save();renderOther();syncURL()}});
 
 /* refresh right away when the app is reopened from the background */
 let lastLoad=0;document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&Date.now()-lastLoad>15000)load()});
 window.addEventListener("pageshow",e=>{if(e.persisted)load()});
+/* ===== browser Back/Forward: every page, event, tab and picked bidder gets its own history step ===== */
+let RESTORING=false;
+function urlFor(){const pg=STATE.page||"event",q=new URLSearchParams();
+  if(pg==="event"){q.set("event",CUR.id);if(STATE.view&&STATE.view!=="lb")q.set("tab",STATE.view)}
+  else if(pg!=="home"){q.set("page",pg);if(pg==="alltime"){if(STATE.atab==="grid")q.set("tab","grid");if(STATE.asel)q.set("bidder",STATE.asel)}if(pg==="stats"&&STATE.stab&&STATE.stab!=="rec")q.set("tab",STATE.stab)}
+  const t=q.toString();return t?"?"+t:location.pathname}
+function syncURL(){if(RESTORING||EMBED)return;const u=urlFor();if(u===location.search||(u===location.pathname&&!location.search))return;try{history.pushState(null,"",u)}catch(e){}}
+window.addEventListener("popstate",()=>{const q=new URLSearchParams(location.search),id=q.get("event"),pg=q.get("page"),tab=q.get("tab");RESTORING=true;
+  try{closeDrawer();closeCard();const sh=document.getElementById("sheet");if(sh)sh.classList.remove("on");document.body.style.overflow="";
+    if(id&&CFG.events.some(e=>e.id===id)){STATE.view=tab||"lb";if(id!==CUR.id){STATE.page="event";setPageFlag();$("#pick").style.display="";drawNav();switchEvent(id)}else goPage("event")}
+    else if(pg==="alltime"||pg==="stats"||pg==="golfers"){if(pg==="alltime"){STATE.atab=tab==="grid"?"grid":"st";STATE.asel=q.get("bidder")||null}if(pg==="stats")STATE.stab=tab||"rec";goPage(pg)}
+    else goPage("home");save()}finally{RESTORING=false}});
 function switchEvent(id){if(id===CUR.id)return;setEvent(id);STATE.ev=CUR.id;save();
   for(const k in GOOD)delete GOOD[k];for(const k in CARDS)delete CARDS[k];UPDATED=null;SOURCE="";STALE="";EVENT={name:"",id:""};CARD=null;closeCard();
-  try{history.replaceState(null,"","?event="+CUR.id)}catch(e){}applyTheme(CUR.name);D=null;$("#view").innerHTML=`<div class="card"><div class="empty">Loading ${esc(CUR.name)}…</div></div>`;load()}
+  syncURL();applyTheme(CUR.name);D=null;$("#view").innerHTML=`<div class="card"><div class="empty">Loading ${esc(CUR.name)}…</div></div>`;load()}
 document.addEventListener("change",e=>{if(e.target.id==="evsel"){if(e.target.value)goEvent(e.target.value);return}});
 document.addEventListener("change",e=>{if(e.target.id!=="sel")return;STATE.sel=e.target.value||null;save();render()});
 (()=>{let id=null,pg=null;try{const q=new URLSearchParams(location.search);id=q.get("event");pg=q.get("page")}catch(e){}
   STATE.page=pg==="alltime"||pg==="stats"||pg==="golfers"?pg:id?"event":"home";
+  {const tab=new URLSearchParams(location.search).get("tab"),b=new URLSearchParams(location.search).get("bidder");if(id&&tab)STATE.view=tab;if(pg==="alltime"){STATE.atab=tab==="grid"?"grid":"st";STATE.asel=b||null}if(pg==="stats"&&tab)STATE.stab=tab}
   if(STATE.page==="home"&&!pg&&!id){LANDING=true;const lc=liveCache(),t=Date.now();
     if(lc&&lc.cfg&&t>=lc.start&&t<=lc.to&&CFG.events.some(e=>e.id===lc.cfg&&hasData(e))){STATE.page="event";id=lc.cfg;LANDING=false;try{history.replaceState(null,"","?event="+id)}catch(e){}}}
   setEvent(id&&CFG.events.some(e=>e.id===id)?id:(STATE.ev&&CFG.events.some(e=>e.id===STATE.ev)?STATE.ev:FIRST().id));applyTheme(CUR.name)})();
