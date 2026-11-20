@@ -126,12 +126,14 @@ footer{text-align:center;font:italic 400 12px var(--serif);color:var(--mut);padd
 @media (max-width:380px){.lb .r{grid-template-columns:26px 3px minmax(0,1fr) 34px 40px 26px;gap:5px}nav button{letter-spacing:.08em;font-size:11px}}
 
 /* ===== per-major themes (set automatically from the ESPN event name) ===== */
-html[data-ev="pga"]{--hdr:#00205B;--th:#00205B;--green:#00205B;--over:#00205B;--gold:#AF9157;--serif:"Source Serif 4",Georgia,serif}
+html[data-ev="pga"]{--hdr:#00205B;--th:#00205B;--green:#00205B;--over:#00205B;--gold:#ffffff;--serif:"Source Serif 4",Georgia,serif}
+/* PGA: navy and white only, like pgachampionship.com; accents that sit on the page use navy */
+html[data-ev="pga"] .selbar{border-left-color:var(--over)}html[data-ev="pga"] .nxa{border-top-color:var(--over)}html[data-ev="pga"] .status::before,html[data-ev="pga"] .status::after{background:var(--over)}html[data-ev="pga"] header:after{opacity:.35}
 html[data-ev="usopen"]{--hdr:#00365F;--th:#00365F;--green:#00365F;--over:#00365F;--gold:#BF0D3E;--serif:"Libre Franklin",Inter,sans-serif}
 html[data-ev="open"]{--hdr:#FFD100;--hdrfg:#0B2545;--th:#FFD100;--thfg:#0B2545;--green:#0B2545;--over:#0B2545;--gold:#0B2545;--serif:"Cormorant Garamond",Georgia,serif}
 html[data-ev="fedex"]{--hdr:#4D148C;--th:#4D148C;--green:#4D148C;--over:#4D148C;--gold:#FF6200;--serif:"Montserrat",Inter,sans-serif}
 @media (prefers-color-scheme:dark){
-  html[data-ev="pga"]:not([data-theme="light"]){--hdr:#001529;--th:#00234B;--green:#a9c1ea;--over:#a9c1ea;--gold:#c9ad78}
+  html[data-ev="pga"]:not([data-theme="light"]){--hdr:#001529;--th:#00234B;--green:#a9c1ea;--over:#a9c1ea;--gold:#ffffff}
   html[data-ev="usopen"]:not([data-theme="light"]){--hdr:#062a47;--th:#0b3a63;--green:#8cc2f0;--over:#8cc2f0}
   html[data-ev="open"]:not([data-theme="light"]){--hdr:#E8BE00;--th:#E8BE00;--green:#ffd75a;--over:#9fbbe0;--gold:#ffd75a}
   html[data-ev="fedex"]:not([data-theme="light"]){--hdr:#2e0b57;--th:#45177d;--green:#c9a3ff;--over:#c9a3ff}}
